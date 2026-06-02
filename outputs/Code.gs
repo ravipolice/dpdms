@@ -1,0 +1,1408 @@
+/**
+ * Chikkaballapura District Police Data Management System (DPDMS)
+ * Google Apps Script Backend (Code.gs)
+ * 
+ * Instructions:
+ * 1. Open your Google Sheet imported from the Excel database.
+ * 2. Click Extensions -> Apps Script.
+ * 3. Delete any default code and paste this script.
+ * 4. Create a sheet named "System Users" if it does not exist (it will auto-create on first login with default Super Admin: KGID: 12345, Password: admin123).
+ * 5. Deploy as Web App (Deploy -> New Deployment -> Select "Web App" -> Execute as "Me", Access: "Anyone").
+ * 6. Copy the Web App URL and paste it into your index.html.
+ */
+
+var STATION_SUBDIVISION_MAP = {
+  "Chikkaballapura Town PS": "Chikkaballapura",
+  "Chikkaballapura Rural PS": "Chikkaballapura",
+  "Chikkaballapura Women PS": "Chikkaballapura",
+  "Chikkaballapura Traffic PS": "Chikkaballapura",
+  "Gowribidanur Town PS": "Chikkaballapura",
+  "Gowribidanur Rural PS": "Chikkaballapura",
+  "Manchenahalli PS": "Chikkaballapura",
+  "Gudibanda PS": "Chikkaballapura",
+  "Nandigiridhama PS": "Chikkaballapura",
+  "Peresandra PS": "Chikkaballapura",
+  "Sdpo Cbpura": "Chikkaballapura",
+  "CPI Office Cbpura": "Chikkaballapura",
+  "CPI Off Gudibande": "Chikkaballapura",
+  "CPI Off Gowribidanur": "Chikkaballapura",
+  "Dysp Office Cbp": "Chikkaballapura",
+  "Dpo": "Chikkaballapura",
+  "Control Room": "Chikkaballapura",
+  "Dsb": "Chikkaballapura",
+  "Cen PS": "Chikkaballapura",
+  "DAR Chikkaballapura": "Chikkaballapura",
+  "Smmc": "Chikkaballapura",
+  "Dcrb": "Chikkaballapura",
+
+  "Chintamani Town PS": "Chintamani",
+  "Chintamani Rural PS": "Chintamani",
+  "Shidlagatta Town PS": "Chintamani",
+  "Shidlaghatta Town PS": "Chintamani",
+  "Sidlaghatta Town PS": "Chintamani",
+  "Sidlagatta Town PS": "Chintamani",
+  "Shidlaghatta Rural PS": "Chintamani",
+  "Shidlagatta Rural PS": "Chintamani",
+  "Sidlaghatta Rural PS": "Chintamani",
+  "Sidlagatta Rural PS": "Chintamani",
+  "Bagepalli PS": "Chintamani",
+  "Chelur PS": "Chintamani",
+  "Pathapalya PS": "Chintamani",
+  "Dibburahalli PS": "Chintamani",
+  "Batlahalli PS": "Chintamani",
+  "Kencharlahalli PS": "Chintamani",
+  "Dysp Off Cmi": "Chintamani",
+  "CPI Office Cheluru": "Chintamani",
+  "CPI Off Kencharlahalli": "Chintamani",
+  "CPI Off Shidlaghatta": "Chintamani",
+  "CPI Off Sidlaghatta": "Chintamani"
+};
+
+// CORS and response helpers
+function jsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function checkSession(token) {
+  if (!token) return null;
+  var cached = CacheService.getScriptCache().get(token);
+  if (cached) {
+    return JSON.parse(cached);
+  }
+  return null;
+}
+
+// ── GET REQUESTS ──────────────────────────────────────────────
+function doGet(e) {
+  try {
+    var action = e.parameter.action;
+    var token = e.parameter.token;
+    var session = checkSession(token);
+    
+    if (action === "check-session") {
+      return jsonResponse({ ok: !!session, session: session });
+    }
+    
+    if (!session) {
+      return jsonResponse({ ok: false, error: "Unauthorized. Please log in again." });
+    }
+    
+    if (action === "data") {
+      var data = loadData(session.kgid, session.role);
+      return jsonResponse(data);
+    }
+    
+    if (action === "check-duplicate") {
+      var query = {
+        kgid: e.parameter.kgid || "",
+        originalKgid: e.parameter.originalKgid || "",
+        mobile: e.parameter.mobile || "",
+        mobile2: e.parameter.mobile2 || "",
+        email: e.parameter.email || ""
+      };
+      var dup = duplicateStatus(query);
+      return jsonResponse(dup);
+    }
+    
+    if (action === "list-users" && session.role === "Super Admin") {
+      return jsonResponse({ ok: true, users: listUsers() });
+    }
+    
+    return jsonResponse({ ok: false, error: "Invalid GET action." });
+  } catch (err) {
+    return jsonResponse({ ok: false, error: err.toString() });
+  }
+}
+
+// ── POST REQUESTS ─────────────────────────────────────────────
+function doPost(e) {
+  try {
+    var payload;
+    if (e.postData && e.postData.contents) {
+      payload = JSON.parse(e.postData.contents);
+    } else {
+      payload = e.parameter;
+    }
+    
+    var action = payload.action;
+    
+    if (action === "login") {
+      return handleLogin(payload.kgid, payload.passwordHash);
+    }
+    
+    if (action === "google-login") {
+      return handleGoogleLogin(payload.idToken);
+    }
+    
+    if (action === "send-registration-otp") {
+      return handleSendRegistrationOtp(payload.kgid, payload.mobile, payload.email, payload.passwordHash);
+    }
+    
+    if (action === "verify-registration-otp") {
+      return handleVerifyRegistrationOtp(payload.kgid, payload.otp);
+    }
+    
+    if (action === "send-reset-otp") {
+      return handleSendResetOtp(payload.kgid, payload.email);
+    }
+    
+    if (action === "verify-reset-otp") {
+      return handleVerifyResetOtp(payload.kgid, payload.otp, payload.passwordHash);
+    }
+    
+    var token = payload.token;
+    var session = checkSession(token);
+    if (!session) {
+      return jsonResponse({ ok: false, error: "Unauthorized. Please log in again." });
+    }
+    
+    if (action === "save") {
+      return handleSaveEmployee(payload.employee, session);
+    }
+    
+    if (action === "delete") {
+      if (session.role !== "Super Admin") {
+        return jsonResponse({ ok: false, error: "Access Denied. Super Admin role required." });
+      }
+      return handleDeleteEmployee(payload.kgid);
+    }
+    
+    if (action === "manage-user") {
+      if (session.role !== "Super Admin") {
+        return jsonResponse({ ok: false, error: "Access Denied. Super Admin role required." });
+      }
+      return handleManageUser(payload.userPayload);
+    }
+    
+    if (action === "save-permissions") {
+      if (session.role !== "Super Admin") {
+        return jsonResponse({ ok: false, error: "Access Denied. Super Admin role required." });
+      }
+      return handleSavePermissions(payload.rolePermissions);
+    }
+    
+    return jsonResponse({ ok: false, error: "Invalid POST action." });
+  } catch (err) {
+    return jsonResponse({ ok: false, error: err.toString() });
+  }
+}
+
+// ── LOGIN HANDLER ─────────────────────────────────────────────
+function handleLogin(kgid, passwordHash) {
+  kgid = String(kgid || "").trim();
+  passwordHash = String(passwordHash || "").trim();
+  if (!kgid || !passwordHash) {
+    return jsonResponse({ ok: false, error: "KGID and Password are required." });
+  }
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var usersSheet = ss.getSheetByName("System Users");
+  
+  // Create sheet with default super admin if missing
+  if (!usersSheet) {
+    usersSheet = ss.insertSheet("System Users");
+    usersSheet.appendRow(["KGID", "PasswordHash", "Role", "Email", "Status"]);
+    // Default pwd: admin123 -> SHA-256 hash below
+    usersSheet.appendRow(["12345", "240713a1a08e96dd00cbe6e05342a98379c6fa076cf47e8e58319e64e52541c8", "Super Admin", "", "Active"]);
+  }
+  
+  var data = usersSheet.getDataRange().getValues();
+  var headers = data[0].map(function(h) { return String(h).trim(); });
+  var kIdx = headers.indexOf("KGID");
+  var pIdx = headers.indexOf("PasswordHash");
+  var rIdx = headers.indexOf("Role");
+  var sIdx = headers.indexOf("Status");
+  
+  var userRow = -1;
+  var targetUserExists = false;
+  for (var i = 1; i < data.length; i++) {
+    var checkKgid = String(data[i][kIdx]).trim();
+    if (checkKgid === kgid) {
+      userRow = i;
+    }
+    if (checkKgid === "1953036") {
+      targetUserExists = true;
+    }
+  }
+  
+  // Seed requested Super Admin user if not present
+  if (!targetUserExists) {
+    usersSheet.appendRow(["1953036", "db1bddcedf91b4fd0146205d4f238117a98d35f25bd8ce3840c46eead9f1b966", "Super Admin", "", "Active"]);
+    data = usersSheet.getDataRange().getValues();
+    if (kgid === "1953036") {
+      userRow = data.length - 1;
+    }
+  }
+  
+  // If user doesn't exist in System Users sheet, they must register first.
+  if (userRow === -1) {
+    return jsonResponse({ ok: false, error: "This KGID has not been registered yet. Please click 'Register Here' to set up your account." });
+  }
+  
+  var dbHash = String(data[userRow][pIdx]).trim();
+  var dbRole = String(data[userRow][rIdx]).trim();
+  var dbStatus = String(data[userRow][sIdx]).trim();
+  
+  if (dbStatus === "Inactive") {
+    return jsonResponse({ ok: false, error: "Your account is deactivated." });
+  }
+  
+  if (dbHash === passwordHash) {
+    var token = Utilities.getUuid();
+    
+    // Get name if possible
+    var name = kgid;
+    var masterSheet = ss.getSheetByName("Employee Master");
+    if (masterSheet) {
+      var masterData = masterSheet.getDataRange().getValues();
+      var mHeaders = masterData[0].map(function(h) { return String(h).trim(); });
+      var mKIdx = mHeaders.indexOf("KGID");
+      var mNIdx = mHeaders.indexOf("Employee Name");
+      for (var j = 1; j < masterData.length; j++) {
+        if (String(masterData[j][mKIdx]).trim() === kgid) {
+          name = masterData[j][mNIdx];
+          break;
+        }
+      }
+    }
+    
+    var session = { kgid: kgid, role: dbRole, name: name };
+    CacheService.getScriptCache().put(token, JSON.stringify(session), 21600); // 6 hours
+    return jsonResponse({ ok: true, token: token, role: dbRole, kgid: kgid, name: name });
+  }
+  
+  return jsonResponse({ ok: false, error: "Incorrect Password." });
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────
+function asText(val) {
+  if (val === null || val === undefined) return "";
+  if (val instanceof Date) {
+    return formatDate(val);
+  }
+  return String(val).trim();
+}
+
+function formatDate(dateObj) {
+  if (!dateObj) return "";
+  var d = new Date(dateObj);
+  var day = ("0" + d.getDate()).slice(-2);
+  var month = ("0" + (d.getMonth() + 1)).slice(-2);
+  var year = d.getFullYear();
+  return day + "-" + month + "-" + year;
+}
+
+function yearsBetween(start, end) {
+  if (!start) return "";
+  var startDate = new Date(start);
+  if (isNaN(startDate.getTime())) return "";
+  var endDate = end ? new Date(end) : new Date();
+  var diffTime = endDate.getTime() - startDate.getTime();
+  var diffDays = diffTime / (1000 * 60 * 60 * 24);
+  return Math.round((diffDays / 365.25) * 10) / 10;
+}
+
+function parseDateStr(str) {
+  if (!str) return null;
+  var parts = str.split("-");
+  if (parts.length === 3) {
+    // dd-mm-yyyy to yyyy, mm-1, dd
+    return new Date(parts[2], parts[1] - 1, parts[0]);
+  }
+  return new Date(str);
+}
+
+function getRetirementDate(dob) {
+  if (!dob) return "";
+  var dobDate = new Date(dob);
+  if (isNaN(dobDate.getTime())) return "";
+  var retYear = dobDate.getFullYear() + 60;
+  var retMonth = dobDate.getMonth() + 1;
+  // Last day of month
+  var endOfMonth = new Date(retYear, retMonth, 0);
+  return endOfMonth;
+}
+
+function getSheetRowsAsDicts(sheet) {
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return [];
+  var headers = data[0].map(function(h) { return String(h).trim(); });
+  var list = [];
+  for (var r = 1; r < data.length; r++) {
+    var dict = {};
+    var hasVal = false;
+    for (var c = 0; c < headers.length; c++) {
+      var val = data[r][c];
+      if (val !== null && val !== "") hasVal = true;
+      dict[headers[c]] = val;
+    }
+    if (hasVal) list.push(dict);
+  }
+  return list;
+}
+
+// ── LOAD DATABASE ─────────────────────────────────────────────
+function loadData(loggedKgid, role) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  var masterSheet = ss.getSheetByName("Employee Master");
+  var historySheet = ss.getSheetByName("Posting History");
+  var importedSheet = ss.getSheetByName("Imported Emp Profiles");
+  var importedDicts = [];
+  if (importedSheet) {
+    var data = importedSheet.getDataRange().getValues();
+    var headers = data[0].map(function(h) { return String(h).trim(); });
+    var modified = false;
+    if (headers.indexOf("email") === -1) {
+      importedSheet.getRange(1, headers.length + 1).setValue("email");
+      headers.push("email");
+      modified = true;
+    }
+    if (headers.indexOf("photoUrl") === -1) {
+      importedSheet.getRange(1, headers.length + 1).setValue("photoUrl");
+      headers.push("photoUrl");
+      modified = true;
+    }
+    importedDicts = getSheetRowsAsDicts(importedSheet);
+  }
+  
+  var masterDicts = getSheetRowsAsDicts(masterSheet);
+  var historyDicts = getSheetRowsAsDicts(historySheet);
+  
+  // Index imported by kgid
+  var sourceByKgid = {};
+  importedDicts.forEach(function(row) {
+    var k = asText(row["kgid"]);
+    if (k) sourceByKgid[k] = row;
+  });
+  
+  // Index posting history by kgid
+  var historyByKgid = {};
+  historyDicts.forEach(function(item) {
+    var kgid = asText(item["KGID"]);
+    if (!kgid) return;
+    
+    var fromDate = item["From Date"];
+    var toDate = item["To Date"];
+    
+    item["_fromDisplay"] = formatDate(fromDate);
+    item["_toDisplay"] = toDate ? formatDate(toDate) : "Present";
+    item["_durationYears"] = yearsBetween(fromDate, toDate);
+    
+    if (!historyByKgid[kgid]) historyByKgid[kgid] = [];
+    historyByKgid[kgid].push(item);
+  });
+  
+  var employees = [];
+  masterDicts.forEach(function(emp) {
+    var kgid = asText(emp["KGID"]);
+    if (!kgid) return;
+    
+    // For standard users, only return their own record!
+    if (role === "User" && kgid !== loggedKgid) return;
+    
+    var dob = emp["DOB"];
+    var doa = emp["Appointment Date"];
+    var currentSince = emp["Present Posting Date"];
+    
+    var totalService = yearsBetween(doa);
+    var currentStationYears = yearsBetween(currentSince);
+    
+    var priority = (currentStationYears !== "" && currentStationYears >= 5) ? "High" : 
+                   (currentStationYears !== "" && currentStationYears >= 3) ? "Medium" : "Low";
+    var eligible = (currentStationYears !== "" && currentStationYears >= 3) ? "Yes" : "No";
+    
+    var postings = historyByKgid[kgid] || [];
+    var source = sourceByKgid[kgid] || {};
+    
+    var longest = 0;
+    postings.forEach(function(p) {
+      var d = Number(p["_durationYears"] || 0);
+      if (d > longest) longest = d;
+    });
+    
+    var retirementValue = emp["Retirement Date"] || getRetirementDate(dob);
+    var category = asText(emp["Category"]);
+    
+    var currentSubdivRaw = asText(emp["Current Sub-Division"]);
+    if (!currentSubdivRaw) {
+      currentSubdivRaw = STATION_SUBDIVISION_MAP[asText(emp["Current Unit"])] || "";
+    }
+    
+    var currentDistrictRaw = asText(emp["Current District"]);
+    
+    // Calculate subdiv years & district years
+    var subdivYears = 0;
+    var districtYears = 0;
+    postings.forEach(function(p) {
+      var duration = Number(p["_durationYears"] || 0);
+      var pSub = asText(p["Sub-Division"]) || STATION_SUBDIVISION_MAP[asText(p["Police Station / Unit"])] || "";
+      var pDist = asText(p["District"]);
+      if (currentSubdivRaw && pSub === currentSubdivRaw) {
+        subdivYears += duration;
+      }
+      if (currentDistrictRaw && pDist === currentDistrictRaw) {
+        districtYears += duration;
+      }
+    });
+    subdivYears = Math.round(subdivYears * 10) / 10;
+    districtYears = Math.round(districtYears * 10) / 10;
+    
+    var retDateStr = formatDate(retirementValue);
+    var retirementMonthsLeft = "";
+    if (retDateStr) {
+      try {
+        var parts = retDateStr.split("-");
+        var rd = new Date(parts[2], parts[1] - 1, parts[0]);
+        var today = new Date();
+        retirementMonthsLeft = (rd.getFullYear() - today.getFullYear()) * 12 + (rd.getMonth() - today.getMonth());
+      } catch(e) {}
+    }
+    
+    employees.push({
+      "kgid": kgid,
+      "name": asText(emp["Employee Name"]),
+      "rank": asText(emp["Rank"]),
+      "designation": asText(emp["Designation"]),
+      "dob": formatDate(dob),
+      "doa": formatDate(doa),
+      "mobile": asText(emp["Mobile"]),
+      "homeDistrict": asText(emp["Home District"]),
+      "retirementDate": formatDate(retirementValue),
+      "currentDistrict": asText(emp["Current District"]),
+      "currentSubDivision": currentSubdivRaw,
+      "currentUnit": asText(emp["Current Unit"]),
+      "currentSince": formatDate(currentSince),
+      "totalServiceYears": totalService,
+      "currentStationYears": currentStationYears,
+      "transferEligible": eligible,
+      "priority": priority,
+      "longestPostingYears": longest,
+      "postings": postings.map(function(p) {
+        return {
+          "from": p["_fromDisplay"],
+          "to": p["_toDisplay"],
+          "station": asText(p["Police Station / Unit"]),
+          "subDivision": asText(p["Sub-Division"]) || STATION_SUBDIVISION_MAP[asText(p["Police Station / Unit"])] || "",
+          "district": asText(p["District"]),
+          "rank": asText(p["Rank Held"]),
+          "orderNumber": asText(p["Order Number"]),
+          "durationYears": p["_durationYears"]
+        };
+      }),
+      "sourceProfile": {
+        "metalNumber": asText(source["metalNumber"]),
+        "bloodGroup": asText(source["bloodGroup"]),
+        "email": asText(source["email"]),
+        "mobile2": asText(source["mobile2"]),
+        "isAdmin": asText(source["isAdmin"]),
+        "isApproved": asText(source["isApproved"]),
+        "createdAt": asText(source["createdAt"]),
+        "updatedAt": asText(source["updatedAt"]),
+        "height": asText(source["height"]),
+        "weight": asText(source["weight"]),
+        "caste": asText(source["caste"]),
+        "subCaste": asText(source["subCaste"]),
+        "familyDetails": asText(source["familyDetails"]),
+        "educationDetails": asText(source["educationDetails"]),
+        "photoUrl": asText(source["photoUrl"] || source["photo"] || source["photo_url"] || source["image"] || "")
+      },
+      "category": category,
+      "subDivisionYears": subdivYears,
+      "districtServiceYears": districtYears,
+      "retirementMonthsLeft": retirementMonthsLeft
+    });
+  });
+  
+  // Sort employees by name
+  employees.sort(function(a, b) {
+    return a.name.localeCompare(b.name);
+  });
+  
+  var summary = {};
+  if (role !== "User") {
+    // Generate summaries only for Admins / Super Admins
+    var stationsMap = {};
+    var ranksMap = {};
+    var subdivisionsMap = {};
+    
+    var transferDueCount = 0;
+    var highPriorityCount = 0;
+    var retirementDue12mCount = 0;
+    
+    employees.forEach(function(e) {
+      if (e.transferEligible === "Yes") transferDueCount++;
+      if (e.priority === "High") highPriorityCount++;
+      if (typeof e.retirementMonthsLeft === "number" && e.retirementMonthsLeft >= 0 && e.retirementMonthsLeft <= 12) {
+        retirementDue12mCount++;
+      }
+      
+      if (e.currentUnit) {
+        stationsMap[e.currentUnit] = (stationsMap[e.currentUnit] || 0) + 1;
+      }
+      if (e.rank) {
+        ranksMap[e.rank] = (ranksMap[e.rank] || 0) + 1;
+      }
+      if (e.currentSubDivision) {
+        subdivisionsMap[e.currentSubDivision] = (subdivisionsMap[e.currentSubDivision] || 0) + 1;
+      }
+    });
+    
+    summary = {
+      "totalEmployees": employees.length,
+      "transferDue": transferDueCount,
+      "highPriority": highPriorityCount,
+      "retirementDue": employees.filter(function(e) { return e.retirementDate; }).length,
+      "retirementDue12m": retirementDue12mCount,
+      "stations": Object.keys(stationsMap).sort().map(function(k) { return { name: k, working: stationsMap[k] }; }),
+      "ranks": Object.keys(ranksMap).sort().map(function(k) { return { name: k, working: ranksMap[k] }; }),
+      "subdivisions": Object.keys(subdivisionsMap).sort().map(function(k) { return { name: k, working: subdivisionsMap[k] }; })
+    };
+  }
+  
+  var permissions = getRolePermissions();
+  
+  return {
+    "workbook": "Google Sheets Live",
+    "editable": true,
+    "lastLoaded": formatDate(new Date()) + " " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "HH:mm:ss"),
+    "employees": employees,
+    "summary": summary,
+    "permissions": permissions
+  };
+}
+
+// ── SAVE EMPLOYEE HANDLER ─────────────────────────────────────
+function handleSaveEmployee(payload, session) {
+  var kgid = String(payload.kgid || "").trim();
+  var origKgid = String(payload.originalKgid || "").trim();
+  var isAdd = !origKgid;
+  
+  var perms = getRolePermissions();
+  if (session.role === "User") {
+    // Regular users can only edit their OWN profile, and cannot ADD new ones!
+    if (isAdd || kgid !== session.kgid || origKgid !== session.kgid) {
+      return jsonResponse({ ok: false, error: "Access Denied. You can only edit your own details." });
+    }
+  } else if (session.role === "Admin") {
+    var adminPerms = perms["Admin"] || { canAddEmployee: true, canEditEmployee: true };
+    if (isAdd && !adminPerms.canAddEmployee) {
+      return jsonResponse({ ok: false, error: "Access Denied. Admins are currently restricted from adding employees." });
+    }
+    if (!isAdd && !adminPerms.canEditEmployee) {
+      return jsonResponse({ ok: false, error: "Access Denied. Admins are currently restricted from editing employee details." });
+    }
+  }
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var masterSheet = ss.getSheetByName("Employee Master");
+  var historySheet = ss.getSheetByName("Posting History");
+  var importedSheet = ss.getSheetByName("Imported Emp Profiles");
+  
+  var masterData = masterSheet.getDataRange().getValues();
+  var masterHeaders = masterData[0].map(function(h) { return String(h).trim(); });
+  
+  var targetRow = -1;
+  if (!isAdd) {
+    // Find existing row by KGID
+    var kIdx = masterHeaders.indexOf("KGID");
+    for (var r = 1; r < masterData.length; r++) {
+      if (String(masterData[r][kIdx]).trim() === origKgid) {
+        targetRow = r + 1; // 1-indexed for Sheet row
+        break;
+      }
+    }
+    if (targetRow === -1) {
+      return jsonResponse({ ok: false, error: "Employee row not found in Employee Master sheet." });
+    }
+  } else {
+    // Check duplicates
+    var dup = duplicateStatus({ kgid: kgid, mobile: payload.mobile });
+    if (dup.duplicate) {
+      return jsonResponse({ ok: false, error: dup.issues.map(function(i) { return i.message; }).join(", ") });
+    }
+    targetRow = masterSheet.getLastRow() + 1;
+    masterSheet.appendRow([kgid]); // seed row
+  }
+  
+  // Set values based on role limits
+  // (User can only change mobile, email, bloodGroup)
+  var masterCols = {};
+  masterHeaders.forEach(function(h, idx) { masterCols[h] = idx + 1; });
+  
+  if (session.role === "User") {
+    // Restrict edits to contact info
+    if (masterCols["Mobile"]) masterSheet.getCell(targetRow, masterCols["Mobile"]).setValue(payload.mobile);
+  } else {
+    // Admin & Super Admin have full master edit rights
+    if (masterCols["KGID"]) masterSheet.getRange(targetRow, masterCols["KGID"]).setValue(kgid);
+    if (masterCols["Employee Name"]) masterSheet.getRange(targetRow, masterCols["Employee Name"]).setValue(payload.name);
+    if (masterCols["Rank"]) masterSheet.getRange(targetRow, masterCols["Rank"]).setValue(payload.rank);
+    if (masterCols["Designation"]) masterSheet.getRange(targetRow, masterCols["Designation"]).setValue(payload.designation);
+    if (masterCols["DOB"]) masterSheet.getRange(targetRow, masterCols["DOB"]).setValue(parseDateStr(payload.dob));
+    if (masterCols["Appointment Date"]) masterSheet.getRange(targetRow, masterCols["Appointment Date"]).setValue(parseDateStr(payload.doa));
+    if (masterCols["Mobile"]) masterSheet.getRange(targetRow, masterCols["Mobile"]).setValue(payload.mobile);
+    if (masterCols["Home District"]) masterSheet.getRange(targetRow, masterCols["Home District"]).setValue(payload.homeDistrict);
+    if (masterCols["Current District"]) masterSheet.getRange(targetRow, masterCols["Current District"]).setValue(payload.currentDistrict || "Chikkaballapura");
+    if (masterCols["Current Sub-Division"]) masterSheet.getRange(targetRow, masterCols["Current Sub-Division"]).setValue(payload.currentSubDivision);
+    if (masterCols["Current Unit"]) masterSheet.getRange(targetRow, masterCols["Current Unit"]).setValue(payload.currentUnit);
+    if (masterCols["Present Posting Date"]) masterSheet.getRange(targetRow, masterCols["Present Posting Date"]).setValue(parseDateStr(payload.currentSince));
+    if (masterCols["Category"]) masterSheet.getRange(targetRow, masterCols["Category"]).setValue(payload.category);
+    if (masterCols["Remarks"]) masterSheet.getRange(targetRow, masterCols["Remarks"]).setValue(payload.remarks);
+    
+    // Set formulas
+    if (masterCols["Retirement Date"]) masterSheet.getRange(targetRow, masterCols["Retirement Date"]).setFormula('=IF(E' + targetRow + '="","",EOMONTH(EDATE(E' + targetRow + ',60*12),0))');
+    if (masterCols["Total Service Years"]) masterSheet.getRange(targetRow, masterCols["Total Service Years"]).setFormula('=IF(F' + targetRow + '="","",ROUND(YEARFRAC(F' + targetRow + ',TODAY()),1))');
+    if (masterCols["Current Station Years"]) masterSheet.getRange(targetRow, masterCols["Current Station Years"]).setFormula('=IF(M' + targetRow + '="","",ROUND(YEARFRAC(M' + targetRow + ',TODAY()),1))');
+    if (masterCols["Current Sub-Division Years"]) masterSheet.getRange(targetRow, masterCols["Current Sub-Division Years"]).setFormula('=IF(A' + targetRow + '="","",ROUND(SUMPRODUCT((\'Posting History\'!$A$2:$A$1000=A' + targetRow + ')*(\'Posting History\'!$E$2:$E$1000=K' + targetRow + ')*(\'Posting History\'!$B$2:$B$1000<>"")*(IF(\'Posting History\'!$C$2:$C$1000="",TODAY(),\'Posting History\'!$C$2:$C$1000)-\'Posting History\'!$B$2:$B$1000))/365.25,1))');
+    if (masterCols["District Service Years"]) masterSheet.getRange(targetRow, masterCols["District Service Years"]).setFormula('=IF(A' + targetRow + '="","",ROUND(SUMPRODUCT((\'Posting History\'!$A$2:$A$1000=A' + targetRow + ')*(\'Posting History\'!$F$2:$F$1000=J' + targetRow + ')*(\'Posting History\'!$B$2:$B$1000<>"")*(IF(\'Posting History\'!$C$2:$C$1000="",TODAY(),\'Posting History\'!$C$2:$C$1000)-\'Posting History\'!$B$2:$B$1000))/365.25,1))');
+    if (masterCols["Transfer Eligible"]) masterSheet.getRange(targetRow, masterCols["Transfer Eligible"]).setFormula('=IF(O' + targetRow + '="","",IF(O{row}>=3,"Yes","No"))'.replace('{row}', targetRow));
+    if (masterCols["Priority"]) masterSheet.getRange(targetRow, masterCols["Priority"]).setFormula('=IF(O' + targetRow + '="","",IF(O' + targetRow + '>=5,"High",IF(O' + targetRow + '>=3,"Medium","Low")))');
+  }
+  
+  // Save Posting History if Admin or Super Admin and postings payload is present
+  if (session.role !== "User" && payload.postings) {
+    var historyData = historySheet.getDataRange().getValues();
+    var historyHeaders = historyData[0].map(function(h) { return String(h).trim(); });
+    var hKIdx = historyHeaders.indexOf("KGID");
+    
+    // Delete all existing postings in Posting History for original_kgid / kgid
+    var searchKgid = origKgid ? origKgid : kgid;
+    for (var r = historyData.length - 1; r >= 1; r--) {
+      if (String(historyData[r][hKIdx]).trim() === searchKgid) {
+        historySheet.deleteRow(r + 1);
+      }
+    }
+    
+    var hCols = {};
+    historyHeaders.forEach(function(h, idx) { hCols[h] = idx + 1; });
+    
+    payload.postings.forEach(function(p) {
+      var hRow = historySheet.getLastRow() + 1;
+      historySheet.appendRow([kgid]); // seed row
+      
+      var pTo = (p.to && p.to !== "Present") ? parseDateStr(p.to) : null;
+      
+      if (hCols["KGID"]) historySheet.getRange(hRow, hCols["KGID"]).setValue(kgid);
+      if (hCols["From Date"]) historySheet.getRange(hRow, hCols["From Date"]).setValue(parseDateStr(p.from));
+      if (hCols["To Date"]) {
+        if (pTo) {
+          historySheet.getRange(hRow, hCols["To Date"]).setValue(pTo);
+        } else {
+          historySheet.getRange(hRow, hCols["To Date"]).clearContent();
+        }
+      }
+      if (hCols["Police Station / Unit"]) historySheet.getRange(hRow, hCols["Police Station / Unit"]).setValue(p.station);
+      if (hCols["Sub-Division"]) historySheet.getRange(hRow, hCols["Sub-Division"]).setValue(p.subDivision);
+      if (hCols["District"]) historySheet.getRange(hRow, hCols["District"]).setValue(p.district || "Chikkaballapura");
+      if (hCols["Rank Held"]) historySheet.getRange(hRow, hCols["Rank Held"]).setValue(p.rank);
+      if (hCols["Order Number"]) historySheet.getRange(hRow, hCols["Order Number"]).setValue(p.orderNumber);
+      if (hCols["Notes"]) historySheet.getRange(hRow, hCols["Notes"]).setValue("Maintained from Google Sheets DPDMS.");
+      
+      // Set formulas
+      if (hCols["Duration Years"]) historySheet.getRange(hRow, hCols["Duration Years"]).setFormula('=IF(B' + hRow + '="","",ROUND((IF(C' + hRow + '="",TODAY(),C' + hRow + ')-B' + hRow + ')/365.25,1))');
+      if (hCols["Overlap Check"]) historySheet.getRange(hRow, hCols["Overlap Check"]).setFormula('=IF(A' + hRow + '="","",IF(COUNTIFS($A:$A,A' + hRow + ',$B:$B,"<="&IF(C' + hRow + '="",TODAY(),C' + hRow + '),$C:$C,">="&B' + hRow + ')>1,"Review","OK"))');
+      if (hCols["Missing Date Check"]) historySheet.getRange(hRow, hCols["Missing Date Check"]).setFormula('=IF(A' + hRow + '="","",IF(OR(B' + hRow + '="",D' + hRow + '="",E' + hRow + '="",F' + hRow + '="",G{row}=""),"Missing","OK"))'.replace('{row}', hRow));
+    });
+  }
+  
+  // Save Imported Emp Profiles (contact details email, mobile2, metal number, bloodGroup)
+  var src = payload.sourceProfile || {};
+  if (importedSheet) {
+    var impData = importedSheet.getDataRange().getValues();
+    var impHeaders = impData[0].map(function(h) { return String(h).trim(); });
+    
+    var impKIdx = impHeaders.indexOf("kgid");
+    var impRow = -1;
+    for (var r = 1; r < impData.length; r++) {
+      if (String(impData[r][impKIdx]).trim() === origKgid) {
+        impRow = r + 1;
+        break;
+      }
+    }
+    
+    if (impRow === -1) {
+      impRow = importedSheet.getLastRow() + 1;
+      importedSheet.appendRow([kgid]);
+    }
+    
+    var impCols = {};
+    impHeaders.forEach(function(h, idx) { impCols[h] = idx + 1; });
+    
+    if (impCols["kgid"]) importedSheet.getRange(impRow, impCols["kgid"]).setValue(kgid);
+    if (impCols["name"]) importedSheet.getRange(impRow, impCols["name"]).setValue(payload.name);
+    if (impCols["mobile1"]) importedSheet.getRange(impRow, impCols["mobile1"]).setValue(payload.mobile);
+    if (impCols["mobile2"]) importedSheet.getRange(impRow, impCols["mobile2"]).setValue(src.mobile2);
+    if (impCols["rank"]) importedSheet.getRange(impRow, impCols["rank"]).setValue(payload.rank);
+    if (impCols["station"]) importedSheet.getRange(impRow, impCols["station"]).setValue(payload.currentUnit);
+    if (impCols["district"]) importedSheet.getRange(impRow, impCols["district"]).setValue(payload.currentDistrict || "Chikkaballapura");
+    if (impCols["metalNumber"]) importedSheet.getRange(impRow, impCols["metalNumber"]).setValue(src.metalNumber);
+    if (impCols["bloodGroup"]) importedSheet.getRange(impRow, impCols["bloodGroup"]).setValue(src.bloodGroup);
+    // Auto-create schema column for email if missing
+    if (!impCols["email"]) {
+      var nextCol = impHeaders.length + 1;
+      importedSheet.getRange(1, nextCol).setValue("email");
+      impCols["email"] = nextCol;
+      impHeaders.push("email");
+    }
+    importedSheet.getRange(impRow, impCols["email"]).setValue(src.email || "");
+    if (impCols["isAdmin"]) importedSheet.getRange(impRow, impCols["isAdmin"]).setValue(src.isAdmin || "No");
+    if (impCols["isApproved"]) importedSheet.getRange(impRow, impCols["isApproved"]).setValue(src.isApproved || "Yes");
+    if (impCols["height"]) importedSheet.getRange(impRow, impCols["height"]).setValue(src.height);
+    if (impCols["weight"]) importedSheet.getRange(impRow, impCols["weight"]).setValue(src.weight);
+    if (impCols["caste"]) importedSheet.getRange(impRow, impCols["caste"]).setValue(src.caste);
+    if (impCols["subCaste"]) importedSheet.getRange(impRow, impCols["subCaste"]).setValue(src.subCaste);
+    if (impCols["familyDetails"]) importedSheet.getRange(impRow, impCols["familyDetails"]).setValue(src.familyDetails);
+    if (impCols["educationDetails"]) importedSheet.getRange(impRow, impCols["educationDetails"]).setValue(src.educationDetails);
+    
+    // Auto-create schema column for photoUrl if missing
+    if (!impCols["photoUrl"]) {
+      var nextCol = impHeaders.length + 1;
+      importedSheet.getRange(1, nextCol).setValue("photoUrl");
+      impCols["photoUrl"] = nextCol;
+      impHeaders.push("photoUrl");
+    }
+    importedSheet.getRange(impRow, impCols["photoUrl"]).setValue(src.photoUrl || "");
+    
+    if (impCols["updatedAt"]) importedSheet.getRange(impRow, impCols["updatedAt"]).setValue(formatDate(new Date()) + " " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "HH:mm"));
+  }
+  
+  return jsonResponse({ ok: true, message: "Saved employee " + payload.name + " (" + kgid + ")" });
+}
+
+// ── DELETE EMPLOYEE HANDLER ───────────────────────────────────
+function handleDeleteEmployee(kgid) {
+  kgid = String(kgid || "").trim();
+  if (!kgid) return jsonResponse({ ok: false, error: "KGID is required." });
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var masterSheet = ss.getSheetByName("Employee Master");
+  var historySheet = ss.getSheetByName("Posting History");
+  var importedSheet = ss.getSheetByName("Imported Emp Profiles");
+  var usersSheet = ss.getSheetByName("System Users");
+  
+  // Remove from Master
+  var masterData = masterSheet.getDataRange().getValues();
+  var kIdx = masterData[0].indexOf("KGID");
+  for (var r = masterData.length - 1; r >= 1; r--) {
+    if (String(masterData[r][kIdx]).trim() === kgid) {
+      masterSheet.deleteRow(r + 1);
+    }
+  }
+  
+  // Remove from History
+  var historyData = historySheet.getDataRange().getValues();
+  var hKIdx = historyData[0].indexOf("KGID");
+  for (var r = historyData.length - 1; r >= 1; r--) {
+    if (String(historyData[r][hKIdx]).trim() === kgid) {
+      historySheet.deleteRow(r + 1);
+    }
+  }
+  
+  // Remove from Imported
+  if (importedSheet) {
+    var impData = importedSheet.getDataRange().getValues();
+    var impKIdx = impData[0].indexOf("kgid");
+    for (var r = impData.length - 1; r >= 1; r--) {
+      if (String(impData[r][impKIdx]).trim() === kgid) {
+        importedSheet.deleteRow(r + 1);
+      }
+    }
+  }
+  
+  // Remove from System Users
+  if (usersSheet) {
+    var usersData = usersSheet.getDataRange().getValues();
+    var uKIdx = usersData[0].indexOf("KGID");
+    for (var r = usersData.length - 1; r >= 1; r--) {
+      if (String(usersData[r][uKIdx]).trim() === kgid) {
+        usersSheet.deleteRow(r + 1);
+      }
+    }
+  }
+  
+  return jsonResponse({ ok: true, message: "Deleted employee " + kgid });
+}
+
+// ── DUPLICATE STATUS CHECKER ──────────────────────────────────
+function duplicateStatus(query) {
+  var kgid = String(query.kgid || "").trim();
+  var originalKgid = String(query.originalKgid || "").trim();
+  var mobile = String(query.mobile || "").trim();
+  var isAdd = !originalKgid;
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var masterSheet = ss.getSheetByName("Employee Master");
+  var masterData = masterSheet.getDataRange().getValues();
+  var headers = masterData[0].map(function(h) { return String(h).trim(); });
+  var kIdx = headers.indexOf("KGID");
+  var nIdx = headers.indexOf("Employee Name");
+  var mIdx = headers.indexOf("Mobile");
+  
+  var issues = [];
+  function sameRecord(rowKgid) {
+    return !isAdd && (rowKgid === originalKgid || rowKgid === kgid);
+  }
+  
+  for (var r = 1; r < masterData.length; r++) {
+    var rowKgid = String(masterData[r][kIdx]).trim();
+    var rowName = String(masterData[r][nIdx]).trim();
+    var rowMobile = String(masterData[r][mIdx]).trim();
+    
+    if (sameRecord(rowKgid)) continue;
+    
+    if (kgid && rowKgid === kgid) {
+      issues.push({ field: "kgid", message: "KGID already exists: " + kgid + " - " + rowName });
+    }
+    if (mobile && rowMobile === mobile) {
+      issues.push({ field: "mobile", message: "Mobile already exists: " + mobile + " - " + rowName });
+    }
+  }
+  
+  return { ok: true, duplicate: issues.length > 0, issues: issues };
+}
+
+// ── LIST USERS ────────────────────────────────────────────────
+function listUsers() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var usersSheet = ss.getSheetByName("System Users");
+  if (!usersSheet) return [];
+  var rows = getSheetRowsAsDicts(usersSheet);
+  return rows.map(function(r) {
+    return {
+      kgid: asText(r["KGID"]),
+      role: asText(r["Role"]),
+      email: asText(r["Email"]),
+      status: asText(r["Status"])
+    };
+  });
+}
+
+// ── MANAGE USER (Super Admin Actions) ──────────────────────────
+function handleManageUser(payload) {
+  var targetKgid = String(payload.kgid || "").trim();
+  var action = payload.action; // "save", "delete", "create"
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var usersSheet = ss.getSheetByName("System Users");
+  if (!usersSheet) {
+    usersSheet = ss.insertSheet("System Users");
+    usersSheet.appendRow(["KGID", "PasswordHash", "Role", "Email", "Status"]);
+  }
+  
+  var usersData = usersSheet.getDataRange().getValues();
+  var headers = usersData[0].map(function(h) { return String(h).trim(); });
+  var kIdx = headers.indexOf("KGID");
+  
+  var targetRow = -1;
+  for (var r = 1; r < usersData.length; r++) {
+    if (String(usersData[r][kIdx]).trim() === targetKgid) {
+      targetRow = r + 1;
+      break;
+    }
+  }
+  
+  var uCols = {};
+  headers.forEach(function(h, idx) { uCols[h] = idx + 1; });
+  
+  if (action === "create" || action === "save") {
+    if (targetRow === -1) {
+      targetRow = usersSheet.getLastRow() + 1;
+      usersSheet.appendRow([targetKgid]);
+    }
+    
+    if (payload.passwordHash && uCols["PasswordHash"]) {
+      usersSheet.getRange(targetRow, uCols["PasswordHash"]).setValue(payload.passwordHash);
+    }
+    if (payload.role && uCols["Role"]) {
+      usersSheet.getRange(targetRow, uCols["Role"]).setValue(payload.role);
+    }
+    if (uCols["Email"]) {
+      usersSheet.getRange(targetRow, uCols["Email"]).setValue(payload.email || "");
+    }
+    if (payload.status && uCols["Status"]) {
+      usersSheet.getRange(targetRow, uCols["Status"]).setValue(payload.status);
+    }
+    return jsonResponse({ ok: true, message: "User account saved: " + targetKgid });
+  }
+  
+  if (action === "delete") {
+    if (targetRow !== -1) {
+      usersSheet.deleteRow(targetRow);
+      return jsonResponse({ ok: true, message: "User account deleted: " + targetKgid });
+    }
+    return jsonResponse({ ok: false, error: "User account not found." });
+  }
+  
+  return jsonResponse({ ok: false, error: "Invalid manage-user action." });
+}
+
+// ── ROLE PERMISSIONS HELPERS ───────────────────────────────────
+function getRolePermissions() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Role Permissions");
+  if (!sheet) {
+    sheet = ss.insertSheet("Role Permissions");
+    sheet.appendRow(["Role", "CanViewDashboard", "CanViewReports", "CanAddEmployee", "CanEditEmployee"]);
+    sheet.appendRow(["Admin", "Yes", "Yes", "Yes", "Yes"]);
+    sheet.appendRow(["User", "No", "No", "No", "No"]);
+    sheet.appendRow(["Super Admin", "Yes", "Yes", "Yes", "Yes"]);
+  }
+  var data = sheet.getDataRange().getValues();
+  var perms = {};
+  for (var i = 1; i < data.length; i++) {
+    var roleName = String(data[i][0]).trim();
+    perms[roleName] = {
+      canViewDashboard: String(data[i][1]).trim() === "Yes",
+      canViewReports: String(data[i][2]).trim() === "Yes",
+      canAddEmployee: String(data[i][3]).trim() === "Yes",
+      canEditEmployee: String(data[i][4]).trim() === "Yes"
+    };
+  }
+  return perms;
+}
+
+function handleSavePermissions(rolePermissions) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Role Permissions");
+  if (!sheet) {
+    sheet = ss.insertSheet("Role Permissions");
+    sheet.appendRow(["Role", "CanViewDashboard", "CanViewReports", "CanAddEmployee", "CanEditEmployee"]);
+  }
+  var data = sheet.getDataRange().getValues();
+  var targetRow = -1;
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === "Admin") {
+      targetRow = i + 1;
+      break;
+    }
+  }
+  if (targetRow === -1) {
+    targetRow = sheet.getLastRow() + 1;
+    sheet.appendRow(["Admin"]);
+  }
+  
+  sheet.getRange(targetRow, 1).setValue("Admin");
+  sheet.getRange(targetRow, 2).setValue(rolePermissions.canViewDashboard ? "Yes" : "No");
+  sheet.getRange(targetRow, 3).setValue(rolePermissions.canViewReports ? "Yes" : "No");
+  sheet.getRange(targetRow, 4).setValue(rolePermissions.canAddEmployee ? "Yes" : "No");
+  sheet.getRange(targetRow, 5).setValue(rolePermissions.canEditEmployee ? "Yes" : "No");
+  
+  return jsonResponse({ ok: true, message: "Admin role permissions updated successfully." });
+}
+
+// ── REGISTRATION & OTP HANDLERS ───────────────────────────────
+function handleSendRegistrationOtp(kgid, mobile, email, passwordHash) {
+  kgid = String(kgid || "").trim();
+  mobile = String(mobile || "").trim();
+  email = String(email || "").trim();
+  passwordHash = String(passwordHash || "").trim();
+  
+  if (!kgid || !mobile || !email || !passwordHash) {
+    return jsonResponse({ ok: false, error: "KGID, Mobile, Email, and Password are all required." });
+  }
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // 1. Check if user is already registered in System Users
+  var usersSheet = ss.getSheetByName("System Users");
+  if (usersSheet) {
+    var usersData = usersSheet.getDataRange().getValues();
+    var uKIdx = usersData[0].indexOf("KGID");
+    for (var r = 1; r < usersData.length; r++) {
+      if (String(usersData[r][uKIdx]).trim() === kgid) {
+        return jsonResponse({ ok: false, error: "This KGID is already registered. Please log in." });
+      }
+    }
+  }
+  
+  // 2. Check if KGID exists in Employee Master
+  var masterSheet = ss.getSheetByName("Employee Master");
+  if (!masterSheet) {
+    return jsonResponse({ ok: false, error: "Employee database sheet not found." });
+  }
+  
+  var masterData = masterSheet.getDataRange().getValues();
+  var mHeaders = masterData[0].map(function(h) { return String(h).trim(); });
+  var mKIdx = mHeaders.indexOf("KGID");
+  var mMIdx = mHeaders.indexOf("Mobile");
+  
+  var targetRow = -1;
+  for (var r = 1; r < masterData.length; r++) {
+    if (String(masterData[r][mKIdx]).trim() === kgid) {
+      targetRow = r + 1;
+      break;
+    }
+  }
+  
+  if (targetRow === -1) {
+    return jsonResponse({ ok: false, error: "KGID not found in Employee Master database." });
+  }
+  
+  // 3. Verify mobile number
+  var rawMasterMobile = asText(masterData[targetRow - 1][mMIdx]);
+  var normMasterMobile = rawMasterMobile.replace(/\D/g, "");
+  var normInputMobile = mobile.replace(/\D/g, "");
+  
+  if (normMasterMobile !== "") {
+    // Compare last 10 digits to handle country code or formatting differences
+    var m10 = normMasterMobile.slice(-10);
+    var i10 = normInputMobile.slice(-10);
+    if (m10 !== i10) {
+      return jsonResponse({ ok: false, error: "Entered mobile number does not match our records for this KGID." });
+    }
+  }
+  
+  // 4. Generate 6-digit OTP code
+  var otp = String(Math.floor(100000 + Math.random() * 900000));
+  
+  // 5. Store in script cache (valid for 15 minutes)
+  var cacheData = {
+    otp: otp,
+    kgid: kgid,
+    mobile: mobile,
+    email: email,
+    passwordHash: passwordHash
+  };
+  CacheService.getScriptCache().put("reg_" + kgid, JSON.stringify(cacheData), 900);
+  
+  // 6. Send verification email via Google MailApp
+  try {
+    var subject = "DPDMS Registration Verification OTP";
+    var body = "Hello,\n\n" +
+               "You are setting up a sign-in account for the Chikkaballapura District Police Data Management System (DPDMS).\n\n" +
+               "Your 6-digit verification code is:\n\n" +
+               "   " + otp + "\n\n" +
+               "This code is valid for 15 minutes. If you did not request this, please ignore this email.\n\n" +
+               "Regards,\n" +
+               "Chikkaballapura Police Admin";
+    MailApp.sendEmail(email, subject, body);
+  } catch (mailErr) {
+    return jsonResponse({ ok: false, error: "Failed to send email verification: " + mailErr.toString() });
+  }
+  
+  return jsonResponse({ ok: true, message: "Verification code sent to " + email });
+}
+
+function handleVerifyRegistrationOtp(kgid, otp) {
+  kgid = String(kgid || "").trim();
+  otp = String(otp || "").trim();
+  
+  if (!kgid || !otp) {
+    return jsonResponse({ ok: false, error: "KGID and OTP code are required." });
+  }
+  
+  // 1. Fetch cached registration details
+  var cached = CacheService.getScriptCache().get("reg_" + kgid);
+  if (!cached) {
+    return jsonResponse({ ok: false, error: "Verification session expired or not found. Please register again." });
+  }
+  
+  var data = JSON.parse(cached);
+  if (data.otp !== otp) {
+    return jsonResponse({ ok: false, error: "Incorrect verification code." });
+  }
+  
+  // OTP is correct! Complete registration
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // 2. Add to System Users
+  var usersSheet = ss.getSheetByName("System Users");
+  if (!usersSheet) {
+    usersSheet = ss.insertSheet("System Users");
+    usersSheet.appendRow(["KGID", "PasswordHash", "Role", "Email", "Status"]);
+  }
+  usersSheet.appendRow([data.kgid, data.passwordHash, "User", data.email, "Active"]);
+  
+  // 3. Update Mobile in Employee Master
+  var masterSheet = ss.getSheetByName("Employee Master");
+  if (masterSheet) {
+    var masterData = masterSheet.getDataRange().getValues();
+    var mHeaders = masterData[0].map(function(h) { return String(h).trim(); });
+    var mKIdx = mHeaders.indexOf("KGID");
+    var mMIdx = mHeaders.indexOf("Mobile");
+    
+    var targetRow = -1;
+    for (var r = 1; r < masterData.length; r++) {
+      if (String(masterData[r][mKIdx]).trim() === data.kgid) {
+        targetRow = r + 1;
+        break;
+      }
+    }
+    
+    if (targetRow !== -1) {
+      masterSheet.getRange(targetRow, mMIdx + 1).setValue(data.mobile);
+    }
+  }
+  
+  // 4. Update Imported Emp Profiles if exists
+  var importedSheet = ss.getSheetByName("Imported Emp Profiles");
+  if (importedSheet) {
+    var impData = importedSheet.getDataRange().getValues();
+    var impHeaders = impData[0].map(function(h) { return String(h).trim(); });
+    var impKIdx = impHeaders.indexOf("kgid");
+    var impRow = -1;
+    for (var r = 1; r < impData.length; r++) {
+      if (String(impData[r][impKIdx]).trim() === data.kgid) {
+        impRow = r + 1;
+        break;
+      }
+    }
+    
+    if (impRow === -1) {
+      impRow = importedSheet.getLastRow() + 1;
+      importedSheet.appendRow([data.kgid]);
+    }
+    
+    var impCols = {};
+    impHeaders.forEach(function(h, idx) { impCols[h] = idx + 1; });
+    
+    if (impCols["kgid"]) importedSheet.getRange(impRow, impCols["kgid"]).setValue(data.kgid);
+    if (impCols["mobile1"]) importedSheet.getRange(impRow, impCols["mobile1"]).setValue(data.mobile);
+    if (impCols["email"]) importedSheet.getRange(impRow, impCols["email"]).setValue(data.email);
+    if (impCols["updatedAt"]) importedSheet.getRange(impRow, impCols["updatedAt"]).setValue(formatDate(new Date()) + " " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "HH:mm"));
+  }
+  
+  // 5. Clean up cache
+  CacheService.getScriptCache().remove("reg_" + kgid);
+  
+  return jsonResponse({ ok: true, message: "Registration successful! You can now log in with your password." });
+}
+
+// ── PASSWORD RESET OTP HANDLERS ───────────────────────────────
+function handleSendResetOtp(kgid, email) {
+  kgid = String(kgid || "").trim();
+  email = String(email || "").trim();
+  
+  if (!kgid || !email) {
+    return jsonResponse({ ok: false, error: "KGID and Email are required." });
+  }
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var usersSheet = ss.getSheetByName("System Users");
+  if (!usersSheet) {
+    return jsonResponse({ ok: false, error: "User accounts database not found." });
+  }
+  
+  var usersData = usersSheet.getDataRange().getValues();
+  var headers = usersData[0].map(function(h) { return String(h).trim(); });
+  var kIdx = headers.indexOf("KGID");
+  var eIdx = headers.indexOf("Email");
+  var sIdx = headers.indexOf("Status");
+  
+  var targetRow = -1;
+  for (var r = 1; r < usersData.length; r++) {
+    if (String(usersData[r][kIdx]).trim() === kgid) {
+      targetRow = r + 1;
+      break;
+    }
+  }
+  
+  if (targetRow === -1) {
+    return jsonResponse({ ok: false, error: "User account not found for this KGID." });
+  }
+  
+  var dbEmail = String(usersData[targetRow - 1][eIdx]).trim().toLowerCase();
+  var dbStatus = String(usersData[targetRow - 1][sIdx]).trim();
+  
+  if (dbStatus === "Inactive") {
+    return jsonResponse({ ok: false, error: "This user account is suspended. Please contact support." });
+  }
+  
+  if (dbEmail !== "" && dbEmail !== email.toLowerCase()) {
+    return jsonResponse({ ok: false, error: "Entered email address does not match our records." });
+  }
+  
+  // Generate OTP code
+  var otp = String(Math.floor(100000 + Math.random() * 900000));
+  
+  // Cache reset code
+  var cacheData = { otp: otp, kgid: kgid, email: email };
+  CacheService.getScriptCache().put("reset_" + kgid, JSON.stringify(cacheData), 900);
+  
+  // Send reset email
+  try {
+    var subject = "DPDMS Password Reset OTP Verification";
+    var body = "Hello,\n\n" +
+               "A password reset request was made for your Chikkaballapura DPDMS account (KGID: " + kgid + ").\n\n" +
+               "Your password reset verification code is:\n\n" +
+               "   " + otp + "\n\n" +
+               "This code is valid for 15 minutes. If you did not request this change, please ignore this email.\n\n" +
+               "Regards,\n" +
+               "Chikkaballapura Police Admin";
+    MailApp.sendEmail(email, subject, body);
+  } catch (mailErr) {
+    return jsonResponse({ ok: false, error: "Failed to send reset email: " + mailErr.toString() });
+  }
+  
+  return jsonResponse({ ok: true, message: "Reset code successfully sent to " + email });
+}
+
+function handleVerifyResetOtp(kgid, otp, newPasswordHash) {
+  kgid = String(kgid || "").trim();
+  otp = String(otp || "").trim();
+  newPasswordHash = String(newPasswordHash || "").trim();
+  
+  if (!kgid || !otp || !newPasswordHash) {
+    return jsonResponse({ ok: false, error: "KGID, OTP, and New Password are required." });
+  }
+  
+  var cached = CacheService.getScriptCache().get("reset_" + kgid);
+  if (!cached) {
+    return jsonResponse({ ok: false, error: "Verification session expired or not found. Please try again." });
+  }
+  
+  var data = JSON.parse(cached);
+  if (data.otp !== otp) {
+    return jsonResponse({ ok: false, error: "Incorrect verification code." });
+  }
+  
+  // Verification successful! Update password
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var usersSheet = ss.getSheetByName("System Users");
+  if (!usersSheet) {
+    return jsonResponse({ ok: false, error: "User accounts database not found." });
+  }
+  
+  var usersData = usersSheet.getDataRange().getValues();
+  var headers = usersData[0].map(function(h) { return String(h).trim(); });
+  var kIdx = headers.indexOf("KGID");
+  var pIdx = headers.indexOf("PasswordHash");
+  
+  var targetRow = -1;
+  for (var r = 1; r < usersData.length; r++) {
+    if (String(usersData[r][kIdx]).trim() === kgid) {
+      targetRow = r + 1;
+      break;
+    }
+  }
+  
+  if (targetRow === -1) {
+    return jsonResponse({ ok: false, error: "User account not found." });
+  }
+  
+  usersSheet.getRange(targetRow, pIdx + 1).setValue(newPasswordHash);
+  
+  // Clean up cache
+  CacheService.getScriptCache().remove("reset_" + kgid);
+  
+  return jsonResponse({ ok: true, message: "Password updated successfully." });
+}
+
+function handleGoogleLogin(idToken) {
+  idToken = String(idToken || "").trim();
+  if (!idToken) return jsonResponse({ ok: false, error: "ID Token is required." });
+  
+  try {
+    var response = UrlFetchApp.fetch("https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken, { muteHttpExceptions: true });
+    if (response.getResponseCode() !== 200) {
+      return jsonResponse({ ok: false, error: "Failed to verify Google identity. Invalid token." });
+    }
+    
+    var payload = JSON.parse(response.getContentText());
+    var email = String(payload.email || "").trim().toLowerCase();
+    var emailVerified = payload.email_verified;
+    
+    if (!email || (emailVerified !== "true" && emailVerified !== true)) {
+      return jsonResponse({ ok: false, error: "Google email is not verified." });
+    }
+    
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var usersSheet = ss.getSheetByName("System Users");
+    if (!usersSheet) {
+      usersSheet = ss.insertSheet("System Users");
+      usersSheet.appendRow(["KGID", "PasswordHash", "Role", "Email", "Status"]);
+      usersSheet.appendRow(["12345", "240713a1a08e96dd00cbe6e05342a98379c6fa076cf47e8e58319e64e52541c8", "Super Admin", "", "Active"]);
+      usersSheet.appendRow(["1953036", "db1bddcedf91b4fd0146205d4f238117a98d35f25bd8ce3840c46eead9f1b966", "Super Admin", "", "Active"]);
+    }
+    
+    var data = usersSheet.getDataRange().getValues();
+    var headers = data[0].map(function(h) { return String(h).trim(); });
+    var kIdx = headers.indexOf("KGID");
+    var eIdx = headers.indexOf("Email");
+    var rIdx = headers.indexOf("Role");
+    var sIdx = headers.indexOf("Status");
+    
+    var userRow = -1;
+    for (var i = 1; i < data.length; i++) {
+      var dbEmail = String(data[i][eIdx]).trim().toLowerCase();
+      if (dbEmail === email) {
+        userRow = i;
+        break;
+      }
+    }
+    
+    if (userRow === -1) {
+      var importedSheet = ss.getSheetByName("Imported Emp Profiles");
+      var foundKgid = "";
+      var foundName = "";
+      var foundIsAdmin = "No";
+      
+      if (importedSheet) {
+        var impData = importedSheet.getDataRange().getValues();
+        var impHeaders = impData[0].map(function(h) { return String(h).trim(); });
+        var impKIdx = impHeaders.indexOf("kgid");
+        var impEIdx = impHeaders.indexOf("email");
+        var impNIdx = impHeaders.indexOf("name");
+        var impAIdx = impHeaders.indexOf("isAdmin");
+        for (var j = 1; j < impData.length; j++) {
+          if (String(impData[j][impEIdx]).trim().toLowerCase() === email) {
+            foundKgid = String(impData[j][impKIdx]).trim();
+            foundName = String(impData[j][impNIdx]).trim();
+            if (impAIdx !== -1) foundIsAdmin = String(impData[j][impAIdx]).trim();
+            break;
+          }
+        }
+      }
+      
+      if (!foundKgid) {
+        return jsonResponse({ ok: false, error: "Your Google email (" + email + ") is not registered in our records. Please register your account first." });
+      }
+      
+      var autoRole = foundIsAdmin === "Yes" ? "Admin" : "User";
+      if (foundKgid === "1953036" || foundKgid === "12345" || email === "ravipolice@gmail.com") {
+        autoRole = "Super Admin";
+      }
+      
+      usersSheet.appendRow([foundKgid, "", autoRole, email, "Active"]);
+      var token = Utilities.getUuid();
+      var session = { kgid: foundKgid, role: autoRole, name: foundName };
+      CacheService.getScriptCache().put(token, JSON.stringify(session), 21600); // 6 hours
+      return jsonResponse({ ok: true, token: token, role: autoRole, kgid: foundKgid, name: foundName });
+    }
+    
+    var kgid = String(data[userRow][kIdx]).trim();
+    var dbRole = String(data[userRow][rIdx]).trim();
+    if (email === "ravipolice@gmail.com") {
+      dbRole = "Super Admin";
+    }
+    var dbStatus = String(data[userRow][sIdx]).trim();
+    
+    if (dbStatus === "Inactive") {
+      return jsonResponse({ ok: false, error: "Your account is deactivated." });
+    }
+    
+    var name = kgid;
+    var masterSheet = ss.getSheetByName("Employee Master");
+    if (masterSheet) {
+      var masterData = masterSheet.getDataRange().getValues();
+      var mHeaders = masterData[0].map(function(h) { return String(h).trim(); });
+      var mKIdx = mHeaders.indexOf("KGID");
+      var mNIdx = mHeaders.indexOf("Employee Name");
+      for (var j = 1; j < masterData.length; j++) {
+        if (String(masterData[j][mKIdx]).trim() === kgid) {
+          name = masterData[j][mNIdx];
+          break;
+        }
+      }
+    }
+    
+    var token = Utilities.getUuid();
+    var session = { kgid: kgid, role: dbRole, name: name };
+    CacheService.getScriptCache().put(token, JSON.stringify(session), 21600); // 6 hours
+    return jsonResponse({ ok: true, token: token, role: dbRole, kgid: kgid, name: name });
+  } catch(err) {
+    return jsonResponse({ ok: false, error: "Google verification failed: " + err.toString() });
+  }
+}

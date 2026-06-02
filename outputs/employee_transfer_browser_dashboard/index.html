@@ -1,0 +1,4265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>District Police Data Management System — Chikkaballapura</title>
+  <meta name="description" content="District Police Data Management System for Chikkaballapura District Police" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design Tokens — Light Theme ─────────────── */
+    :root {
+      --bg:        #f0f2f5;
+      --surf:      #ffffff;
+      --surf2:     #f7f8fa;
+      --surf3:     #eef1f5;
+      --bdr:       #e2e6ed;
+      --bdr2:      #d0d5de;
+      --navy:      #1a2744;
+      --navy-lt:   #243558;
+      --navy-dim:  rgba(26,39,68,0.06);
+      --gold:      #b8941f;
+      --gold-lt:   #d4ab24;
+      --gold-dim:  rgba(184,148,31,0.10);
+      --txt:       #1e293b;
+      --txt2:      #334155;
+      --muted:     #64748b;
+      --muted2:    #94a3b8;
+      --grn:       #16a34a;
+      --grn-lt:    #22c55e;
+      --grn-dim:   rgba(22,163,74,0.08);
+      --amb:       #d97706;
+      --amb-lt:    #f59e0b;
+      --amb-dim:   rgba(217,119,6,0.08);
+      --red:       #dc2626;
+      --red-lt:    #ef4444;
+      --red-dim:   rgba(220,38,38,0.07);
+      --blu:       #2563eb;
+      --blu-lt:    #3b82f6;
+      --blu-dim:   rgba(37,99,235,0.07);
+      --pur:       #7c3aed;
+      --pur-dim:   rgba(124,58,237,0.07);
+      --cyn:       #0891b2;
+      --cyn-dim:   rgba(8,145,178,0.07);
+      --r:         10px;
+      --r-sm:      7px;
+      --sh:        0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+      --sh-lg:     0 4px 24px rgba(0,0,0,.1);
+      --trans:     .2s ease;
+      --navy-surf: #1a2744;
+      --navy-btn-txt: #ffffff;
+    }
+
+    /* ── Design Tokens — Dark Theme ──────────────── */
+    body.dark-theme {
+      --bg:        #0b0f19;
+      --surf:      #111827;
+      --surf2:     #1f2937;
+      --surf3:     #374151;
+      --bdr:       #1f2937;
+      --bdr2:      #374151;
+      --navy:      #38bdf8;
+      --navy-lt:   #60a5fa;
+      --navy-dim:  rgba(56,189,248,0.12);
+      --gold:      #fbbf24;
+      --gold-lt:   #fde047;
+      --gold-dim:  rgba(251,191,36,0.15);
+      --txt:       #f3f4f6;
+      --txt2:      #e5e7eb;
+      --muted:     #9ca3af;
+      --muted2:    #6b7280;
+      --navy-surf: #1f2937;
+      --navy-btn-txt: #0b0f19;
+    }
+
+    /* ── Theme Toggle Button Styling ─────────────── */
+    #dashboardThemeToggleBtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+    }
+    body:not(.dark-theme) #dashboardThemeToggleBtn .sun-icon { display: none; }
+    body:not(.dark-theme) #dashboardThemeToggleBtn .moon-icon { display: inline-block; }
+    body.dark-theme #dashboardThemeToggleBtn .sun-icon { display: inline-block; }
+    body.dark-theme #dashboardThemeToggleBtn .moon-icon { display: none; }
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--txt);font-family:'Inter','Segoe UI',sans-serif;font-size:14px;line-height:1.55;min-height:100vh}
+    body.modal-open{overflow:hidden}
+    ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
+
+    /* ── Header ──────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: linear-gradient(135deg, #0b1329 0%, #152244 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+    .hd-inner {
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 0 22px;
+    }
+    .hd-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0 8px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--gold);
+      box-shadow: 0 0 16px rgba(251, 191, 36, 0.35);
+      transition: transform 0.3s var(--trans);
+    }
+    .brand-logo:hover {
+      transform: scale(1.05);
+    }
+    .brand-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+      letter-spacing: -0.2px;
+    }
+    .brand-sub {
+      font-size: 9.5px;
+      color: var(--gold-lt);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+      background: rgba(251, 191, 36, 0.08);
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      border: 1px solid rgba(251, 191, 36, 0.15);
+    }
+    .hd-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .data-badge {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 6px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .data-badge::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    /* ── Tabs ────────────────────────────────────── */
+    .tab-row {
+      display: flex;
+      gap: 6px;
+      padding: 6px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 8px 16px;
+      font: 600 13px 'Inter', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--trans);
+      border-radius: 6px;
+      min-height: unset;
+      position: relative;
+    }
+    .tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .tab-btn.act {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+    .tab-btn.act::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 15%;
+      right: 15%;
+      height: 3px;
+      background: var(--gold-lt);
+      border-radius: 999px;
+      box-shadow: 0 0 10px var(--gold-lt);
+    }
+    .ti {
+      font-size: 14px;
+    }
+
+    /* ── Buttons ─────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 15px;
+      border-radius: var(--r-sm);
+      font: 600 13px 'Inter', sans-serif;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all var(--trans);
+      min-height: 34px;
+      white-space: nowrap;
+    }
+    .hd-right .btn-ghost {
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 6px 12px;
+    }
+    .hd-right .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+    .hd-right .btn-gold {
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      color: #0b0f19;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+    }
+    .hd-right .btn-gold:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(217, 119, 6, 0.35);
+      filter: brightness(1.05);
+    }
+    .hd-right .btn-red {
+      background: rgba(220, 38, 38, 0.22);
+      color: #fca5a5;
+      border-color: rgba(220, 38, 38, 0.35);
+      border-radius: 6px;
+    }
+    .hd-right .btn-red:hover {
+      background: rgba(220, 38, 38, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-ghost {
+      background: var(--surf);
+      color: var(--txt);
+      border-color: var(--bdr2);
+    }
+    .btn-ghost:hover {
+      background: var(--surf2);
+      border-color: var(--muted2);
+    }
+    .btn-gold {
+      background: var(--gold);
+      color: #fff;
+      border-color: var(--gold);
+    }
+    .btn-gold:hover {
+      background: var(--gold-lt);
+      box-shadow: 0 2px 12px rgba(184, 148, 31, 0.3);
+    }
+    .btn-red {
+      background: var(--red-dim);
+      color: var(--red);
+      border-color: rgba(220, 38, 38, 0.25);
+    }
+    .btn-red:hover {
+      background: rgba(220, 38, 38, 0.14);
+    }
+    .btn-sm {
+      padding: 5px 11px;
+      font-size: 12px;
+      min-height: 28px;
+    }
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    /* ── Main ────────────────────────────────────── */
+    main{max-width:1520px;margin:0 auto;padding:20px 22px 48px}
+    .tab-sec{display:none}.tab-sec.act{display:block;animation:fadeUp .22s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── KPI Grid ────────────────────────────────── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+    .kpi{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:18px 18px 16px;position:relative;overflow:hidden;transition:transform var(--trans),box-shadow var(--trans);cursor:pointer;box-shadow:var(--sh)}
+    .kpi:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
+    .kpi:active{transform:translateY(-1px) scale(0.99)}
+    .kpi:focus-visible{outline:2px solid var(--blu);outline-offset:2px}
+    .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+    .kpi::before{background:var(--navy)}
+    .kpi.k-red::before{background:var(--red)}.kpi.k-amb::before{background:var(--amb)}
+    .kpi.k-grn::before{background:var(--grn)}.kpi.k-blu::before{background:var(--blu)}
+    .kpi.k-pur::before{background:var(--pur)}.kpi.k-cyn::before{background:var(--cyn)}
+    .kpi-lbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .kpi-val{font-size:34px;font-weight:900;line-height:1}
+    .kpi .kpi-val{color:var(--navy)}.kpi.k-red .kpi-val{color:var(--red)}.kpi.k-amb .kpi-val{color:var(--amb)}
+    .kpi.k-grn .kpi-val{color:var(--grn)}.kpi.k-blu .kpi-val{color:var(--blu)}.kpi.k-pur .kpi-val{color:var(--pur)}.kpi.k-cyn .kpi-val{color:var(--cyn)}
+    .kpi-sub{font-size:11px;color:var(--muted2);margin-top:5px}
+    .kpi-glow{position:absolute;top:-10px;right:-10px;width:70px;height:70px;border-radius:50%;pointer-events:none}
+    .kpi .kpi-glow{background:var(--navy-dim)}.kpi.k-red .kpi-glow{background:var(--red-dim)}.kpi.k-amb .kpi-glow{background:var(--amb-dim)}
+    .kpi.k-grn .kpi-glow{background:var(--grn-dim)}.kpi.k-blu .kpi-glow{background:var(--blu-dim)}.kpi.k-pur .kpi-glow{background:var(--pur-dim)}
+    .kpi.k-cyn .kpi-glow{background:var(--cyn-dim)}
+
+    /* ── Chart Cards ─────────────────────────────── */
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+    .chart-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+    .cc-head{padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;background:var(--surf2)}
+    .cc-title{font-size:13px;font-weight:700;color:var(--navy)}
+    .cc-sub{font-size:11px;color:var(--muted)}
+    .cc-body{padding:10px 14px;max-height:400px;overflow-y:auto}
+    .bar-row{display:grid;grid-template-columns:140px 1fr 38px;align-items:center;gap:10px;padding:4px 0}
+    .bar-lbl{font-size:12px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .bar-track{height:10px;background:var(--surf3);border-radius:5px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:5px;transition:width .7s ease}
+    .bar-gold{background:linear-gradient(90deg,var(--gold),var(--gold-lt))}.bar-blue{background:linear-gradient(90deg,var(--blu),var(--blu-lt))}
+    .bar-red{background:linear-gradient(90deg,var(--red),var(--red-lt))}.bar-green{background:linear-gradient(90deg,var(--grn),var(--grn-lt))}
+    .bar-amber{background:linear-gradient(90deg,var(--amb),var(--amb-lt))}.bar-purple{background:linear-gradient(90deg,var(--pur),#a78bfa)}
+    .bar-cyan{background:linear-gradient(90deg,var(--cyn),#06b6d4)}.bar-navy{background:linear-gradient(90deg,var(--navy),var(--navy-lt))}
+    .bar-n{font-size:12px;color:var(--muted);text-align:right;font-weight:700}
+
+    /* ── Donut ────────────────────────────────────── */
+    .donut-wrap{display:flex;align-items:center;justify-content:center;gap:24px;padding:12px 8px}
+    .donut{position:relative;width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .donut-center{position:absolute;width:80px;height:80px;border-radius:50%;background:var(--surf);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 0 8px rgba(0,0,0,.06)}
+    .donut-num{font-size:24px;font-weight:900;color:var(--navy);line-height:1}
+    .donut-sub{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+    .legend{display:grid;gap:6px}
+    .leg-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt2)}
+    .leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+    .leg-n{margin-left:auto;font-weight:700;color:var(--muted);min-width:28px;text-align:right}
+
+    /* ── Histogram ───────────────────────────────── */
+    .histo{display:flex;align-items:flex-end;gap:6px;padding:14px 10px 4px;height:180px}
+    .histo-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+    .histo-bar-wrap{width:100%;flex:1;display:flex;align-items:flex-end;justify-content:center}
+    .histo-bar{width:100%;max-width:48px;border-radius:5px 5px 0 0;transition:height .6s ease;min-height:2px}
+    .histo-n{font-size:11px;font-weight:700;color:var(--txt)}
+    .histo-lbl{font-size:9.5px;color:var(--muted);font-weight:600;text-align:center;white-space:nowrap}
+
+    /* ── Top List ────────────────────────────────── */
+    .top-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)}
+    .top-item:last-child{border-bottom:none}
+    .top-rank{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+    .top-rank.r1{background:var(--red-dim);color:var(--red)}.top-rank.r2{background:var(--amb-dim);color:var(--amb)}.top-rank.r3{background:var(--gold-dim);color:var(--gold)}.top-rank.rx{background:var(--surf3);color:var(--muted)}
+    .top-info{flex:1;min-width:0}.top-name{font-size:13px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .top-meta{font-size:11px;color:var(--muted)}
+    .top-val{font-size:14px;font-weight:800;flex-shrink:0}.top-val.tv-red{color:var(--red)}.top-val.tv-amb{color:var(--amb)}.top-val.tv-grn{color:var(--grn)}
+
+    /* ── KPI View Tab Section ───────────────────── */
+    .kpi-view-header {
+      background: var(--surf);
+      border: 1px solid var(--bdr);
+      border-radius: var(--r);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--sh);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .kpi-view-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .kpi-view-title-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .kpi-view-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .kpi-view-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .kpi-view-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .kpi-view-search-wrapper {
+      position: relative;
+      max-width: 320px;
+      width: 100%;
+    }
+    .kpi-view-search-input {
+      width: 100%;
+      background: var(--surf2);
+      border: 1px solid var(--bdr);
+      color: var(--txt);
+      border-radius: var(--r-sm);
+      padding: 7px 12px 7px 32px;
+      font-size: 13px;
+      min-height: 34px;
+      transition: border-color var(--trans), box-shadow var(--trans);
+    }
+    .kpi-view-search-input:focus {
+      outline: none;
+      border-color: var(--blu);
+      box-shadow: 0 0 0 3px var(--blu-dim);
+    }
+    .kpi-view-search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      font-size: 14px;
+    }
+    .kpi-view-back-btn {
+      background: var(--surf2);
+      border: 1px solid var(--bdr2);
+      color: var(--txt);
+      border-radius: var(--r-sm);
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--trans);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 34px;
+      white-space: nowrap;
+    }
+    .kpi-view-back-btn:hover {
+      background: var(--surf3);
+      border-color: var(--muted);
+      transform: translateX(-2px);
+    }
+
+    /* ── Circle Office sub-tiles ─────────────────── */
+    .co-tile {
+      background: var(--surf);
+      border: 1px solid var(--bdr);
+      border-radius: var(--r-sm);
+      padding: 10px 14px;
+      cursor: pointer;
+      position: relative;
+      transition: all var(--trans);
+      box-shadow: var(--sh);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .co-tile:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--sh-md);
+      border-color: var(--pur);
+    }
+    .co-tile.act {
+      border: 2px solid var(--pur);
+      background: var(--pur-dim);
+    }
+    .k-cyn-tiles .co-tile:hover {
+      border-color: var(--cyn);
+    }
+    .k-cyn-tiles .co-tile.act {
+      border: 2px solid var(--cyn);
+      background: var(--cyn-dim);
+    }
+    .k-cyn-tiles .co-tile-count {
+      color: var(--cyn);
+    }
+    .k-blu-tiles .co-tile:hover {
+      border-color: var(--blu);
+    }
+    .k-blu-tiles .co-tile.act {
+      border: 2px solid var(--blu);
+      background: var(--blu-dim);
+    }
+    .k-blu-tiles .co-tile-count {
+      color: var(--blu);
+    }
+    .k-red-tiles .co-tile:hover {
+      border-color: var(--red);
+    }
+    .k-red-tiles .co-tile.act {
+      border: 2px solid var(--red);
+      background: var(--red-dim);
+    }
+    .k-red-tiles .co-tile-count {
+      color: var(--red);
+    }
+    .co-tile-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.2;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .co-tile-count {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--pur);
+      margin-top: 0;
+      align-self: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Horizontal Search & Filters ─────────────── */
+    .filter-bar {
+      background: var(--surf);
+      border: 1px solid var(--bdr);
+      border-radius: var(--r);
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: var(--sh);
+    }
+    .pan-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pan-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .pan-count {
+      margin-left: auto;
+      font-size: 11.5px;
+      color: var(--muted);
+      background: var(--surf3);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .flbl {
+      display: grid;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .35px;
+    }
+    input, select, textarea {
+      background: var(--surf2);
+      border: 1px solid var(--bdr);
+      color: var(--txt);
+      border-radius: var(--r-sm);
+      padding: 7px 10px;
+      font: inherit;
+      font-size: 13px;
+      width: 100%;
+      min-height: 34px;
+      transition: border-color var(--trans), box-shadow var(--trans);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--blu);
+      box-shadow: 0 0 0 3px var(--blu-dim);
+    }
+    input::placeholder {
+      color: var(--muted2);
+    }
+    select option {
+      background: var(--surf);
+      color: var(--txt);
+    }
+
+    /* ── Employee Cards Grid ─────────────────────── */
+    .employee-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .emp-card {
+      background: var(--surf);
+      border: 1px solid var(--bdr);
+      border-radius: var(--r);
+      padding: 20px;
+      cursor: pointer;
+      position: relative;
+      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
+      box-shadow: var(--sh);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 130px;
+    }
+    .emp-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--sh-lg);
+      border-color: var(--gold-lt);
+    }
+    .emp-card:active {
+      transform: translateY(-2px) scale(0.99);
+    }
+    .emp-card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .emp-card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .emp-card-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+      color: var(--gold-lt);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 22px;
+      border: 2.5px solid var(--gold-lt);
+      box-shadow: 0 2px 8px rgba(26, 39, 68, 0.15);
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+    .emp-card-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .emp-card-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .emp-card-rank {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+    .emp-card-details {
+      font-size: 13px;
+      color: var(--txt2);
+      display: grid;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+    .emp-card-detail-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .emp-card-detail-label {
+      color: var(--muted);
+    }
+    .emp-card-detail-value {
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 190px;
+      text-align: right;
+    }
+    .emp-card-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--bdr);
+      padding-top: 14px;
+      margin-top: auto;
+    }
+
+    @media(max-width: 1024px) {
+      .filter-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media(max-width: 600px) {
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── Profile ─────────────────────────────────── */
+    .prof-panel{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);box-shadow:var(--sh)}
+    .prof-hero{padding:18px 20px 14px;background:linear-gradient(135deg,#1a2744 0%,#2d4a7a 100%);border-bottom:1px solid var(--bdr);border-radius:var(--r) var(--r) 0 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .prof-name{font-size:22px;font-weight:900;color:#ffffff;line-height:1.2}
+    .prof-meta{font-size:12px;color:rgba(255,255,255,.65);margin-top:4px}
+    .prof-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+    .prof-acts{display:flex;gap:7px;flex-shrink:0}
+    .prof-acts .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.2)}.prof-acts .btn-ghost:hover{background:rgba(255,255,255,.22)}
+    .prof-acts .btn-red{background:rgba(255,255,255,.12);color:#fca5a5;border-color:rgba(255,255,255,.2)}.prof-acts .btn-red:hover{background:rgba(248,113,113,.25)}
+    .badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent}
+    .b-hi{background:rgba(220,38,38,.15);color:#fca5a5;border-color:rgba(220,38,38,.3)}
+    .b-med{background:rgba(217,119,6,.15);color:#fde68a;border-color:rgba(217,119,6,.3)}
+    .b-lo{background:rgba(22,163,74,.15);color:#86efac;border-color:rgba(22,163,74,.3)}
+    .b-yes{background:rgba(220,38,38,.15);color:#fca5a5;border-color:rgba(220,38,38,.3)}
+    .b-no{background:rgba(22,163,74,.15);color:#86efac;border-color:rgba(22,163,74,.3)}
+    .b-neu{background:rgba(37,99,235,.15);color:#93c5fd;border-color:rgba(37,99,235,.3)}
+
+    /* ── Collapsible Sections ────────────────────── */
+    .cs{border-bottom:1px solid var(--bdr)}.cs:last-child{border-bottom:none}
+    .cs-trigger{width:100%;background:transparent;border:none;color:var(--txt);padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;font:600 13px 'Inter',sans-serif;transition:background var(--trans);min-height:unset;border-radius:0;text-align:left}
+    .cs-trigger:hover{background:var(--surf2)}.cs-trigger.open{color:var(--navy);background:var(--surf2)}
+    .cs-ico{font-size:15px}.cs-lbl{flex:1}
+    .cs-chev{color:var(--muted);transition:transform .3s ease;font-size:11px}.cs-trigger.open .cs-chev{transform:rotate(180deg);color:var(--navy)}
+    .cs-body{max-height:0;overflow:hidden;transition:max-height .36s cubic-bezier(.4,0,.2,1)}.cs-body.open{max-height:4000px}
+    .cs-inner{padding:2px 20px 16px}
+
+    /* ── Fields Grid ─────────────────────────────── */
+    .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+    .fcard{background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:9px 12px}
+    .fc-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+    .fc-val{font-size:13px;color:var(--txt);font-weight:500;word-break:break-word}.fc-nil{color:var(--muted2)}
+
+    /* ── Tables ──────────────────────────────────── */
+    .dtbl{width:100%;border-collapse:collapse}
+    .dtbl th{background:var(--navy-surf);color:#fff;padding:9px 10px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+    .dtbl td{padding:9px 10px;border-bottom:1px solid var(--bdr);color:var(--txt);font-size:13px;vertical-align:top}
+    .dtbl tr:hover td{background:var(--surf2)}.dtbl tr:last-child td{border-bottom:none}
+    .dtbl tbody tr:nth-child(even) td{background:var(--surf2)}
+
+    /* ── Edit Form ───────────────────────────────── */
+    .eform{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;padding:18px 20px}
+    .efsec{grid-column:1/-1;border-bottom:1px solid var(--bdr);padding-bottom:8px;margin-bottom:2px}
+    .efsec-title{font-size:11px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px}
+    .ef-actions{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;padding-top:10px;border-top:1px solid var(--bdr);margin-top:4px}
+    .ef-notice{grid-column:1/-1;padding:9px 13px;border-radius:var(--r-sm);font-size:13px;display:none}
+    .ef-notice.info{background:var(--blu-dim);color:var(--blu);border:1px solid rgba(37,99,235,.2)}
+    .ef-notice.success{background:var(--grn-dim);color:var(--grn);border:1px solid rgba(22,163,74,.2)}
+    .ef-notice.error{background:var(--red-dim);color:var(--red);border:1px solid rgba(220,38,38,.2)}
+    .dup-warn{grid-column:1/-1;display:none;background:var(--amb-dim);color:var(--amb);border:1px solid rgba(217,119,6,.25);padding:9px 13px;border-radius:var(--r-sm);font-size:13px;font-weight:600}
+
+    /* ── Posting History Editor Styles ── */
+    .hist-container{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+    .hist-card{background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;display:flex;flex-direction:column;gap:8px;position:relative;transition:all var(--trans)}
+    .hist-card:hover{border-color:var(--muted2);box-shadow:var(--sh)}
+    .hist-card.editing{background:var(--surf);border-color:var(--gold-lt);box-shadow:0 0 10px rgba(251,191,36,0.1)}
+    .hist-card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .hist-card-title{font-size:13px;font-weight:700;color:var(--txt)}
+    .hist-card-meta{font-size:11px;color:var(--muted);margin-top:2px}
+    .hist-card-actions{display:flex;gap:6px;margin-top:6px;align-self:flex-end}
+    .hist-edit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+    @media(max-width:768px){.hist-edit-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:480px){.hist-edit-grid{grid-template-columns:1fr}}
+    .hist-edit-grid label{display:flex;flex-direction:column;gap:4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.35px}
+    .hist-edit-grid input{height:34px;padding:0 10px;border-radius:var(--r-sm);border:1px solid var(--bdr);background:var(--surf);color:var(--txt);font-size:12.5px}
+    .hist-edit-grid input:focus{border-color:var(--navy);outline:none}
+    .hist-add-btn-wrap{grid-column:1/-1;display:flex;justify-content:flex-start;margin-top:4px}
+
+
+    /* ── Reports ─────────────────────────────────── */
+    .rpt-nav{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+    .rpt-btn{padding:7px 15px;border-radius:999px;font:600 12.5px 'Inter',sans-serif;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--muted);transition:all var(--trans);min-height:unset;box-shadow:var(--sh)}
+    .rpt-btn:hover{color:var(--txt);border-color:var(--muted2)}.rpt-btn.act{background:var(--navy);color:var(--navy-btn-txt);border-color:var(--navy)}
+    .rpt-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+    .rpt-head{padding:13px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;background:var(--surf2)}
+    .rpt-title{font-size:15px;font-weight:800;color:var(--navy)}.rpt-cnt{font-size:11px;color:var(--muted);margin-top:2px}
+    .rpt-filters{padding:10px 16px;border-bottom:1px solid var(--bdr);display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surf2)}
+    .rft-lbl{font-size:11px;color:var(--muted);font-weight:700}
+    .chip{padding:4px 12px;border-radius:999px;font:600 11.5px 'Inter',sans-serif;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--muted);transition:all var(--trans);min-height:unset}
+    .chip:hover{color:var(--txt);border-color:var(--muted2)}.chip.act{background:var(--navy);color:var(--navy-btn-txt);border-color:var(--navy)}
+    .rpt-body{overflow-x:auto}
+
+    .r-urg{color:var(--red);font-weight:700}.r-soon{color:var(--amb);font-weight:700}.r-ok{color:var(--grn)}
+    .empty{padding:44px 24px;text-align:center;color:var(--muted)}.empty-ico{font-size:36px;margin-bottom:10px;opacity:.45}.empty-txt{font-size:14px}
+
+    /* ── Modal ───────────────────────────────────── */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+    .modal-bg.open{display:flex}
+    .modal{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:26px;max-width:400px;width:92%;box-shadow:var(--sh-lg);animation:fadeUp .2s ease;position:relative}
+    .modal-title{font-size:17px;font-weight:800;color:var(--navy);margin-bottom:10px}
+    .modal-body{color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:20px}
+    .modal-acts{display:flex;gap:10px;justify-content:flex-end}
+    .modal-close{position:absolute;top:15px;right:15px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;transition:background var(--trans),color var(--trans)}
+    .modal-close:hover{background:var(--bdr);color:var(--navy)}
+
+    .profile-modal {
+      max-width: 900px;
+      width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      padding: 0;
+      border: 1px solid var(--bdr2);
+      box-shadow: var(--sh-lg);
+    }
+    .profile-modal .prof-hero {
+      padding-right: 65px;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .profile-modal-close {
+      position: sticky;
+      top: 15px;
+      z-index: 100;
+      float: right;
+      margin-right: 15px;
+      margin-bottom: -30px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: #fff;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--trans);
+    }
+    .profile-modal-close:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    /* ── Google Style Profile Menu ───────────────── */
+    .profile-avatar-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.2s ease, transform 0.1s ease;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+    }
+    .profile-avatar-btn:hover {
+      box-shadow: 0 0 0 3px rgba(184,148,31,0.4);
+      transform: scale(1.05);
+    }
+    .profile-dropdown-card {
+      position: absolute;
+      top: 42px;
+      right: 0;
+      width: 300px;
+      background: var(--surf);
+      border: 1px solid var(--bdr);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 1px 8px rgba(0, 0, 0, 0.1);
+      padding: 24px 20px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      z-index: 1000;
+      animation: dropdownFade 0.2s ease;
+    }
+    .profile-dropdown-card.open {
+      display: flex;
+    }
+    @keyframes dropdownFade {
+      from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .pd-avatar-large {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(184,148,31,0.2);
+    }
+    .pd-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--txt);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .pd-email {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 2px;
+    }
+    .pd-role {
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--navy-dim);
+      color: var(--navy);
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pd-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--bdr);
+      margin-bottom: 16px;
+    }
+    .pd-signout-btn {
+      background: #ffffff;
+      color: var(--txt);
+      border: 1px solid var(--bdr2);
+      padding: 10px 24px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .pd-signout-btn:hover {
+      background: #f8f9fa;
+      border-color: var(--muted2);
+      color: var(--red);
+    }
+
+    @media(max-width:1160px){.grid2,.grid3{grid-template-columns:1fr}}
+    @media(max-width:880px){header{position:static}.srch-layout{grid-template-columns:1fr}.fgrid{grid-template-columns:1fr 1fr}.eform{grid-template-columns:1fr 1fr}main{padding:12px}}
+    @media(max-width:520px){.eform,.fgrid{grid-template-columns:1fr}.tab-btn{padding:8px 10px;font-size:11.5px}.hd-top{flex-wrap:wrap}}
+
+    /* ── Premium Dark Login Screen Overrides (Phylum-inspired) ── */
+    #loginModal {
+      position: fixed;
+      inset: 0;
+      background-color: #030712;
+      background-image: 
+        radial-gradient(circle at 15% 85%, rgba(8, 145, 178, 0.25) 0%, transparent 40%),
+        radial-gradient(circle at 85% 15%, rgba(37, 99, 235, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(10, 17, 36, 1) 0%, rgba(3, 7, 18, 1) 100%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 950 !important;
+      font-family: 'Inter', sans-serif;
+      overflow-y: auto;
+      padding: 24px;
+      box-sizing: border-box;
+      backdrop-filter: blur(8px);
+    }
+    #loginModal.open {
+      display: flex;
+    }
+    #loginModal .login-card {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      width: 1060px;
+      max-width: 100%;
+      min-height: 600px;
+      background: rgba(10, 15, 30, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(8, 145, 178, 0.1);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      overflow: hidden;
+      position: relative;
+      animation: loginCardFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes loginCardFadeIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    #loginModal .login-left {
+      background: linear-gradient(145deg, rgba(8, 15, 28, 0.8) 0%, rgba(3, 7, 18, 0.95) 100%);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+    #loginModal .login-left::before {
+      content: '';
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    #loginModal .login-left-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      width: 100%;
+    }
+    #loginModal .login-logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #b8941f;
+      box-shadow: 0 0 15px rgba(184,148,31,0.4);
+    }
+    #loginModal .login-brand-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #loginModal .login-brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      line-height: 1.3;
+    }
+    #loginModal .login-brand-sub {
+      font-size: 14px;
+      color: #b8941f;
+      font-weight: 700;
+      margin-top: 6px;
+      letter-spacing: 1px;
+    }
+    #loginModal .login-left-body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-grow: 1;
+      padding: 20px 0;
+    }
+    #loginModal .security-illustration {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.5));
+    }
+    #loginModal .login-left-footer {
+      font-size: 14px;
+      color: #b8941f;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      text-align: center;
+    }
+    #loginModal .login-right {
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    #loginModal .login-mobile-header {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    #loginModal .login-logo-mobile {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #b8941f;
+    }
+    #loginModal .brand-title-mobile {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+    #loginModal .brand-sub-mobile {
+      font-size: 9.5px;
+      color: #94a3b8;
+    }
+    #loginModal .auth-header {
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    #loginModal .auth-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.25;
+      letter-spacing: -0.3px;
+    }
+    #loginModal .auth-subtitle {
+      font-size: 13.5px;
+      color: #94a3b8;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+    #loginModal form {
+      width: 100%;
+    }
+    #loginModal .flbl-wrapper {
+      margin-bottom: 16px;
+    }
+    #loginModal .flbl-text {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      letter-spacing: 0.2px;
+    }
+    #loginModal .flbl-hint {
+      display: block;
+      font-size: 11.5px;
+      color: #d4ab24; /* Using lighter gold for better contrast/readability */
+      margin-top: -2px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+    #loginModal .input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    #loginModal .input-wrapper input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      color: #f8fafc;
+      border-radius: 12px;
+      padding: 12px 16px 12px 42px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    #loginModal .input-wrapper input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      background: rgba(15, 23, 42, 0.7);
+    }
+    #loginModal .input-wrapper input::placeholder {
+      color: #475569;
+    }
+    #loginModal .input-wrapper .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 17px;
+      height: 17px;
+      color: #64748b;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+    #loginModal .input-wrapper input:focus + .input-icon {
+      color: #3b82f6;
+    }
+    #loginModal .input-wrapper .password-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #3b82f6;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      background: none;
+      border: none;
+      transition: color 0.15s;
+    }
+    #loginModal .input-wrapper .password-toggle:hover {
+      color: #60a5fa;
+    }
+    #loginModal .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 12.5px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+    #loginModal .btn-primary:hover {
+      background: #3b82f6;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+    }
+    #loginModal .btn-primary:active {
+      transform: translateY(0);
+    }
+    #loginModal .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    #loginModal .login-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 16px 0;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    #loginModal .login-divider::before,
+    #loginModal .login-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    #loginModal .login-divider:not(:empty)::before {
+      margin-right: 1em;
+    }
+    #loginModal .login-divider:not(:empty)::after {
+      margin-left: 1em;
+    }
+    #loginModal .btn-toggle-password-login {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1.5px solid rgba(255, 255, 255, 0.06);
+      color: #94a3b8;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 0px;
+      outline: none;
+      font-family: inherit;
+    }
+    #loginModal .btn-toggle-password-login:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+    #loginModal .btn-toggle-password-login .chevron-icon {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.3s ease;
+    }
+    #loginModal .btn-toggle-password-login.expanded .chevron-icon {
+      transform: rotate(180deg);
+    }
+    #loginModal .auth-footer-links {
+      font-size: 12px;
+      text-align: center;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 16px;
+    }
+    #loginModal .auth-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    #loginModal .auth-footer-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      transition: color 0.15s;
+      font-weight: 500;
+    }
+    #loginModal .auth-footer-links a:hover {
+      color: #ffffff;
+    }
+    #loginModal .auth-footer-links a.highlight {
+      color: #3b82f6;
+      font-weight: 700;
+    }
+    #loginModal .auth-footer-links a.highlight:hover {
+      color: #60a5fa;
+    }
+
+    #loginModal .otp-desc {
+      font-size: 13px;
+      color: #94a3b8;
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* Checkbox Styling */
+    #loginModal .remember-wrapper {
+      display: flex;
+      align-items: center;
+      margin: 4px 0 16px;
+    }
+    #loginModal .custom-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      background: rgba(15, 23, 42, 0.5);
+      margin-right: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.2s;
+    }
+    #loginModal .custom-checkbox:checked {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+    #loginModal .custom-checkbox:checked::after {
+      content: '✓';
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      position: absolute;
+    }
+    #loginModal .checkbox-label {
+      color: #94a3b8;
+      font-size: 12.5px;
+      cursor: pointer;
+      user-select: none;
+    }
+    #loginModal .checkbox-label a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    #loginModal .checkbox-label a:hover {
+      text-decoration: underline;
+    }
+
+    #loginModal .ef-notice {
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      line-height: 1.4;
+      border: 1px solid;
+    }
+    #loginModal .ef-notice.error {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+    #loginModal .ef-notice.success {
+      background: rgba(34, 197, 94, 0.1);
+      border-color: rgba(34, 197, 94, 0.2);
+      color: #86efac;
+    }
+
+    /* ── Theme Toggle Button ── */
+    #loginModal .theme-toggle-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 1000;
+    }
+    #loginModal .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      transform: scale(1.05);
+    }
+    #loginModal .theme-toggle-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ── Light Login Theme Overrides ── */
+    #loginModal.light-login-theme {
+      background-color: #f1f5f9;
+      background-image: 
+        radial-gradient(circle at 15% 85%, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 15%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, #f8fafc 0%, #cbd5e1 100%);
+    }
+    #loginModal.light-login-theme .login-card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1.5px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.1), 0 0 40px rgba(59, 130, 246, 0.03);
+    }
+    #loginModal.light-login-theme .login-left {
+      background: rgba(241, 245, 249, 0.65);
+      border-right: 1.5px solid rgba(0, 0, 0, 0.06);
+    }
+    #loginModal.light-login-theme .login-brand-name {
+      color: #0f172a;
+    }
+    #loginModal.light-login-theme .login-brand-sub {
+      color: #b8941f;
+    }
+    #loginModal.light-login-theme .login-left-footer {
+      color: #b8941f !important;
+    }
+    #loginModal.light-login-theme .auth-title {
+      color: #0f172a;
+    }
+    #loginModal.light-login-theme .flbl-text {
+      color: #475569;
+    }
+    #loginModal.light-login-theme .flbl-hint {
+      color: #b8941f;
+    }
+    #loginModal.light-login-theme .input-wrapper input {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      color: #0f172a;
+    }
+    #loginModal.light-login-theme .input-wrapper input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3.5px rgba(59, 130, 246, 0.12);
+      background: #ffffff;
+    }
+    #loginModal.light-login-theme .input-wrapper input::placeholder {
+      color: #94a3b8;
+    }
+    #loginModal.light-login-theme .input-wrapper .input-icon {
+      color: #64748b;
+    }
+    #loginModal.light-login-theme .input-wrapper input:focus + .input-icon {
+      color: #3b82f6;
+    }
+    #loginModal.light-login-theme .login-divider {
+      color: #64748b;
+    }
+    #loginModal.light-login-theme .login-divider::before,
+    #loginModal.light-login-theme .login-divider::after {
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+    #loginModal.light-login-theme .btn-toggle-password-login {
+      background: rgba(0, 0, 0, 0.02);
+      border: 1.5px solid rgba(0, 0, 0, 0.06);
+      color: #475569;
+    }
+    #loginModal.light-login-theme .btn-toggle-password-login:hover {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.12);
+      color: #0f172a;
+    }
+    #loginModal.light-login-theme .remember-wrapper .checkbox-label {
+      color: #475569;
+    }
+    #loginModal.light-login-theme .auth-footer-links {
+      border-top: 1.5px solid #e2e8f0;
+    }
+    #loginModal.light-login-theme .auth-footer-links a {
+      color: #2563eb;
+    }
+    #loginModal.light-login-theme .auth-footer-links a:hover {
+      color: #1d4ed8;
+    }
+    #loginModal.light-login-theme .password-toggle {
+      color: #2563eb;
+    }
+    #loginModal.light-login-theme .theme-toggle-btn {
+      background: rgba(0, 0, 0, 0.04);
+      border: 1.5px solid rgba(0, 0, 0, 0.06);
+      color: #475569;
+    }
+    #loginModal.light-login-theme .theme-toggle-btn:hover {
+      background: rgba(0, 0, 0, 0.08);
+      color: #0f172a;
+    }
+
+    /* Adjust layout on small viewports */
+    @media (max-width: 850px) {
+      #loginModal .login-card {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+        min-height: auto;
+      }
+      #loginModal .login-left {
+        display: none !important;
+      }
+      #loginModal .login-mobile-header {
+        display: flex;
+      }
+      #loginModal .login-right {
+        padding: 32px 24px;
+      }
+      #loginModal .auth-header {
+        margin-bottom: 20px;
+      }
+      #loginModal .auth-title {
+        font-size: 20px;
+      }
+    }
+  </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<header>
+  <div class="hd-inner">
+    <div class="hd-top">
+      <div class="brand">
+        <img src="logo.png" alt="Chikkaballapura District Police" class="brand-logo" />
+        <div>
+          <div class="brand-title">District Police Data Management System [DPDMS]</div>
+          <div class="brand-sub">CHIKKABALLAPURA DISTRICT POLICE</div>
+        </div>
+      </div>
+      <div class="hd-right">
+        <div class="data-badge" id="dataBadge">Loading…</div>
+        <button class="btn btn-ghost btn-sm" id="settingsBtn" title="API Settings">⚙️</button>
+        <button class="btn btn-ghost btn-sm" id="refreshBtn">↻ Refresh</button>
+        <button class="btn btn-ghost btn-sm" id="dashboardThemeToggleBtn" onclick="toggleDashboardTheme()" title="Toggle Light/Dark Theme">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <button class="btn btn-gold btn-sm" id="addBtn">＋ Add Employee</button>
+        
+        <!-- Google Style Profile Menu -->
+        <div class="user-profile-menu" id="userProfileMenu" style="display:none; position:relative">
+          <button class="profile-avatar-btn" id="profileAvatarBtn" title="Google Account: User Details">
+            <span id="profileAvatarInitials">A</span>
+          </button>
+          <div class="profile-dropdown-card" id="profileDropdownCard">
+            <div class="pd-avatar-large">
+              <span id="pdAvatarInitialsLarge">A</span>
+            </div>
+            <div class="pd-name" id="pdName">User Name</div>
+            <div class="pd-email" id="pdEmail">KGID: 1953036</div>
+            <div class="pd-role" id="pdRole">Super Admin</div>
+            <div class="pd-divider"></div>
+            <button class="pd-signout-btn" id="logoutBtn">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="tab-row">
+      <button class="tab-btn act" data-tab="employees"><span class="ti">📊</span>Dashboard</button>
+      <button class="tab-btn" data-tab="transfers"><span class="ti">🔄</span>Transfers</button>
+      <button class="tab-btn" data-tab="search"><span class="ti">👥</span>Employees</button>
+      <button class="tab-btn" data-tab="reports"><span class="ti">📋</span>Reports</button>
+      <button class="tab-btn" data-tab="settings" id="tabBtnSettings" style="display:none"><span class="ti">⚙️</span>Users & Roles</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══ TAB 1 · EMPLOYEES DASHBOARD ═════════════════ -->
+  <section class="tab-sec act" id="tab-employees">
+    <div class="kpi-grid" id="empKpis"></div>
+    <div class="grid2">
+      <div class="chart-card"><div class="cc-head"><span class="cc-title">🏢 Station-wise Strength</span><span class="cc-sub" id="stLbl"></span></div><div class="cc-body" id="stChart"></div></div>
+      <div class="chart-card"><div class="cc-head"><span class="cc-title">🗺️ Sub-Division Strength</span></div><div class="cc-body" id="sdChart"></div></div>
+    </div>
+  </section>
+
+  <!-- ═══ TAB 2 · TRANSFER DASHBOARD ═════════════════ -->
+  <section class="tab-sec" id="tab-transfers">
+    <div class="kpi-grid" id="txKpis"></div>
+    <div class="grid2">
+      <div class="chart-card"><div class="cc-head"><span class="cc-title">📊 Transfer Priority Split</span></div><div class="cc-body" id="txDonut"></div></div>
+      <div class="chart-card"><div class="cc-head"><span class="cc-title">📅 Years-at-Station Distribution</span><span class="cc-sub">All employees</span></div><div class="cc-body" id="txHisto"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="chart-card"><div class="cc-head"><span class="cc-title">🔥 Top 15 Longest-Serving at Current Station</span></div><div class="cc-body" id="txTop"></div></div>
+      <div class="chart-card"><div class="cc-head"><span class="cc-title">🏢 Station Transfer Pressure</span><span class="cc-sub">% of staff due for transfer</span></div><div class="cc-body" id="txPressure"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="chart-card"><div class="cc-head"><span class="cc-title">📅 Retirement Timeline</span></div><div class="cc-body" id="txRetire"></div></div>
+      <div class="chart-card"><div class="cc-head"><span class="cc-title">🗺️ Sub-Division Transfer Load</span></div><div class="cc-body" id="txSubdiv"></div></div>
+    </div>
+  </section>
+
+  <!-- ═══ TAB 3 · SEARCH ══════════════════════════════ -->
+  <section class="tab-sec" id="tab-search">
+    <!-- Horizontal filter bar -->
+    <div class="filter-bar" id="filterBar">
+      <div class="pan-head" style="border-bottom:none; padding: 0 0 12px 0; margin-bottom: 12px; border-bottom: 1px solid var(--bdr); display:flex; align-items:center;">
+        <span style="font-size:16px; margin-right:8px">🔍</span>
+        <span class="pan-title">Find Employee</span>
+        <span class="pan-count" id="resCount">0</span>
+      </div>
+      <div class="filter-grid">
+        <label class="flbl">Quick Search (KGID / Name / Mobile)<input id="fQuick" placeholder="Type KGID, name, mobile…" /></label>
+        <label class="flbl">Rank<select id="fRank"><option value="">All Ranks</option></select></label>
+        <label class="flbl">Present Station<select id="fStation"><option value="">All Stations</option></select></label>
+        <label class="flbl">Transfer Status<select id="fEligible"><option value="">All</option><option value="Yes">Transfer Due</option><option value="No">Not Due</option></select></label>
+      </div>
+    </div>
+    
+    <!-- Employees Grid -->
+    <div class="employee-grid" id="employeeGrid"></div>
+    
+    <!-- User Self Service Container -->
+    <div id="userSelfServiceContainer" style="display:none"></div>
+  </section>
+
+  <!-- ═══ DEDICATED KPI CATEGORY VIEW ═════════════════ -->
+  <section class="tab-sec" id="tab-kpi-view">
+    <div class="kpi-view-header">
+      <div class="kpi-view-header-top">
+        <div class="kpi-view-title-group">
+          <div class="kpi-view-title" id="kpiViewTitle">🏢 KPI Category List</div>
+          <div class="kpi-view-subtitle" id="kpiViewSub">Category details</div>
+        </div>
+        <button class="kpi-view-back-btn" onclick="clearKpiFilter()">← Back to Dashboard</button>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid var(--bdr); padding-top: 14px;">
+        <div class="kpi-view-search-wrapper">
+          <span class="kpi-view-search-icon">🔍</span>
+          <input type="text" id="kpiSearchInput" class="kpi-view-search-input" placeholder="Search within this category..." oninput="handleKpiSearchInput(this.value)" />
+        </div>
+        <span class="pan-count" id="kpiCountBadge">0</span>
+      </div>
+    </div>
+    <!-- Circle Office Tiles Grid (Option B sub-tiles) -->
+    <div id="circleOfficeTiles" style="display: none; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px;"></div>
+    
+    <div class="employee-grid" id="kpiEmployeeGrid"></div>
+  </section>
+
+  <!-- ═══ TAB 4 · REPORTS ══════════════════════════════ -->
+  <section class="tab-sec" id="tab-reports">
+    <div class="rpt-nav">
+      <button class="rpt-btn act" data-rpt="priority">🔴 Transfer Priority</button>
+      <button class="rpt-btn" data-rpt="retirement">📅 Retirement Due</button>
+      <button class="rpt-btn" data-rpt="seniority">📜 Seniority List</button>
+      <button class="rpt-btn" data-rpt="strength">🏢 Station Strength</button>
+      <button class="rpt-btn" data-rpt="subdiv">🗺️ Sub-Division</button>
+    </div>
+    <div class="rpt-card">
+      <div class="rpt-head"><div><div class="rpt-title" id="rptTitle">Transfer Priority List</div><div class="rpt-cnt" id="rptCnt"></div></div><button class="btn btn-ghost btn-sm" id="csvBtn">⬇ Export CSV</button></div>
+      <div class="rpt-filters" id="rptFilters"></div>
+      <div class="rpt-body" id="rptBody"></div>
+    </div>
+  </section>
+
+  <!-- ═══ TAB 5 · SUPER ADMIN SETTINGS ═════════════════ -->
+  <section class="tab-sec" id="tab-settings" style="max-width:1200px; margin:0 auto">
+    <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:20px; align-items:start">
+      
+      <!-- Users List Panel -->
+      <div class="rpt-card">
+        <div class="rpt-head">
+          <div>
+            <div class="rpt-title">👥 Registered Users</div>
+            <div class="rpt-cnt" id="userListCount">0 users registered</div>
+          </div>
+          <button class="SaAddUserBtn btn btn-gold btn-sm" onclick="showAddUserModal()">➕ Create User Account</button>
+        </div>
+        <div class="rpt-body" style="padding:0">
+          <table class="sa-tbl dtbl" id="usersTable">
+            <thead>
+              <tr>
+                <th>KGID</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersListBody">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:20px; color:var(--muted)">Loading users list…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Admin Permissions / Features Panel -->
+      <div class="rpt-card">
+        <div class="rpt-head">
+          <div>
+            <div class="rpt-title">⚙️ Admin Feature Permissions</div>
+            <div class="rpt-cnt">Configure what features the Admin role can access</div>
+          </div>
+          <button class="btn btn-gold btn-sm" onclick="saveAdminPermissions()">Save Features</button>
+        </div>
+        <div style="padding:20px; display:grid; gap:16px" id="permChecksContainer">
+          <div id="permsNotice" class="ef-notice" style="display:none"></div>
+          
+          <label style="display:flex; align-items:center; gap:10px; font-weight:600; font-size:14px; cursor:pointer">
+            <input type="checkbox" id="chkPermDashboard" style="width:20px; height:20px; min-height:unset" checked />
+            Enable Dashboard Tabs (Employees & Transfers)
+          </label>
+          <p style="font-size:12px; color:var(--muted); margin-left:30px; margin-top:-10px">Allows Admins to view aggregate statistics, graphs, and KPIs on employees and transfers.</p>
+          
+          <label style="display:flex; align-items:center; gap:10px; font-weight:600; font-size:14px; cursor:pointer">
+            <input type="checkbox" id="chkPermReports" style="width:20px; height:20px; min-height:unset" checked />
+            Enable Reports Tab (Seniority, Strength, subdiv etc)
+          </label>
+          <p style="font-size:12px; color:var(--muted); margin-left:30px; margin-top:-10px">Allows Admins to generate tables and export CSV lists for transfers, retirements, strength, and seniority.</p>
+          
+          <label style="display:flex; align-items:center; gap:10px; font-weight:600; font-size:14px; cursor:pointer">
+            <input type="checkbox" id="chkPermAddEmployee" style="width:20px; height:20px; min-height:unset" checked />
+            Enable Add Employee Button
+          </label>
+          <p style="font-size:12px; color:var(--muted); margin-left:30px; margin-top:-10px">Allows Admins to register and add new police officers directly into the database.</p>
+          
+          <label style="display:flex; align-items:center; gap:10px; font-weight:600; font-size:14px; cursor:pointer">
+            <input type="checkbox" id="chkPermEditEmployee" style="width:20px; height:20px; min-height:unset" checked />
+            Enable Edit Employee Details
+          </label>
+          <p style="font-size:12px; color:var(--muted); margin-left:30px; margin-top:-10px">Allows Admins to click "Edit" on employee profile cards and modify service records, posting history, and details.</p>
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+</main>
+
+<!-- Super Admin User Account Modal -->
+<div class="sa-modal-wrapper modal-bg" id="saUserModal" style="z-index:910">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-close" type="button" onclick="$('saUserModal').classList.remove('open')">✕</button>
+    <div class="sa-modal-head" style="margin-bottom:15px">
+      <div class="modal-title" id="saUserModalTitle">Create User Account</div>
+    </div>
+    <form id="saUserForm" onsubmit="saveSaUser(event)" style="display:grid; gap:12px">
+      <div id="saUserError" class="saUserError" style="display:none; margin-bottom:8px; padding: 9px 13px; border-radius: 7px; font-size: 13px; background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,.2)"></div>
+      <input type="hidden" id="saUserAction" value="create" />
+      <label class="flbl">KGID / Employee ID
+        <input id="saUserKgid" required placeholder="Enter KGID…" />
+      </label>
+      <label class="flbl">Role
+        <select id="saUserRole" required>
+          <option value="User">User (Self-Service profile edit only)</option>
+          <option value="Admin">Admin (Access dashboard and search)</option>
+          <option value="Super Admin">Super Admin (Overall settings control)</option>
+        </select>
+      </label>
+      <label class="flbl">Email Address (Optional)
+        <input id="saUserEmail" type="email" placeholder="Enter Email…" />
+      </label>
+      <label class="flbl">Account Status
+        <select id="saUserStatus" required>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive / Suspended</option>
+        </select>
+      </label>
+      <label class="flbl"><span id="saUserPasswordLabel">Set Password</span>
+        <input id="saUserPassword" placeholder="Enter Password…" />
+      </label>
+      <p id="saUserPasswordHelp" style="font-size:11px; color:var(--muted); margin-top:-8px">If resetting, leave blank to keep unchanged.</p>
+      
+      <div class="modal-acts" style="margin-top:10px">
+        <button class="btn btn-ghost" type="button" id="saUserCancel">Cancel</button>
+        <button class="btn btn-gold" type="submit">Save Account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-bg" id="delModal">
+  <div class="modal">
+    <button class="modal-close" type="button" onclick="$('delModal').classList.remove('open')">✕</button>
+    <div class="modal-title">⚠️ Confirm Deletion</div>
+    <div class="modal-body" id="delBody">Are you sure?</div>
+    <div class="modal-acts"><button class="btn btn-ghost" id="delCancel">Cancel</button><button class="btn btn-red" id="delConfirm">🗑 Delete Employee</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="loginModal" style="z-index:900">
+  <div class="login-card">
+    <!-- Theme Toggle Button in Top-Right Corner of Card -->
+    <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleLoginTheme()" title="Toggle Light/Dark Theme">
+      <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+    
+    <!-- Left Column: Branding and Security Illustration -->
+    <div class="login-left">
+      <div class="login-left-header">
+        <img src="logo.png" class="login-logo" alt="DPDMS Emblem" />
+        <div class="login-brand-info">
+          <span class="login-brand-name">District Police Data Management System</span>
+          <span class="login-brand-sub">(DPDMS)</span>
+        </div>
+      </div>
+      
+      <div class="login-left-body">
+        <svg class="security-illustration" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#0891b2" stop-opacity="0.25" />
+              <stop offset="100%" stop-color="#0891b2" stop-opacity="0" />
+            </radialGradient>
+            <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3b82f6" />
+              <stop offset="100%" stop-color="#1d4ed8" />
+            </linearGradient>
+            <linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1e1b4b" />
+              <stop offset="100%" stop-color="#0f172a" />
+            </linearGradient>
+            <linearGradient id="accentGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#60a5fa" />
+              <stop offset="100%" stop-color="#38bdf8" />
+            </linearGradient>
+          </defs>
+          <circle cx="250" cy="250" r="220" fill="url(#bgGlow)" />
+          <circle cx="100" cy="120" r="8" fill="#38bdf8" opacity="0.6">
+            <animate attributeName="transform" type="translate" values="0,0; 0,15; 0,0" dur="4s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="420" cy="380" r="6" fill="#3b82f6" opacity="0.4">
+            <animate attributeName="transform" type="translate" values="0,0; 0,-20; 0,0" dur="5s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="390" cy="150" r="12" fill="#0891b2" opacity="0.5">
+            <animate attributeName="transform" type="translate" values="0,0; 0,10; 0,0" dur="3s" repeatCount="indefinite" />
+          </circle>
+          <g>
+            <ellipse cx="250" cy="380" rx="160" ry="24" fill="#020617" opacity="0.6" />
+            <path d="M140 280 L250 210 L360 280 L250 350 Z" fill="url(#boxGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
+            <path d="M140 280 L140 330 L250 400 L250 350 Z" fill="#0f172a" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+            <path d="M250 350 L250 400 L360 330 L360 280 Z" fill="#1e293b" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+            <ellipse cx="250" cy="285" rx="60" ry="20" fill="url(#accentGlow)" opacity="0.3" filter="blur(10px)" />
+            <g transform="translate(180, 180) rotate(-10)">
+              <path d="M0 0 H100 A15 15 0 0 1 115 15 V110 A15 15 0 0 1 100 125 H0 A15 15 0 0 1 -15 110 V15 A15 15 0 0 1 0 0 Z" fill="#ffffff" />
+              <path d="M15 30 H85 M15 50 H85 M15 70 H85 M15 90 H60" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
+              <path d="M60 90 L70 100 L95 75" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+            <path d="M140 320 C145 280, 175 285, 180 305" stroke="#f8fafc" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.9" />
+            <path d="M305 320 C300 290, 275 295, 270 315" stroke="#f8fafc" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.9" />
+            <g transform="translate(320, 160)">
+              <path d="M0 0 C40 0, 50 15, 50 40 C50 80, 10 110, 0 120 C-10 110, -50 80, -50 40 C-50 15, -40 0, 0 0 Z" fill="url(#shieldGrad)" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+              <path d="M-15 55 L-5 65 L18 40" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+            <g transform="translate(130, 120)">
+              <animateTransform attributeName="transform" type="translate" values="130,120; 130,110; 130,120" dur="3s" repeatCount="indefinite" />
+              <path d="M10 20 V5 C10 -5, 30 -5, 30 5 V20" stroke="#60a5fa" stroke-width="5" fill="none" stroke-linecap="round" />
+              <rect x="0" y="18" width="40" height="30" rx="6" fill="#2563eb" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
+              <circle cx="20" cy="30" r="4" fill="#1e1b4b" />
+              <path d="M20 34 L20 40" stroke="#1e1b4b" stroke-width="2" stroke-linecap="round" />
+            </g>
+            <g transform="translate(230, 110) rotate(-35)">
+              <animateTransform attributeName="transform" type="translate" values="220,105; 220,115; 220,105" dur="3.5s" repeatCount="indefinite" />
+              <circle cx="15" cy="15" r="10" stroke="#f59e0b" stroke-width="4" fill="none" />
+              <path d="M25 15 H65" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" />
+              <path d="M55 15 V25 M61 15 V25" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" />
+            </g>
+            <g transform="translate(90, 200) rotate(-15)">
+              <rect x="0" y="0" width="55" height="40" rx="8" fill="#1e293b" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" />
+              <path d="M14 26 L8 20 L14 14" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M24 12 L18 28" stroke="#64748b" stroke-width="2" />
+              <path d="M31 14 L37 20 L31 26" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+            <g transform="translate(100, 260)">
+              <circle cx="20" cy="20" r="12" stroke="#60a5fa" stroke-width="3" fill="none" />
+              <path d="M29 29 L42 42" stroke="#60a5fa" stroke-width="4" stroke-linecap="round" />
+            </g>
+          </g>
+        </svg>
+      </div>
+      
+      <div class="login-left-footer">
+        Chikkaballapura District Police
+      </div>
+    </div>
+    
+    <!-- Right Column: Interactive Forms -->
+    <div class="login-right">
+      <!-- Mobile branding -->
+      <div class="login-mobile-header">
+        <img src="logo.png" class="login-logo-mobile" alt="DPDMS Emblem" />
+        <div>
+          <div class="brand-title-mobile">DPDMS</div>
+          <div class="brand-sub-mobile">District Police Data Management System</div>
+        </div>
+      </div>
+
+      <div class="auth-header">
+        <h2 id="authModalTitle" class="auth-title">DPDMS USER LOGIN</h2>
+      </div>
+      
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="doLogin(event)">
+        <div id="loginError" class="ef-notice error" style="display:none"></div>
+        
+        <!-- Google Sign In Button (Placed on Top) -->
+        <div id="googleSignInButton" style="display:flex; justify-content:center; margin-bottom:12px; min-height:40px"></div>
+        
+        <!-- OR Divider -->
+        <div class="login-divider">
+          <span>OR</span>
+        </div>
+        
+        <!-- Collapsible Toggle Button -->
+        <button type="button" class="btn-toggle-password-login" id="togglePasswordLogin" onclick="togglePasswordLoginFields()">
+          <span>Sign in with Employee ID & Password</span>
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        
+        <!-- Collapsible Fields Container (starts collapsed) -->
+        <div id="passwordLoginFields" style="max-height: 0px; overflow: hidden; transition: max-height 0.3s ease-out; margin-bottom: 0px;">
+          <div style="padding-top: 15px;">
+            <div class="flbl-wrapper">
+              <label class="flbl-text" for="loginKgid">Employee ID / KGID</label>
+              <div class="input-wrapper">
+                <input id="loginKgid" placeholder="Enter your KGID…" autocomplete="username" />
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+            </div>
+            
+            <div class="flbl-wrapper">
+              <label class="flbl-text" for="loginPassword">Password</label>
+              <div class="input-wrapper">
+                <input id="loginPassword" type="password" placeholder="Enter your password…" autocomplete="current-password" />
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span class="password-toggle" onclick="togglePassword('loginPassword', this)">Show</span>
+              </div>
+            </div>
+            
+            <div class="remember-wrapper">
+              <input type="checkbox" id="loginRemember" class="custom-checkbox" checked />
+              <label for="loginRemember" class="checkbox-label">Keep me signed in on this device</label>
+            </div>
+            
+            <button class="btn-primary" type="submit">Login</button>
+          </div>
+        </div>
+        
+        <div class="auth-footer-links">
+          <div style="margin-bottom: 6px;">
+            <a href="#" onclick="toggleAuthMode(2); return false;">Forgot Password?</a>
+          </div>
+          <div>
+            <span style="color:#64748b">New user?</span> <a href="#" onclick="toggleAuthMode(1); return false;" class="highlight">Register Here</a>
+          </div>
+        </div>
+      </form>
+      
+      <!-- Registration Form -->
+      <form id="registerForm" onsubmit="doRegister(event)" style="display:none">
+        <div id="registerError" class="ef-notice error" style="display:none"></div>
+        <div id="registerSuccess" class="ef-notice success" style="display:none"></div>
+        
+        <div id="registerInputFields">
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="registerKgid">Employee ID / KGID</label>
+            <div class="input-wrapper">
+              <input id="registerKgid" required placeholder="Enter KGID…" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+          </div>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="registerMobile">Registered Mobile Number</label>
+            <div class="input-wrapper">
+              <input id="registerMobile" required placeholder="Enter 10-digit mobile number…" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            </div>
+          </div>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="registerEmail">Email Address (for OTP / Login ID)</label>
+            <span class="flbl-hint">Provide a valid email address. This email will be used for OTP verification, account access, password recovery, and Google Sign-In.</span>
+            <div class="input-wrapper">
+              <input id="registerEmail" type="email" required placeholder="Enter email address…" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </div>
+          </div>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="registerPassword">Choose Password</label>
+            <div class="input-wrapper">
+              <input id="registerPassword" type="password" required placeholder="Create strong password…" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span class="password-toggle" onclick="togglePassword('registerPassword', this)">Show</span>
+            </div>
+          </div>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="registerConfirm">Confirm Password</label>
+            <div class="input-wrapper">
+              <input id="registerConfirm" type="password" required placeholder="Re-enter password to confirm…" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span class="password-toggle" onclick="togglePassword('registerConfirm', this)">Show</span>
+            </div>
+          </div>
+
+          <div class="remember-wrapper">
+            <input type="checkbox" id="registerAgree" class="custom-checkbox" required checked />
+            <label for="registerAgree" class="checkbox-label">I agree to the <a href="#">Terms & Conditions</a></label>
+          </div>
+          
+          <button class="btn-primary" type="submit">Send Verification OTP</button>
+        </div>
+        
+        <div id="registerOtpContainer" style="display:none; gap:16px; flex-direction:column">
+          <p class="otp-desc">We have sent a 6-digit OTP code to your email. Please enter it below to complete registration.</p>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="registerOtpCode">Enter OTP Code</label>
+            <div class="input-wrapper">
+              <input id="registerOtpCode" placeholder="Enter 6-digit OTP…" maxLength="6" style="text-align:center; font-size:18px; font-weight:700; letter-spacing:4px" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+            </div>
+          </div>
+          
+          <button class="btn-primary" type="button" onclick="verifyOtpAndRegister()">Complete Registration</button>
+          
+          <div style="text-align:center; margin-top:8px">
+            <a href="#" onclick="resendRegisterOtp(); return false;" style="color:#3b82f6; font-size:12.5px; text-decoration:none; font-weight:600">Resend OTP Code</a>
+          </div>
+        </div>
+        
+        <div class="auth-footer-links">
+          <div>
+            <span style="color:#64748b">Registered?</span> <a href="#" onclick="toggleAuthMode(0); return false;" class="highlight">Login Here</a>
+          </div>
+        </div>
+      </form>
+      
+      <!-- Forgot Password Form -->
+      <form id="forgotForm" onsubmit="doForgot(event)" style="display:none">
+        <div id="forgotError" class="ef-notice error" style="display:none"></div>
+        <div id="forgotSuccess" class="ef-notice success" style="display:none"></div>
+        
+        <div id="forgotInputFields" style="display:grid; gap:4px">
+          <p class="otp-desc">Enter your KGID and registered email address to receive a password reset OTP code.</p>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="forgotKgid">Employee ID / KGID</label>
+            <div class="input-wrapper">
+              <input id="forgotKgid" required placeholder="Enter KGID…" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+          </div>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="forgotEmail">Registered Email</label>
+            <div class="input-wrapper">
+              <input id="forgotEmail" type="email" required placeholder="Enter registered email…" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </div>
+          </div>
+          
+          <button class="btn-primary" type="submit" style="margin-top:12px">Send Reset OTP</button>
+        </div>
+        
+        <div id="forgotOtpContainer" style="display:none; gap:16px; flex-direction:column">
+          <p class="otp-desc">We have sent a password reset OTP code to your email. Enter it below along with your new password.</p>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="forgotOtpCode">Enter OTP Code</label>
+            <div class="input-wrapper">
+              <input id="forgotOtpCode" placeholder="Enter 6-digit OTP…" maxLength="6" style="text-align:center; font-size:18px; font-weight:700; letter-spacing:4px" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+            </div>
+          </div>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="forgotNewPassword">Choose New Password</label>
+            <div class="input-wrapper">
+              <input id="forgotNewPassword" type="password" required placeholder="Create new password…" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span class="password-toggle" onclick="togglePassword('forgotNewPassword', this)">Show</span>
+            </div>
+          </div>
+          
+          <div class="flbl-wrapper">
+            <label class="flbl-text" for="forgotConfirmPassword">Confirm New Password</label>
+            <div class="input-wrapper">
+              <input id="forgotConfirmPassword" type="password" required placeholder="Confirm new password…" />
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span class="password-toggle" onclick="togglePassword('forgotConfirmPassword', this)">Show</span>
+            </div>
+          </div>
+          
+          <button class="btn-primary" type="button" onclick="verifyOtpAndResetPassword()">Reset Password</button>
+        </div>
+        
+        <div class="auth-footer-links">
+          <div>
+            <a href="#" onclick="toggleAuthMode(0); return false;" class="highlight">Back to Login</a>
+          </div>
+        </div>
+      </form>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Profile Details Modal -->
+<div class="modal-bg" id="profileModal" style="z-index:900">
+  <div class="modal profile-modal">
+    <button class="profile-modal-close" onclick="closeProfileModal()">✕</button>
+    <div id="profileModalContent"></div>
+  </div>
+</div>
+
+<!-- API Settings Modal -->
+<div class="modal-bg" id="settingsModal" style="z-index:1000">
+  <div class="modal" style="max-width:440px">
+    <button class="modal-close" type="button" onclick="$('settingsModal').classList.remove('open')">✕</button>
+    <div class="modal-title">⚙️ API Settings</div>
+    <div class="modal-body">
+      Configure where the dashboard loads its data. Leave empty to use the local Python server.
+      <label class="flbl" style="margin-top:12px">Google Apps Script Web App URL
+        <input id="settingsApiUrl" placeholder="https://script.google.com/macros/s/..." />
+      </label>
+      <label class="flbl" style="margin-top:12px">Google OAuth Client ID (For Google Sign-In)
+        <input id="settingsClientId" placeholder="123456789-xxxx.apps.googleusercontent.com" />
+      </label>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-ghost" id="settingsCancel">Cancel</button>
+      <button class="btn btn-gold" id="settingsSave">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let DATA={employees:[],summary:{}},selKgid='',editing=false,draft=null,draftPostings=[];
+let activeTab='employees',activeRpt='priority';
+let rptFilter={priority:'all',retirement:'12'};
+let delPending='',csvRows=[],csvHeaders=[];
+let customKpiFilter=null;
+let kpiSearchQuery='';
+let selectedCircleOffice=null;
+let selectedSdpo=null;
+let selectedPs=null;
+let selectedSb=null;
+
+const $=id=>document.getElementById(id);
+const text=v=>(v===null||v===undefined||v==='')?'—':v;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const pClass=p=>({High:'hi',Medium:'med',Low:'lo'}[p]||'lo');
+
+// ── Native SHA-256 Hashing ─────────────────────────────────────
+async function sha256(message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
+// ── Caste Database & Dropdowns ────────────────────────────────
+const CASTE_DATABASE = {
+  "Category-I": [
+    "Bestha (Gangamatha, Kabbaliga, Bhoyi, Koli, Mogaveera, Ambiga)",
+    "Budubuduki",
+    "Jogi",
+    "Medara (Medari, Medar)",
+    "Uppara (Sagara, Lonari)",
+    "Yerukala",
+    "Gondali",
+    "Bajania",
+    "Helava",
+    "Kanjar (Kanjari)",
+    "Kashikapdi",
+    "Katabu",
+    "Kolhatigi",
+    "Sudugadu Siddha",
+    "Beda"
+  ],
+  "Category-II(A)": [
+    "Agasa (Madivala, Dhobi)",
+    "Devadiga (Moili)",
+    "Idiga (Billava, Deevar, Ediga, Poojari)",
+    "Kumbara (Kulala)",
+    "Kuruba (Halumatha)",
+    "Nayinda (Hadapada, Hajama, Nayanaja)",
+    "Tigala (Agnikula Kshatriya)",
+    "Viswakarma (Achari, Badigar, Kammara, Panchal, Pattar, Sonar)",
+    "Neygi (Devanga, Jadar, Kuruhina Shetty, Padma Shali)",
+    "Ganiga (Teli)",
+    "Darji (Simpi, Chippiga, Rangrez, Bhavasar Kshatriya)",
+    "Gurav (Tambli)",
+    "Hoovadiga (Hugar, Mali, Phool Mali)",
+    "Nadora (Torake, Uppu Nador)",
+    "Rajapuri (Balavalikar)",
+    "Sadru (Hindu Sadru)",
+    "Shanan (Namadhari)",
+    "Sudir (Sudra)"
+  ],
+  "Category-II(B)": [
+    "Muslim (Pinjara, Nadaf, Dudekula, Ladaf, Mansuri)"
+  ],
+  "Category-III(A)": [
+    "Vokkaliga (Gowda, Reddy, Gangadkar, Namdhari, Kunchitiga, Hallikar, Marasu)",
+    "Kodagaru (Kodava)",
+    "Balija (Balajiga, Banajiga, Naidu, Telaga, Setty Balija)"
+  ],
+  "Category-III(B)": [
+    "Veerashaiva / Lingayath",
+    "Maratha (Are Maratha, Arya Maratha)",
+    "Bunts / Bant (Parivara Bant)",
+    "Jains (Digambaras)",
+    "Christian"
+  ],
+  "SC": [
+    "Adi Karnataka",
+    "Adi Dravida",
+    "Banjara (Lambani)",
+    "Bhovi",
+    "Madiga",
+    "Holeya",
+    "Chalavadi",
+    "Korama",
+    "Koracha"
+  ],
+  "ST": [
+    "Valmiki (Bedar, Nayaka)",
+    "Soliga",
+    "Kadu Kuruba",
+    "Jenu Kuruba",
+    "Yerava",
+    "Gond"
+  ],
+  "General / GM": [
+    "Brahmin (Smartha, Madhwa, Sri Vaishnava, Havika, Konkani, etc.)",
+    "Vysya (Arya Vysya)",
+    "General / Others"
+  ]
+};
+
+function updateSubCasteDropdown(selectedSubCaste = '') {
+  const casteSelect = $('f_caste');
+  const subCasteSelect = $('f_subCaste');
+  const otherContainer = $('f_subCasteOtherContainer');
+  const otherInput = $('f_subCasteOther');
+  
+  if (!casteSelect || !subCasteSelect) return;
+  
+  const caste = casteSelect.value;
+  subCasteSelect.innerHTML = '<option value="">— Select Sub-Caste —</option>';
+  
+  if (caste && CASTE_DATABASE[caste]) {
+    CASTE_DATABASE[caste].forEach(sc => {
+      const option = document.createElement('option');
+      option.value = sc;
+      option.textContent = sc;
+      subCasteSelect.appendChild(option);
+    });
+    
+    // Add custom "Other" option
+    const otherOption = document.createElement('option');
+    otherOption.value = "Other";
+    otherOption.textContent = "Other (please specify)";
+    subCasteSelect.appendChild(otherOption);
+  }
+  
+  if (selectedSubCaste) {
+    const isStandard = Array.from(subCasteSelect.options).some(opt => opt.value === selectedSubCaste);
+    if (isStandard) {
+      subCasteSelect.value = selectedSubCaste;
+      otherContainer.style.display = 'none';
+      otherInput.value = '';
+    } else if (selectedSubCaste.trim() !== '') {
+      subCasteSelect.value = "Other";
+      otherInput.value = selectedSubCaste;
+      otherContainer.style.display = 'block';
+    }
+  } else {
+    otherContainer.style.display = 'none';
+    otherInput.value = '';
+  }
+}
+
+function checkSubCasteOther() {
+  const subCasteSelect = $('f_subCaste');
+  const otherContainer = $('f_subCasteOtherContainer');
+  const otherInput = $('f_subCasteOther');
+  
+  if (!subCasteSelect || !otherContainer) return;
+  
+  if (subCasteSelect.value === "Other") {
+    otherContainer.style.display = 'block';
+  } else {
+    otherContainer.style.display = 'none';
+    otherInput.value = '';
+  }
+}
+
+// ── API Configurations ─────────────────────────────────────────
+const getApiUrl = () => localStorage.getItem('dpdms_api_url') || 'https://script.google.com/macros/s/AKfycbzTbIFC6kfiQSMY-NzQ0vr19oveT-Qyz2xICG2h1KY6nmP10-8B_AKeQJU30uPK0w3f/exec';
+const getToken = () => localStorage.getItem('dpdms_token') || '';
+const getRole = () => localStorage.getItem('dpdms_role') || '';
+const getLoggedKgid = () => localStorage.getItem('dpdms_kgid') || '';
+const getGoogleClientId = () => localStorage.getItem('dpdms_google_client_id') || '603972083927-gi46s861fi1jvkb0nvlnr4fadl6aq2i8.apps.googleusercontent.com';
+
+async function apiFetch(action, params = {}, options = {}) {
+  const url = getApiUrl();
+  const token = getToken();
+  
+  if (url) {
+    const queryParams = new URLSearchParams({ ...params, action, token });
+    const requestUrl = `${url}?${queryParams.toString()}`;
+    
+    if (options.method === 'POST' || options.method === 'DELETE') {
+      const body = {
+        action: action === 'DELETE' ? 'delete' : action,
+        token: token,
+        ...options.body
+      };
+      const res = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error('API server returned error status ' + res.status);
+      return await res.json();
+    } else {
+      const res = await fetch(requestUrl, { mode: 'cors' });
+      if (!res.ok) throw new Error('API server returned error status ' + res.status);
+      return await res.json();
+    }
+  } else {
+    // Local Python Server Fallback
+    if (options.method === 'DELETE') {
+      const res = await fetch(`/api/employee?kgid=${params.kgid}`, { method: 'DELETE' });
+      return await res.json();
+    } else if (options.method === 'POST') {
+      const res = await fetch(`/api/employee`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options.body)
+      });
+      return await res.json();
+    } else {
+      if (action === 'data') {
+        const res = await fetch(`/api/data`);
+        return await res.json();
+      } else if (action === 'check-duplicate') {
+        const queryParams = new URLSearchParams(params);
+        const res = await fetch(`/api/check-duplicate?${queryParams.toString()}`);
+        return await res.json();
+      }
+    }
+  }
+}
+
+// ── Auth & Role Manager ────────────────────────────────────────
+function applyRoleRules() {
+  const role = getRole();
+  const name = localStorage.getItem('dpdms_name') || '';
+  const p = (DATA.permissions && DATA.permissions[role]) || {};
+  
+  if (role && getApiUrl()) {
+    const initial = name ? name.trim().charAt(0).toUpperCase() : 'U';
+    $('profileAvatarInitials').textContent = initial;
+    $('pdAvatarInitialsLarge').textContent = initial;
+    $('pdName').textContent = name;
+    $('pdEmail').textContent = 'KGID: ' + getLoggedKgid();
+    $('pdRole').textContent = role;
+    $('userProfileMenu').style.display = 'block';
+  } else {
+    $('userProfileMenu').style.display = 'none';
+    $('profileDropdownCard').classList.remove('open');
+  }
+  
+  // Navigation visibility
+  const nav = document.querySelector('nav.tab-row');
+  const aside = document.querySelector('.srch-layout aside');
+  const layout = document.querySelector('.srch-layout');
+  
+  if (getApiUrl() && role === 'User') {
+    if (nav) nav.style.display = 'none';
+    if (aside) aside.style.display = 'none';
+    if (layout) layout.style.gridTemplateColumns = '1fr';
+    
+    // Force switch to Search tab
+    activeTab = 'search';
+    document.querySelectorAll('.tab-sec').forEach(s => s.classList.toggle('act', s.id === 'tab-search'));
+  } else {
+    if (nav) nav.style.display = 'flex';
+    if (aside) aside.style.display = 'block';
+    if (layout) layout.style.gridTemplateColumns = '330px minmax(0,1fr)';
+    
+    // Dynamic feature flags for Admin
+    if (getApiUrl() && role === 'Admin') {
+      const showDash = p.canViewDashboard !== false;
+      const showRpts = p.canViewReports !== false;
+      
+      document.querySelector('button[data-tab="employees"]').style.display = showDash ? 'flex' : 'none';
+      document.querySelector('button[data-tab="transfers"]').style.display = showDash ? 'flex' : 'none';
+      document.querySelector('button[data-tab="reports"]').style.display = showRpts ? 'flex' : 'none';
+      
+      // If Admin has dashboard disabled and is currently on dashboard, redirect them
+      if (!showDash && (activeTab === 'employees' || activeTab === 'transfers')) {
+        activeTab = showRpts ? 'reports' : 'search';
+      }
+    } else {
+      // Super Admin shows all tabs
+      document.querySelector('button[data-tab="employees"]').style.display = 'flex';
+      document.querySelector('button[data-tab="transfers"]').style.display = 'flex';
+      document.querySelector('button[data-tab="reports"]').style.display = 'flex';
+    }
+  }
+  
+  // Settings Tab Visibility
+  const showSettingsTab = getApiUrl() && role === 'Super Admin';
+  $('tabBtnSettings').style.display = showSettingsTab ? 'flex' : 'none';
+  if (!showSettingsTab && activeTab === 'settings') {
+    activeTab = 'employees';
+  }
+  
+  // Settings Gear Button Visibility
+  const showSettingsBtn = !getApiUrl() || role === 'Super Admin';
+  $('settingsBtn').style.display = showSettingsBtn ? 'inline-block' : 'none';
+  
+  // Add Employee button visibility
+  const canAdd = !getApiUrl() || role === 'Super Admin' || (role === 'Admin' && p.canAddEmployee !== false);
+  $('addBtn').style.display = canAdd ? 'inline-block' : 'none';
+  
+  // Highlight active tab
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('act', btn.dataset.tab === activeTab);
+  });
+  document.querySelectorAll('.tab-sec').forEach(sec => {
+    sec.classList.toggle('act', sec.id === 'tab-' + activeTab);
+  });
+}
+
+function togglePassword(inputId, toggleBtn) {
+  const input = $(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    toggleBtn.textContent = 'Hide';
+  } else {
+    input.type = 'password';
+    toggleBtn.textContent = 'Show';
+  }
+}
+
+function setTheme(theme) {
+  const isDark = (theme === 'dark');
+  document.body.classList.toggle('dark-theme', isDark);
+  localStorage.setItem('dpdms_theme', theme);
+  
+  const loginModal = $('loginModal');
+  if (loginModal) {
+    loginModal.classList.toggle('light-login-theme', !isDark);
+  }
+  
+  const loginBtn = $('themeToggleBtn');
+  if (loginBtn) {
+    const sunIcon = loginBtn.querySelector('.sun-icon');
+    const moonIcon = loginBtn.querySelector('.moon-icon');
+    if (sunIcon && moonIcon) {
+      if (isDark) {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      } else {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      }
+    }
+  }
+}
+
+function toggleDashboardTheme() {
+  const currentTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+  setTheme(currentTheme);
+}
+
+function toggleLoginTheme() {
+  toggleDashboardTheme();
+}
+
+function togglePasswordLoginFields() {
+  const container = $('passwordLoginFields');
+  const btn = $('togglePasswordLogin');
+  const kgidInput = $('loginKgid');
+  const passInput = $('loginPassword');
+  if (!container || !btn) return;
+  
+  if (container.style.maxHeight === '0px' || !container.style.maxHeight) {
+    container.style.maxHeight = '400px';
+    container.style.marginBottom = '16px';
+    btn.classList.add('expanded');
+    kgidInput.setAttribute('required', 'true');
+    passInput.setAttribute('required', 'true');
+  } else {
+    container.style.maxHeight = '0px';
+    container.style.marginBottom = '0px';
+    btn.classList.remove('expanded');
+    kgidInput.removeAttribute('required');
+    passInput.removeAttribute('required');
+  }
+}
+
+function toggleAuthMode(mode) {
+  // mode: 0 = login, 1 = register, 2 = forgot password
+  // Also maps back-compatibly: false -> 0, true -> 1
+  const m = mode === true ? 1 : (mode === false ? 0 : mode);
+  
+  $('loginForm').style.display = m === 0 ? 'grid' : 'none';
+  $('registerForm').style.display = m === 1 ? 'grid' : 'none';
+  $('forgotForm').style.display = m === 2 ? 'grid' : 'none';
+  
+  if (m === 0) {
+    $('authModalTitle').textContent = 'DPDMS USER LOGIN';
+    // Reset collapsible container to closed
+    const container = $('passwordLoginFields');
+    const btn = $('togglePasswordLogin');
+    if (container) {
+      container.style.maxHeight = '0px';
+      container.style.marginBottom = '0px';
+      if (btn) btn.classList.remove('expanded');
+      $('loginKgid').removeAttribute('required');
+      $('loginPassword').removeAttribute('required');
+      $('loginKgid').value = '';
+      $('loginPassword').value = '';
+    }
+  } else if (m === 1) {
+    $('authModalTitle').textContent = 'DPDMS USER REGISTRATION';
+    $('registerInputFields').style.display = 'grid';
+    $('registerOtpContainer').style.display = 'none';
+    $('registerError').style.display = 'none';
+    $('registerSuccess').style.display = 'none';
+    
+    $('registerKgid').value = '';
+    $('registerMobile').value = '';
+    $('registerEmail').value = '';
+    $('registerPassword').value = '';
+    $('registerConfirm').value = '';
+    $('registerOtpCode').value = '';
+  } else if (m === 2) {
+    $('authModalTitle').textContent = 'DPDMS PASSWORD RESET';
+    $('forgotInputFields').style.display = 'grid';
+    $('forgotOtpContainer').style.display = 'none';
+    $('forgotError').style.display = 'none';
+    $('forgotSuccess').style.display = 'none';
+    
+    $('forgotKgid').value = '';
+    $('forgotEmail').value = '';
+    $('forgotOtpCode').value = '';
+    $('forgotNewPassword').value = '';
+    $('forgotConfirmPassword').value = '';
+  }
+}
+
+function initGoogleSignIn() {
+  const clientId = getGoogleClientId();
+  const btn = $('googleSignInButton');
+  if (!btn) return;
+  
+  if (!clientId || !getApiUrl()) {
+    btn.style.display = 'none';
+    return;
+  }
+  
+  if (typeof google === 'undefined') {
+    btn.innerHTML = `<span style="font-size:11.5px; color:var(--muted)">Loading Google Sign-in…</span>`;
+    setTimeout(initGoogleSignIn, 300);
+    return;
+  }
+  
+  btn.innerHTML = '';
+  btn.style.display = 'flex';
+  
+  try {
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleGoogleLogin
+    });
+    
+    google.accounts.id.renderButton(
+      btn,
+      { theme: 'filled_blue', size: 'large', width: 340, shape: 'rectangular', logo_alignment: 'left' }
+    );
+  } catch (err) {
+    btn.innerHTML = `<span style="font-size:11.5px; color:var(--red)">Google SDK Error</span>`;
+    console.error(err);
+  }
+}
+
+async function handleGoogleLogin(response) {
+  const loginError = $('loginError');
+  loginError.style.display = 'none';
+  
+  try {
+    const res = await apiFetch('google-login', {}, {
+      method: 'POST',
+      body: { idToken: response.credential }
+    });
+    
+    if (!res.ok) {
+      loginError.textContent = res.error || 'Google sign-in failed.';
+      loginError.style.display = 'block';
+      return;
+    }
+    
+    localStorage.setItem('dpdms_token', res.token);
+    localStorage.setItem('dpdms_role', res.role);
+    localStorage.setItem('dpdms_kgid', res.kgid);
+    localStorage.setItem('dpdms_name', res.name);
+    
+    $('loginModal').classList.remove('open');
+    await loadData();
+  } catch(err) {
+    loginError.textContent = 'Error: ' + err.message;
+    loginError.style.display = 'block';
+  }
+}
+
+function showLogin() {
+  toggleAuthMode(false);
+  $('loginKgid').value = '';
+  $('loginPassword').value = '';
+  $('loginError').style.display = 'none';
+  $('loginModal').classList.add('open');
+  initGoogleSignIn();
+}
+
+async function doForgot(ev) {
+  ev.preventDefault();
+  $('forgotError').style.display = 'none';
+  $('forgotSuccess').style.display = 'none';
+  
+  const kgid = $('forgotKgid').value.trim();
+  const email = $('forgotEmail').value.trim();
+  
+  $('forgotSuccess').textContent = "Sending reset code, please wait…";
+  $('forgotSuccess').style.display = 'block';
+  
+  try {
+    const res = await apiFetch('send-reset-otp', {}, {
+      method: 'POST',
+      body: { kgid, email }
+    });
+    
+    if (!res.ok) {
+      $('forgotError').textContent = res.error || "Failed to send reset code.";
+      $('forgotError').style.display = 'block';
+      $('forgotSuccess').style.display = 'none';
+      return;
+    }
+    
+    $('forgotSuccess').textContent = res.message || "OTP code sent successfully.";
+    $('forgotSuccess').style.display = 'block';
+    
+    // Switch to OTP entry
+    $('forgotInputFields').style.display = 'none';
+    $('forgotOtpContainer').style.display = 'flex';
+  } catch (err) {
+    $('forgotError').textContent = "Error: " + err.message;
+    $('forgotError').style.display = 'block';
+    $('forgotSuccess').style.display = 'none';
+  }
+}
+
+async function verifyOtpAndResetPassword() {
+  $('forgotError').style.display = 'none';
+  $('forgotSuccess').style.display = 'none';
+  
+  const kgid = $('forgotKgid').value.trim();
+  const otp = $('forgotOtpCode').value.trim();
+  const pwd = $('forgotNewPassword').value;
+  const conf = $('forgotConfirmPassword').value;
+  
+  if (!otp) {
+    $('forgotError').textContent = "Please enter the OTP verification code.";
+    $('forgotError').style.display = 'block';
+    return;
+  }
+  
+  if (pwd !== conf) {
+    $('forgotError').textContent = "Passwords do not match.";
+    $('forgotError').style.display = 'block';
+    return;
+  }
+  
+  const hash = await sha256(pwd);
+  
+  try {
+    const res = await apiFetch('verify-reset-otp', {}, {
+      method: 'POST',
+      body: { kgid, otp, passwordHash: hash }
+    });
+    
+    if (!res.ok) {
+      $('forgotError').textContent = res.error || "Password reset failed.";
+      $('forgotError').style.display = 'block';
+      return;
+    }
+    
+    alert("Password has been reset successfully! Please log in.");
+    toggleAuthMode(0);
+    $('loginKgid').value = kgid;
+  } catch (err) {
+    $('forgotError').textContent = "Error: " + err.message;
+    $('forgotError').style.display = 'block';
+  }
+}
+
+async function doRegister(ev) {
+  ev.preventDefault();
+  $('registerError').style.display = 'none';
+  $('registerSuccess').style.display = 'none';
+  
+  const kgid = $('registerKgid').value.trim();
+  const mobile = $('registerMobile').value.trim();
+  const email = $('registerEmail').value.trim();
+  const pwd = $('registerPassword').value;
+  const conf = $('registerConfirm').value;
+  
+  if (pwd !== conf) {
+    $('registerError').textContent = "Passwords do not match.";
+    $('registerError').style.display = 'block';
+    return;
+  }
+  
+  const hash = await sha256(pwd);
+  $('registerSuccess').textContent = "Sending verification OTP, please wait…";
+  $('registerSuccess').style.display = 'block';
+  
+  try {
+    const res = await apiFetch('send-registration-otp', {}, {
+      method: 'POST',
+      body: { kgid, mobile, email, passwordHash: hash }
+    });
+    
+    if (!res.ok) {
+      $('registerError').textContent = res.error || "Registration failed.";
+      $('registerError').style.display = 'block';
+      $('registerSuccess').style.display = 'none';
+      return;
+    }
+    
+    $('registerSuccess').textContent = res.message || "OTP code sent successfully.";
+    $('registerSuccess').style.display = 'block';
+    
+    // Switch to OTP entry
+    $('registerInputFields').style.display = 'none';
+    $('registerOtpContainer').style.display = 'flex';
+  } catch (err) {
+    $('registerError').textContent = "Error: " + err.message;
+    $('registerError').style.display = 'block';
+    $('registerSuccess').style.display = 'none';
+  }
+}
+
+async function verifyOtpAndRegister() {
+  $('registerError').style.display = 'none';
+  $('registerSuccess').style.display = 'none';
+  
+  const kgid = $('registerKgid').value.trim();
+  const otp = $('registerOtpCode').value.trim();
+  
+  if (!otp) {
+    $('registerError').textContent = "Please enter the OTP verification code.";
+    $('registerError').style.display = 'block';
+    return;
+  }
+  
+  try {
+    const res = await apiFetch('verify-registration-otp', {}, {
+      method: 'POST',
+      body: { kgid, otp }
+    });
+    
+    if (!res.ok) {
+      $('registerError').textContent = res.error || "OTP verification failed.";
+      $('registerError').style.display = 'block';
+      return;
+    }
+    
+    alert("Registration completed successfully! Please log in.");
+    toggleAuthMode(false);
+    $('loginKgid').value = kgid;
+  } catch (err) {
+    $('registerError').textContent = "Error: " + err.message;
+    $('registerError').style.display = 'block';
+  }
+}
+
+async function resendRegisterOtp() {
+  $('registerError').style.display = 'none';
+  $('registerSuccess').style.display = 'none';
+  
+  const kgid = $('registerKgid').value.trim();
+  const mobile = $('registerMobile').value.trim();
+  const email = $('registerEmail').value.trim();
+  const pwd = $('registerPassword').value;
+  const hash = await sha256(pwd);
+  
+  $('registerSuccess').textContent = "Resending OTP code, please wait…";
+  $('registerSuccess').style.display = 'block';
+  
+  try {
+    const res = await apiFetch('send-registration-otp', {}, {
+      method: 'POST',
+      body: { kgid, mobile, email, passwordHash: hash }
+    });
+    
+    if (!res.ok) {
+      $('registerError').textContent = res.error || "Failed to resend OTP.";
+      $('registerError').style.display = 'block';
+      $('registerSuccess').style.display = 'none';
+      return;
+    }
+    
+    $('registerSuccess').textContent = "A new OTP code has been sent to " + email;
+    $('registerSuccess').style.display = 'block';
+  } catch (err) {
+    $('registerError').textContent = "Error: " + err.message;
+    $('registerError').style.display = 'block';
+    $('registerSuccess').style.display = 'none';
+  }
+}
+
+async function doLogin(ev) {
+  ev.preventDefault();
+  $('loginError').style.display = 'none';
+  const kgid = $('loginKgid').value.trim();
+  const password = $('loginPassword').value;
+  const hash = await sha256(password);
+  
+  try {
+    const res = await apiFetch('login', {}, {
+      method: 'POST',
+      body: { kgid: kgid, passwordHash: hash }
+    });
+    
+    if (!res.ok) {
+      $('loginError').textContent = res.error || 'Login failed.';
+      $('loginError').style.display = 'block';
+      return;
+    }
+    
+    localStorage.setItem('dpdms_token', res.token);
+    localStorage.setItem('dpdms_role', res.role);
+    localStorage.setItem('dpdms_kgid', res.kgid);
+    localStorage.setItem('dpdms_name', res.name);
+    
+    $('loginModal').classList.remove('open');
+    await loadData();
+  } catch(err) {
+    $('loginError').textContent = 'Error: ' + err.message;
+    $('loginError').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('dpdms_token');
+  localStorage.removeItem('dpdms_role');
+  localStorage.removeItem('dpdms_kgid');
+  localStorage.removeItem('dpdms_name');
+  
+  if (getApiUrl()) {
+    showLogin();
+  } else {
+    loadData().catch(e => $('dataBadge').textContent = '⚠ ' + e.message);
+  }
+}
+
+function showSettings() {
+  $('settingsApiUrl').value = getApiUrl();
+  $('settingsClientId').value = getGoogleClientId();
+  $('settingsModal').classList.add('open');
+}
+
+function saveSettings() {
+  const url = $('settingsApiUrl').value.trim();
+  const clientId = $('settingsClientId').value.trim();
+  localStorage.setItem('dpdms_api_url', url);
+  localStorage.setItem('dpdms_google_client_id', clientId);
+  $('settingsModal').classList.remove('open');
+  
+  // Clear stale session
+  localStorage.removeItem('dpdms_token');
+  localStorage.removeItem('dpdms_role');
+  localStorage.removeItem('dpdms_kgid');
+  localStorage.removeItem('dpdms_name');
+  
+  loadData().catch(e => $('dataBadge').textContent = '⚠ ' + e.message);
+}
+
+function normalizeLoadedData(data) {
+  if (!data || !data.employees) return;
+  data.employees.forEach(e => {
+    if (e.currentUnit) {
+      const u = e.currentUnit;
+      if (u === 'Shidlagatta Town PS' || u === 'Shidlaghatta Town PS' || u === 'Sidlagatta Town PS') {
+        e.currentUnit = 'Sidlaghatta Town PS';
+      } else if (u === 'Shidlagatta Rural PS' || u === 'Shidlaghatta Rural PS' || u === 'Sidlagatta Rural PS') {
+        e.currentUnit = 'Sidlaghatta Rural PS';
+      } else if (u === 'CPI Off Shidlaghatta' || u === 'CPI Off Shidlagatta' || u === 'CPI Off Sidlagatta' || u === 'CPI Off Sidlaghatta') {
+        e.currentUnit = 'CPI Off Sidlaghatta';
+      }
+    }
+    if (e.postings) {
+      e.postings.forEach(p => {
+        if (p.station) {
+          const u = p.station;
+          if (u === 'Shidlagatta Town PS' || u === 'Shidlaghatta Town PS' || u === 'Sidlagatta Town PS') {
+            p.station = 'Sidlaghatta Town PS';
+          } else if (u === 'Shidlagatta Rural PS' || u === 'Shidlaghatta Rural PS' || u === 'Sidlagatta Rural PS') {
+            p.station = 'Sidlaghatta Rural PS';
+          } else if (u === 'CPI Off Shidlaghatta' || u === 'CPI Off Shidlagatta' || u === 'CPI Off Sidlagatta' || u === 'CPI Off Sidlaghatta') {
+            p.station = 'CPI Off Sidlaghatta';
+          }
+        }
+      });
+    }
+  });
+}
+
+// ── LOADING DATA ──────────────────────────────────────────────
+async function loadData() {
+  $('dataBadge').textContent = 'Loading…';
+  
+  // Static snapshot fallback
+  if (!getApiUrl() && window.EMBEDDED_DATA) {
+    DATA = window.EMBEDDED_DATA;
+    normalizeLoadedData(DATA);
+    DATA.editable = false;
+    selKgid = selKgid || (DATA.employees[0] && DATA.employees[0].kgid) || '';
+    $('dataBadge').textContent = 'Snapshot · ' + DATA.lastLoaded;
+    applyRoleRules();
+    boot();
+    return;
+  }
+  
+  if (getApiUrl() && !getToken()) {
+    applyRoleRules();
+    showLogin();
+    return;
+  }
+  
+  try {
+    const res = await apiFetch('data');
+    if (res.error) {
+      if (res.error.includes('Unauthorized')) {
+        doLogout();
+        return;
+      }
+      throw new Error(res.error);
+    }
+    DATA = res;
+    normalizeLoadedData(DATA);
+    
+    const role = getRole();
+    if (getApiUrl() && role === 'User') {
+      selKgid = getLoggedKgid();
+    } else {
+      selKgid = selKgid || (DATA.employees[0] && DATA.employees[0].kgid) || '';
+    }
+    $('dataBadge').textContent = DATA.lastLoaded;
+    applyRoleRules();
+    boot();
+  } catch(err) {
+    $('dataBadge').textContent = '⚠ ' + err.message;
+  }
+}
+
+function boot(){hydrateFilters();renderEmpDash();renderTxDash();renderSearch();if(activeTab==='reports')renderRpt(activeRpt);}
+
+function hydrateFilters(){
+  const ranks=[...new Set(DATA.employees.map(e=>e.rank).filter(Boolean))].sort();
+  const stations=[...new Set(DATA.employees.map(e=>e.currentUnit).filter(Boolean))].sort();
+  const pr=$('fRank').value,ps=$('fStation').value;
+  $('fRank').innerHTML=`<option value="">All Ranks</option>`+ranks.map(v=>`<option>${esc(v)}</option>`).join('');
+  $('fStation').innerHTML=`<option value="">All Stations</option>`+stations.map(v=>`<option>${esc(v)}</option>`).join('');
+  $('fRank').value=pr;$('fStation').value=ps;
+}
+function filtered(){
+  const q=$('fQuick').value.trim().toLowerCase(),rk=$('fRank').value,st=$('fStation').value,el=$('fEligible').value;
+  return DATA.employees.filter(e=>{
+    if (customKpiFilter === 'dpo' && (!e.currentUnit || !e.currentUnit.toLowerCase().includes('dpo'))) return false;
+    if (customKpiFilter === 'special_branch' && (!e.currentUnit || (!e.currentUnit.toLowerCase().includes('dcrb') && !e.currentUnit.toLowerCase().includes('dsb')))) return false;
+    if (customKpiFilter === 'circle_office' && (!e.currentUnit || (!e.currentUnit.toLowerCase().includes('cpi') && !e.currentUnit.toLowerCase().includes('circle')))) return false;
+    if (customKpiFilter === 'pure_ps' && (!e.currentUnit || !e.currentUnit.toLowerCase().endsWith(' ps'))) return false;
+    if (customKpiFilter === 'dar' && (!e.currentUnit || !e.currentUnit.toLowerCase().includes('dar'))) return false;
+    if (customKpiFilter === 'sdpo' && (!e.currentUnit || (!e.currentUnit.toLowerCase().includes('dysp') && !e.currentUnit.toLowerCase().includes('sdpo')))) return false;
+
+    const sp=e.sourceProfile||{};
+    if(q&&![e.kgid,e.name,e.mobile,e.doa,e.designation,e.rank,e.currentUnit,sp.mobile2,sp.email,sp.metalNumber].some(v=>String(v||'').toLowerCase().includes(q)))return false;
+    if(rk&&e.rank!==rk&&e.designation!==rk)return false;
+    if(st&&e.currentUnit!==st)return false;
+    if(el&&e.transferEligible!==el)return false;
+    return true;
+  });
+}
+
+/* ── Employees Dashboard ───────────────────────────── */
+function renderEmpDash(){
+  const emps=DATA.employees||[];
+  const sts=[...new Set(emps.map(e=>e.currentUnit).filter(Boolean))];
+  const sds=[...new Set(emps.map(e=>e.currentSubDivision).filter(Boolean))];
+  
+  const dpoUnits = sts.filter(s => s.toLowerCase() === 'dpo' || s.toLowerCase().includes('dpo'));
+  const specialBranches = sts.filter(s => s.toLowerCase().includes('dcrb') || s.toLowerCase().includes('dsb'));
+  const circleOffices = sts.filter(s => s.toLowerCase().includes('cpi') || s.toLowerCase().includes('circle'));
+  const pureSts = sts.filter(s => s.toLowerCase().endsWith(' ps'));
+  const darUnits = sts.filter(s => s.toLowerCase().includes('dar'));
+
+  const dpoStr = emps.filter(e => e.currentUnit && e.currentUnit.toLowerCase().includes('dpo')).length;
+  const sbStr = emps.filter(e => e.currentUnit && (e.currentUnit.toLowerCase().includes('dcrb') || e.currentUnit.toLowerCase().includes('dsb'))).length;
+  const sdpoStr = emps.filter(e => e.currentUnit && (e.currentUnit.toLowerCase().includes('dysp') || e.currentUnit.toLowerCase().includes('sdpo'))).length;
+  const coStr = emps.filter(e => e.currentUnit && (e.currentUnit.toLowerCase().includes('cpi') || e.currentUnit.toLowerCase().includes('circle'))).length;
+  const psStr = emps.filter(e => e.currentUnit && e.currentUnit.toLowerCase().endsWith(' ps')).length;
+  const darStr = emps.filter(e => e.currentUnit && e.currentUnit.toLowerCase().includes('dar')).length;
+
+  $('empKpis').innerHTML=`${kpi('Total Employees',emps.length,'All ranks & stations','')}${kpi('DPO',`${dpoUnits.length} [${dpoStr}]`,'District Police Office','k-blu')}${kpi('Special Branch',`${specialBranches.length} [${sbStr}]`,'DCRB & DSB','k-red')}${kpi('Sub-Division',`${sds.length} [${sdpoStr}]`,'Covered areas','k-cyn')}${kpi('Circle Office',`${circleOffices.length} [${coStr}]`,'CPI Offices','k-pur')}${kpi('Police Stations',`${pureSts.length} [${psStr}]`,'Police Stations','k-blu')}${kpi('DAR',`${darUnits.length} [${darStr}]`,'Armed Reserve','k-grn')}`;
+
+  const stData=sts.map(s=>({n:s,c:emps.filter(e=>e.currentUnit===s).length})).sort((a,b)=>b.c-a.c);const mxSt=stData[0]?.c||1;
+  $('stLbl').textContent=stData.length+' stations';
+  $('stChart').innerHTML=stData.map(s=>`<div class="bar-row"><div class="bar-lbl" title="${esc(s.n)}">${esc(s.n)}</div><div class="bar-track"><div class="bar-fill bar-navy" style="width:${Math.round(s.c/mxSt*100)}%"></div></div><div class="bar-n">${s.c}</div></div>`).join('');
+
+  const sdData=sdDataMap(sds, emps);const mxSd=sdData[0]?.c||1;
+  $('sdChart').innerHTML=sdData.length?sdData.map(s=>`<div class="bar-row"><div class="bar-lbl" title="${esc(s.n)}">${esc(s.n)}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${Math.round(s.c/mxSd*100)}%"></div></div><div class="bar-n">${s.c}</div></div>`).join(''):'<div class="empty"><div class="empty-txt">No Sub-Division data</div></div>';
+}
+function sdDataMap(sds, emps) {
+  return sds.map(s=>({n:s,c:emps.filter(e=>e.currentSubDivision===s).length})).sort((a,b)=>b.c-a.c);
+}
+
+/* ── Transfer Dashboard ────────────────────────────── */
+function renderTxDash(){
+  const emps=DATA.employees||[];
+  const due=emps.filter(e=>e.transferEligible==='Yes'),hi=emps.filter(e=>e.priority==='High'),med=emps.filter(e=>e.priority==='Medium'&&e.transferEligible==='Yes'),notDue=emps.filter(e=>e.transferEligible!=='Yes');
+  const ret3=emps.filter(e=>typeof e.retirementMonthsLeft==='number'&&e.retirementMonthsLeft>=0&&e.retirementMonthsLeft<=3);
+  const ret6=emps.filter(e=>typeof e.retirementMonthsLeft==='number'&&e.retirementMonthsLeft>=0&&e.retirementMonthsLeft<=6);
+  const ret12=emps.filter(e=>typeof e.retirementMonthsLeft==='number'&&e.retirementMonthsLeft>=0&&e.retirementMonthsLeft<=12);
+
+  $('txKpis').innerHTML=`${kpi('Transfer Due',due.length,'3+ years at station','k-amb')}${kpi('High Priority',hi.length,'5+ years overdue','k-red')}${kpi('Medium Priority',med.length,'3–5 years','k-amb')}${kpi('Not Yet Due',notDue.length,'< 3 years','k-grn')}${kpi('Retiring 3M',ret3.length,'Immediate attention','k-red')}${kpi('Retiring 12M',ret12.length,'Within one year','k-pur')}`;
+
+  const slices=[{l:'High Priority (5+ yrs)',n:hi.length,c:'var(--red)'},{l:'Medium (3–5 yrs)',n:med.length,c:'var(--amb)'},{l:'Low / Not Due',n:notDue.length,c:'var(--grn)'}];
+  const total=emps.length||1;let offset=0;
+  const segs=slices.map(s=>{const p=s.n/total*100;const seg=`${s.c} ${offset}% ${offset+p}%`;offset+=p;return seg;});
+  $('txDonut').innerHTML=`<div class="donut-wrap"><div class="donut" style="background:conic-gradient(${segs.join(',')})"><div class="donut-center"><div class="donut-num">${due.length}</div><div class="donut-sub">Due</div></div></div><div class="legend">${slices.map(s=>`<div class="leg-item"><div class="leg-dot" style="background:${s.c}"></div>${s.l}<div class="leg-n">${s.n}</div></div>`).join('')}<div class="leg-item" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--bdr)"><div class="leg-dot" style="background:var(--muted2)"></div>Total Employees<div class="leg-n">${emps.length}</div></div></div></div>`;
+
+  const buckets=[{l:'<1 yr',min:0,max:1,c:'var(--grn)'},{l:'1–3 yr',min:1,max:3,c:'var(--blu)'},{l:'3–5 yr',min:3,max:5,c:'var(--amb)'},{l:'5–7 yr',min:5,max:7,c:'var(--red)'},{l:'7–10 yr',min:7,max:10,c:'var(--pur)'},{l:'10+ yr',min:10,max:999,c:'#db2777'}];
+  const bData=buckets.map(b=>{b.n=emps.filter(e=>{const y=typeof e.currentStationYears==='number'?e.currentStationYears:-1;return y>=b.min&&y<b.max;}).length;return b;});const mxH=Math.max(...bData.map(b=>b.n),1);
+  $('txHisto').innerHTML=`<div class="histo">${bData.map(b=>`<div class="histo-col"><div class="histo-n">${b.n}</div><div class="histo-bar-wrap"><div class="histo-bar" style="height:${Math.max(Math.round(b.n/mxH*100),2)}%;background:${b.c}"></div></div><div class="histo-lbl">${b.l}</div></div>`).join('')}</div>`;
+
+  const sorted=[...emps].filter(e=>typeof e.currentStationYears==='number'&&e.currentStationYears>0).sort((a,b)=>b.currentStationYears-a.currentStationYears).slice(0,15);
+  $('txTop').innerHTML=sorted.length?sorted.map((e,i)=>{const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rx';const vc=e.currentStationYears>=5?'tv-red':e.currentStationYears>=3?'tv-amb':'tv-grn';return `<div class="top-item"><div class="top-rank ${rc}">${i+1}</div><div class="top-info"><div class="top-name">${esc(e.name)}</div><div class="top-meta">${esc(e.kgid)} · ${esc(e.rank)} · ${esc(e.currentUnit)}</div></div><div class="top-val ${vc}">${e.currentStationYears} yrs</div></div>`;}).join(''):'<div class="empty"><div class="empty-txt">No station years data</div></div>';
+
+  const sts=[...new Set(emps.map(e=>e.currentUnit).filter(Boolean))];
+  const pr=sts.map(s=>{const t=emps.filter(e=>e.currentUnit===s).length;const d=emps.filter(e=>e.currentUnit===s&&e.transferEligible==='Yes').length;return{n:s,t,d,pct:t?Math.round(d/t*100):0};}).filter(p=>p.d>0).sort((a,b)=>b.pct-a.pct);
+  $('txPressure').innerHTML=pr.length?pr.map(p=>{const c=p.pct>=60?'bar-red':p.pct>=30?'bar-amber':'bar-green';return `<div class="bar-row"><div class="bar-lbl" title="${esc(p.n)}">${esc(p.n)}</div><div class="bar-track"><div class="bar-fill ${c}" style="width:${p.pct}%"></div></div><div class="bar-n" style="color:${p.pct>=60?'var(--red)':p.pct>=30?'var(--amb)':'var(--grn)'}">${p.pct}%</div></div>`;}).join(''):'<div class="empty"><div class="empty-txt">No transfer pressure data</div></div>';
+
+  const retBuckets=[{l:'🔴 Next 3 months',data:ret3,c:'var(--red)'},{l:'🟡 Next 6 months',data:ret6,c:'var(--amb)'},{l:'🟢 Next 12 months',data:ret12,c:'var(--grn)'}];
+  $('txRetire').innerHTML=retBuckets.some(b=>b.data.length)?retBuckets.map(b=>`<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:${b.c};margin-bottom:6px">${b.l} — ${b.data.length} employees</div>${b.data.slice(0,5).map(e=>`<div class="top-item"><div class="top-info"><div class="top-name">${esc(e.name)}</div><div class="top-meta">${esc(e.kgid)} · ${esc(e.rank)} · ${esc(e.currentUnit)}</div></div><div class="top-val" style="color:${b.c}">${e.retirementMonthsLeft}m</div></div>`).join('')}${b.data.length>5?`<div style="font-size:11px;color:var(--muted);padding:4px 0">+ ${b.data.length-5} more</div>`:''}</div>`).join(''):'<div class="empty"><div class="empty-txt">No retirement data (DOB needed)</div></div>';
+
+  const sds=[...new Set(emps.map(e=>e.currentSubDivision).filter(Boolean))];
+  const sdL=sds.map(sd=>{const t=emps.filter(e=>e.currentSubDivision===sd).length;const d=emps.filter(e=>e.currentSubDivision===sd&&e.transferEligible==='Yes').length;return{n:sd,t,d,pct:t?Math.round(d/t*100):0};}).sort((a,b)=>b.d-a.d);const mxSdL=sdL[0]?.d||1;
+  $('txSubdiv').innerHTML=sdL.length?sdL.map(s=>{const c=s.pct>=50?'bar-red':s.pct>=25?'bar-amber':'bar-green';return `<div class="bar-row"><div class="bar-lbl" title="${esc(s.n)}">${esc(s.n)}</div><div class="bar-track"><div class="bar-fill ${c}" style="width:${Math.round(s.d/mxSdL*100)}%"></div></div><div class="bar-n">${s.d}/${s.t}</div></div>`;}).join(''):'<div class="empty"><div class="empty-txt">No Sub-Division data</div></div>';
+}
+
+function handleKpiClick(lbl) {
+  if (lbl === 'Total Employees') {
+    customKpiFilter = null;
+    switchTab('search');
+  } else if (lbl === 'DPO') {
+    customKpiFilter = 'dpo';
+    switchTab('kpi-view');
+  } else if (lbl === 'Special Branch') {
+    customKpiFilter = 'special_branch';
+    switchTab('kpi-view');
+  } else if (lbl === 'Sub-Division') {
+    customKpiFilter = 'sdpo';
+    switchTab('kpi-view');
+  } else if (lbl === 'Circle Office') {
+    customKpiFilter = 'circle_office';
+    switchTab('kpi-view');
+  } else if (lbl === 'Police Stations') {
+    customKpiFilter = 'pure_ps';
+    switchTab('kpi-view');
+  } else if (lbl === 'DAR') {
+    customKpiFilter = 'dar';
+    switchTab('kpi-view');
+  } else if (lbl === 'Transfer Due') {
+    switchTab('reports');
+    renderRpt('priority');
+  } else if (lbl === 'High Priority') {
+    switchTab('reports');
+    rptFilter.priority = 'High';
+    renderRpt('priority');
+  } else if (lbl === 'Medium Priority') {
+    switchTab('reports');
+    rptFilter.priority = 'Medium';
+    renderRpt('priority');
+  } else if (lbl === 'Not Yet Due') {
+    switchTab('search');
+    $('fEligible').value = 'No';
+    renderSearch();
+  } else if (lbl === 'Retiring 3M') {
+    switchTab('reports');
+    rptFilter.retirement = '3';
+    renderRpt('retirement');
+  } else if (lbl === 'Retiring 12M') {
+    switchTab('reports');
+    rptFilter.retirement = '12';
+    renderRpt('retirement');
+  }
+}
+
+function kpi(lbl,val,sub,cls){
+  let valHtml = val;
+  if (typeof val === 'string' && val.includes('[')) {
+    const parts = val.split('[');
+    const mainVal = parts[0].trim();
+    const bracketVal = parts[1].replace(']', '').trim();
+    valHtml = `${mainVal} <span style="font-size: 16px; font-weight: 500; opacity: 0.65; margin-left: 2px;">[${bracketVal}]</span>`;
+  }
+  return `<div class="kpi ${cls}" onclick="handleKpiClick('${lbl}')" role="button" tabindex="0"><div class="kpi-glow"></div><div class="kpi-lbl">${lbl}</div><div class="kpi-val">${valHtml}</div><div class="kpi-sub">${sub}</div></div>`;
+}
+
+/* ── Dedicated KPI View (Option B) ─────────────────── */
+function clearKpiFilter() {
+  customKpiFilter = null;
+  selectedCircleOffice = null;
+  selectedSdpo = null;
+  selectedPs = null;
+  selectedSb = null;
+  kpiSearchQuery = '';
+  const input = $('kpiSearchInput');
+  if (input) input.value = '';
+  switchTab('employees');
+}
+
+function kpiTitle(f) {
+  const titles = {
+    dpo: '🏢 DPO Employees List',
+    special_branch: '🔍 Special Branch Employees List',
+    circle_office: '🏢 Circle Office Employees List',
+    pure_ps: '👮 Police Stations List',
+    dar: '🛡️ DAR Employees List',
+    sdpo: '🗺️ Sub-Division Employees List'
+  };
+  return titles[f] || '👥 KPI Employees List';
+}
+
+function kpiSub(f) {
+  const subs = {
+    dpo: 'District Police Office (DPO)',
+    special_branch: 'DCRB & DSB (Special Branch)',
+    circle_office: 'CPI Offices (Circle Office)',
+    pure_ps: 'Police Stations',
+    dar: 'Armed Reserve (DAR)',
+    sdpo: 'Sub-Divisions'
+  };
+  return subs[f] || 'Filtered list';
+}
+
+function handleKpiSearchInput(val) {
+  kpiSearchQuery = String(val || '').trim().toLowerCase();
+  renderKpiView();
+}
+
+function selectCircleOffice(unit) {
+  selectedCircleOffice = unit;
+  renderKpiView();
+}
+
+function selectSdpo(unit) {
+  selectedSdpo = unit;
+  renderKpiView();
+}
+
+function selectPs(unit) {
+  selectedPs = unit;
+  renderKpiView();
+}
+
+function selectSb(unit) {
+  selectedSb = unit;
+  renderKpiView();
+}
+
+function renderKpiView() {
+  const f = customKpiFilter;
+  if (!f) return;
+
+  $('kpiViewTitle').textContent = kpiTitle(f);
+  $('kpiViewSub').textContent = kpiSub(f);
+
+  // Render sub-tiles based on category
+  if (f === 'circle_office') {
+    $('circleOfficeTiles').className = ''; // default purple
+    const categoryEmps = DATA.employees.filter(e => e.currentUnit && (e.currentUnit.toLowerCase().includes('cpi') || e.currentUnit.toLowerCase().includes('circle')));
+    const coUnits = [...new Set(categoryEmps.map(e => e.currentUnit))].sort();
+    
+    let tilesHtml = `
+      <div class="co-tile${!selectedCircleOffice ? ' act' : ''}" onclick="selectCircleOffice(null)">
+        <div class="co-tile-name">All Circle Offices</div>
+        <div class="co-tile-count">${categoryEmps.length}</div>
+      </div>
+    `;
+    coUnits.forEach(unit => {
+      const count = categoryEmps.filter(e => e.currentUnit === unit).length;
+      const isAct = selectedCircleOffice === unit;
+      tilesHtml += `
+        <div class="co-tile${isAct ? ' act' : ''}" onclick="selectCircleOffice('${esc(unit)}')">
+          <div class="co-tile-name">${esc(unit)}</div>
+          <div class="co-tile-count">${count}</div>
+        </div>
+      `;
+    });
+    $('circleOfficeTiles').innerHTML = tilesHtml;
+    $('circleOfficeTiles').style.display = 'grid';
+  } else if (f === 'sdpo') {
+    $('circleOfficeTiles').className = 'k-cyn-tiles';
+    const categoryEmps = DATA.employees.filter(e => e.currentUnit && (e.currentUnit.toLowerCase().includes('dysp') || e.currentUnit.toLowerCase().includes('sdpo')));
+    const sdpoUnits = ['Chikkaballapura', 'Chintamani'];
+    
+    let tilesHtml = `
+      <div class="co-tile${!selectedSdpo ? ' act' : ''}" onclick="selectSdpo(null)">
+        <div class="co-tile-name">All Sub-Divisions</div>
+        <div class="co-tile-count">${categoryEmps.length}</div>
+      </div>
+    `;
+    const sdpoDisplayNames = {
+      'Chikkaballapura': 'Sub-Division Chikkaballapura',
+      'Chintamani': 'Sub-Division Chintamani'
+    };
+    sdpoUnits.forEach(unit => {
+      const count = categoryEmps.filter(e => e.currentSubDivision === unit).length;
+      const isAct = selectedSdpo === unit;
+      const disp = sdpoDisplayNames[unit] || (unit + ' Sub-Division');
+      tilesHtml += `
+        <div class="co-tile${isAct ? ' act' : ''}" onclick="selectSdpo('${esc(unit)}')">
+          <div class="co-tile-name">${esc(disp)}</div>
+          <div class="co-tile-count">${count}</div>
+        </div>
+      `;
+    });
+    $('circleOfficeTiles').innerHTML = tilesHtml;
+    $('circleOfficeTiles').style.display = 'grid';
+  } else if (f === 'pure_ps') {
+    $('circleOfficeTiles').className = 'k-blu-tiles';
+    const categoryEmps = DATA.employees.filter(e => e.currentUnit && e.currentUnit.toLowerCase().endsWith(' ps'));
+    const psUnits = [...new Set(categoryEmps.map(e => e.currentUnit))].sort();
+    
+    let tilesHtml = `
+      <div class="co-tile${!selectedPs ? ' act' : ''}" onclick="selectPs(null)">
+        <div class="co-tile-name">All Stations</div>
+        <div class="co-tile-count">${categoryEmps.length}</div>
+      </div>
+    `;
+    psUnits.forEach(unit => {
+      const count = categoryEmps.filter(e => e.currentUnit === unit).length;
+      const isAct = selectedPs === unit;
+      tilesHtml += `
+        <div class="co-tile${isAct ? ' act' : ''}" onclick="selectPs('${esc(unit)}')">
+          <div class="co-tile-name">${esc(unit)}</div>
+          <div class="co-tile-count">${count}</div>
+        </div>
+      `;
+    });
+    $('circleOfficeTiles').innerHTML = tilesHtml;
+    $('circleOfficeTiles').style.display = 'grid';
+  } else if (f === 'special_branch') {
+    $('circleOfficeTiles').className = 'k-red-tiles';
+    const categoryEmps = DATA.employees.filter(e => e.currentUnit && (e.currentUnit.toLowerCase().includes('dcrb') || e.currentUnit.toLowerCase().includes('dsb')));
+    const sbUnits = [...new Set(categoryEmps.map(e => e.currentUnit))].sort();
+    
+    let tilesHtml = `
+      <div class="co-tile${!selectedSb ? ' act' : ''}" onclick="selectSb(null)">
+        <div class="co-tile-name">All Special Branch</div>
+        <div class="co-tile-count">${categoryEmps.length}</div>
+      </div>
+    `;
+    sbUnits.forEach(unit => {
+      const count = categoryEmps.filter(e => e.currentUnit === unit).length;
+      const isAct = selectedSb === unit;
+      tilesHtml += `
+        <div class="co-tile${isAct ? ' act' : ''}" onclick="selectSb('${esc(unit)}')">
+          <div class="co-tile-name">${esc(unit)}</div>
+          <div class="co-tile-count">${count}</div>
+        </div>
+      `;
+    });
+    $('circleOfficeTiles').innerHTML = tilesHtml;
+    $('circleOfficeTiles').style.display = 'grid';
+  } else {
+    $('circleOfficeTiles').style.display = 'none';
+  }
+
+  // Filter employees belonging to this KPI category
+  let emps = DATA.employees || [];
+  
+  // 1. Filter by KPI category
+  emps = emps.filter(e => {
+    if (f === 'dpo') return e.currentUnit && e.currentUnit.toLowerCase().includes('dpo');
+    if (f === 'special_branch') return e.currentUnit && (e.currentUnit.toLowerCase().includes('dcrb') || e.currentUnit.toLowerCase().includes('dsb'));
+    if (f === 'circle_office') return e.currentUnit && (e.currentUnit.toLowerCase().includes('cpi') || e.currentUnit.toLowerCase().includes('circle'));
+    if (f === 'pure_ps') return e.currentUnit && e.currentUnit.toLowerCase().endsWith(' ps');
+    if (f === 'dar') return e.currentUnit && e.currentUnit.toLowerCase().includes('dar');
+    if (f === 'sdpo') return e.currentUnit && (e.currentUnit.toLowerCase().includes('dysp') || e.currentUnit.toLowerCase().includes('sdpo'));
+    return true;
+  });
+
+  // 1b. Filter by selected Circle Office sub-tile
+  if (f === 'circle_office' && selectedCircleOffice) {
+    emps = emps.filter(e => e.currentUnit === selectedCircleOffice);
+  }
+  // 1c. Filter by selected SDPO sub-tile
+  if (f === 'sdpo' && selectedSdpo) {
+    emps = emps.filter(e => e.currentSubDivision === selectedSdpo);
+  }
+  // 1d. Filter by selected PS sub-tile
+  if (f === 'pure_ps' && selectedPs) {
+    emps = emps.filter(e => e.currentUnit === selectedPs);
+  }
+  // 1e. Filter by selected Special Branch sub-tile
+  if (f === 'special_branch' && selectedSb) {
+    emps = emps.filter(e => e.currentUnit === selectedSb);
+  }
+
+  // 2. Filter by local search query
+  if (kpiSearchQuery) {
+    emps = emps.filter(e => {
+      const sp = e.sourceProfile || {};
+      return [e.kgid, e.name, e.mobile, e.designation, e.rank, e.currentUnit, sp.email, sp.metalNumber]
+        .some(v => String(v || '').toLowerCase().includes(kpiSearchQuery));
+    });
+  }
+
+  // Sort by name
+  emps.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  // Update counts
+  $('kpiCountBadge').textContent = emps.length;
+
+  const grid = $('kpiEmployeeGrid');
+  if (!emps.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column: 1/-1"><div class="empty-ico">🔍</div><div class="empty-txt">No employees found in this category</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = emps.map(e => {
+    const initials = e.name ? e.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '👮';
+    const showPriority = e.priority === 'High' || e.priority === 'Medium';
+    const showDue = e.transferEligible === 'Yes';
+    const badgesHtml = (showPriority || showDue) ? `
+      <div class="emp-card-badges">
+        ${showPriority ? `<span class="badge b-${pClass(e.priority)}">Priority: ${text(e.priority)}</span>` : ''}
+        ${showDue ? `<span class="badge b-yes">Due: Yes</span>` : ''}
+      </div>
+    ` : '';
+
+    const hasPhoto = e.sourceProfile && e.sourceProfile.photoUrl;
+    const avatarHtml = hasPhoto ?
+      `<img class="emp-card-avatar" src="${esc(e.sourceProfile.photoUrl)}" alt="${esc(e.name)}" />` :
+      `<div class="emp-card-avatar">${esc(initials)}</div>`;
+
+    return `
+      <div class="emp-card" onclick="openProfile('${esc(e.kgid)}')">
+        <div class="emp-card-body">
+          <div class="emp-card-header">
+            ${avatarHtml}
+            <div class="emp-card-info">
+              <div class="emp-card-name" title="${esc(e.name)}">${esc(e.name)}</div>
+              <div class="emp-card-rank">${esc(e.rank || '—')}</div>
+            </div>
+          </div>
+          <div class="emp-card-details">
+            <div class="emp-card-detail-item">
+              <span class="emp-card-detail-label">KGID:</span>
+              <span class="emp-card-detail-value">${esc(e.kgid)}</span>
+            </div>
+            <div class="emp-card-detail-item">
+              <span class="emp-card-detail-label">Station:</span>
+              <span class="emp-card-detail-value" title="${esc(e.currentUnit || '—')}">${esc(e.currentUnit || '—')}</span>
+            </div>
+            <div class="emp-card-detail-item">
+              <span class="emp-card-detail-label">Mobile:</span>
+              <span class="emp-card-detail-value">${esc(e.mobile || '—')}</span>
+            </div>
+          </div>
+        </div>
+        ${badgesHtml}
+      </div>
+    `;
+  }).join('');
+
+  if ($('profileModal').classList.contains('open') && selKgid) {
+    const emp = DATA.employees.find(e => e.kgid === selKgid);
+    if (emp) {
+      editing ? renderEditor(draft || emp, 'profileModalContent') : renderProfile(emp, 'profileModalContent');
+    } else {
+      closeProfileModal();
+    }
+  }
+}
+
+/* ── Search Tab ────────────────────────────────────── */
+function renderSearch(){
+  const role = getRole();
+  if (getApiUrl() && role === 'User') {
+    $('filterBar').style.display = 'none';
+    $('employeeGrid').style.display = 'none';
+    $('userSelfServiceContainer').style.display = 'block';
+    const emp = DATA.employees.find(e => e.kgid === getLoggedKgid());
+    if (emp) {
+      editing ? renderEditor(draft || emp, 'userSelfServiceContainer') : renderProfile(emp, 'userSelfServiceContainer');
+    } else {
+      $('userSelfServiceContainer').innerHTML = `<div class="empty"><div class="empty-txt">Employee record not found for KGID ${getLoggedKgid()}</div></div>`;
+    }
+    return;
+  }
+
+  $('filterBar').style.display = 'block';
+  $('employeeGrid').style.display = 'grid';
+  $('userSelfServiceContainer').style.display = 'none';
+
+  const emps=filtered().sort((a,b)=>(a.name||'').localeCompare(b.name||''));$('resCount').textContent=emps.length;const grid=$('employeeGrid');
+  if(!emps.length){
+    grid.innerHTML=`<div class="empty" style="grid-column: 1/-1"><div class="empty-ico">🔍</div><div class="empty-txt">No employees match the filters</div></div>`;
+    return;
+  }
+  
+  grid.innerHTML = emps.map(e => {
+    const initials = e.name ? e.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '👮';
+    const showPriority = e.priority === 'High' || e.priority === 'Medium';
+    const showDue = e.transferEligible === 'Yes';
+    const badgesHtml = (showPriority || showDue) ? `
+      <div class="emp-card-badges">
+        ${showPriority ? `<span class="badge b-${pClass(e.priority)}">Priority: ${text(e.priority)}</span>` : ''}
+        ${showDue ? `<span class="badge b-yes">Due: Yes</span>` : ''}
+      </div>
+    ` : '';
+
+    const hasPhoto = e.sourceProfile && e.sourceProfile.photoUrl;
+    const avatarHtml = hasPhoto ?
+      `<img class="emp-card-avatar" src="${esc(e.sourceProfile.photoUrl)}" alt="${esc(e.name)}" />` :
+      `<div class="emp-card-avatar">${esc(initials)}</div>`;
+
+    return `
+      <div class="emp-card" onclick="openProfile('${esc(e.kgid)}')">
+        <div class="emp-card-body">
+          <div class="emp-card-header">
+            ${avatarHtml}
+            <div class="emp-card-info">
+              <div class="emp-card-name" title="${esc(e.name)}">${esc(e.name)}</div>
+              <div class="emp-card-rank">${esc(e.rank || '—')}</div>
+            </div>
+          </div>
+          <div class="emp-card-details">
+            <div class="emp-card-detail-item">
+              <span class="emp-card-detail-label">KGID:</span>
+              <span class="emp-card-detail-value">${esc(e.kgid)}</span>
+            </div>
+            <div class="emp-card-detail-item">
+              <span class="emp-card-detail-label">Station:</span>
+              <span class="emp-card-detail-value" title="${esc(e.currentUnit || '—')}">${esc(e.currentUnit || '—')}</span>
+            </div>
+            <div class="emp-card-detail-item">
+              <span class="emp-card-detail-label">Mobile:</span>
+              <span class="emp-card-detail-value">${esc(e.mobile || '—')}</span>
+            </div>
+          </div>
+        </div>
+        ${badgesHtml}
+      </div>
+    `;
+  }).join('');
+
+  if ($('profileModal').classList.contains('open') && selKgid) {
+    const emp = DATA.employees.find(e => e.kgid === selKgid);
+    if (emp) {
+      editing ? renderEditor(draft || emp, 'profileModalContent') : renderProfile(emp, 'profileModalContent');
+    } else {
+      closeProfileModal();
+    }
+  }
+}
+
+function openProfile(kgid) {
+  selKgid = kgid;
+  editing = false;
+  draft = null;
+  const emp = DATA.employees.find(e => e.kgid === kgid);
+  renderProfile(emp, 'profileModalContent');
+  $('profileModal').classList.add('open');
+}
+function closeProfileModal() {
+  $('profileModal').classList.remove('open');
+  editing = false;
+  draft = null;
+  if (activeTab === 'kpi-view') {
+    renderKpiView();
+  } else {
+    renderSearch();
+  }
+}
+
+function renderProfile(e, targetId = 'profileModalContent'){
+  if(!e)return;const sp=e.sourceProfile||{},po=e.postings||[];
+  const role=getRole();
+  const editable=DATA.editable;
+  
+  const showEdit=editable && (!getApiUrl() || role==='Super Admin' || role==='Admin' || (role==='User' && e.kgid===getLoggedKgid()));
+  const showDelete=editable && (!getApiUrl() || role==='Super Admin');
+  
+  const editBtn=showEdit ? `<button class="btn btn-ghost btn-sm" onclick="startEdit('${esc(targetId)}')">✏ Edit</button>` : '';
+  const deleteBtn=showDelete ? `<button class="btn btn-red btn-sm" onclick="promptDel()">🗑</button>` : '';
+
+  const profInitials = e.name ? e.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '👮';
+  const profHasPhoto = sp.photoUrl;
+  const profAvatarHtml = profHasPhoto ?
+    `<img src="${esc(sp.photoUrl)}" alt="${esc(e.name)}" style="width:72px; height:72px; border-radius:50%; border:3px solid var(--gold-lt); object-fit:cover; box-shadow:0 4px 12px rgba(0,0,0,0.15); flex-shrink:0" />` :
+    `<div style="width:72px; height:72px; border-radius:50%; border:3px solid var(--gold-lt); background:linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%); color:var(--gold-lt); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:24px; box-shadow:0 4px 12px rgba(0,0,0,0.15); flex-shrink:0">${esc(profInitials)}</div>`;
+
+  $(targetId).innerHTML=`
+    <div class="prof-hero" style="display:flex; align-items:center; gap:20px">
+      ${profAvatarHtml}
+      <div style="flex:1">
+        <div class="prof-name">${esc(e.name)}</div>
+        <div class="prof-meta">${esc(e.kgid)} · ${esc(e.rank)} · ${esc(e.currentUnit||'—')}</div>
+        <div class="prof-badges">
+          <span class="badge b-${pClass(e.priority)}">Priority: ${text(e.priority)}</span>
+          <span class="badge b-${e.transferEligible==='Yes'?'yes':'no'}">Transfer: ${text(e.transferEligible)}</span>
+          ${typeof e.retirementMonthsLeft==='number'&&e.retirementMonthsLeft>=0&&e.retirementMonthsLeft<=12?`<span class="badge b-yes">⚠ Retiring in ${e.retirementMonthsLeft}m</span>`:''}
+        </div>
+      </div>
+      <div class="prof-acts" style="display:flex; flex-direction:column; gap:6px; align-self:stretch; justify-content:space-between; align-items:flex-end">
+        <div style="display:flex; gap:6px">${editBtn}${deleteBtn}</div>
+        <button class="btn btn-ghost btn-sm" onclick="doPrint()">🖨 Print</button>
+      </div>
+    </div>
+    <div class="cs">${cs('👤','Basic Information',`<div class="fgrid">${f('KGID',e.kgid)}${f('Name',e.name)}${f('Rank',e.rank)}${f('Metal Number',sp.metalNumber)}${f('Mobile',e.mobile)}${f('Date of Birth',e.dob)}${f('Date of Appointment',e.doa)}${f('Home District',e.homeDistrict)}${f('Retirement Date',e.retirementDate)}${typeof e.retirementMonthsLeft==='number'?f('Months to Retirement',`<span class="${e.retirementMonthsLeft<=3?'r-urg':e.retirementMonthsLeft<=6?'r-soon':'r-ok'}">${e.retirementMonthsLeft}</span>`):f('Months to Retirement','—')}</div>`,true)}</div>
+    <div class="cs">${cs('📍','Current Posting',`<div class="fgrid">${f('District',e.currentDistrict)}${f('Sub Division',e.currentSubDivision)}${f('Station / Unit',e.currentUnit)}${f('Joined On',e.currentSince)}${f('Station Service',text(e.currentStationYears)+' yrs')}${f('Sub Division Service',text(e.subDivisionYears)+' yrs')}${f('District Service',text(e.districtServiceYears)+' yrs')}${f('Total Service',text(e.totalServiceYears)+' yrs')}</div>`,true)}</div>
+    <div class="cs">${cs('📜','Complete Posting History',`<div style="overflow-x:auto"><table class="dtbl"><thead><tr><th>Sl</th><th>From</th><th>To</th><th>Station</th><th>Sub Division</th><th>District</th><th>Rank</th><th>Duration</th><th>Order</th></tr></thead><tbody>${po.length?po.map((p,i)=>`<tr><td>${i+1}</td><td>${text(p.from)}</td><td>${text(p.to)}</td><td>${text(p.station)}</td><td>${text(p.subDivision)}</td><td>${text(p.district)}</td><td>${text(p.rank)}</td><td>${text(p.durationYears)} yrs</td><td>${text(p.orderNumber)}</td></tr>`).join(''):`<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:18px">No posting history</td></tr>`}</tbody></table></div>`)}</div>
+    <div class="cs">${cs('🔄','Transfer Analysis',`<div class="fgrid">${f('Total Service',text(e.totalServiceYears)+' yrs')}${f('Stations Served',po.length)}${f('Longest Posting',text(e.longestPostingYears)+' yrs')}${f('Eligible',e.transferEligible)}${f('Priority',`<span class="badge b-${pClass(e.priority)}" style="font-size:12px">${text(e.priority)}</span>`)}${f('Station Years',text(e.currentStationYears))}</div>`)}</div>
+    <div class="cs">${cs('🗃','Source Profile',`<div class="fgrid">${f('Blood Group',sp.bloodGroup)}${f('Email',sp.email)}${f('Mobile 2',sp.mobile2)}${f('Height',sp.height)}${f('Weight',sp.weight)}${f('Caste',sp.caste)}${f('Sub-Caste',sp.subCaste)}${f('Family Details',sp.familyDetails)}${f('Education Details',sp.educationDetails)}${f('Photo URL',sp.photoUrl)}${f('Approved',sp.isApproved)}${f('Admin',sp.isAdmin)}${f('Created',sp.createdAt)}${f('Updated',sp.updatedAt)}</div>`)}</div>
+    <div class="cs">${cs('📊','District Snapshot',`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${miniTbl('Station Strength',DATA.summary.stations)}${miniTbl('Rank Distribution',DATA.summary.ranks)}${miniTbl('Sub-Division',DATA.summary.subdivisions)}</div>`)}</div>`;
+  $(targetId).querySelectorAll('.cs-trigger').forEach(b=>b.addEventListener('click',()=>{b.classList.toggle('open');b.nextElementSibling.classList.toggle('open');}));
+}
+
+function cs(icon,label,content,open=false){return `<button class="cs-trigger${open?' open':''}" onclick=""><span class="cs-ico">${icon}</span><span class="cs-lbl">${label}</span><span class="cs-chev">▼</span></button><div class="cs-body${open?' open':''}"><div class="cs-inner">${content}</div></div>`;}
+function f(label,value){const v=(value===undefined||value===null||value==='')?null:value;return `<div class="fcard"><div class="fc-lbl">${esc(label)}</div><div class="fc-val">${v!==null?value:'<span class="fc-nil">—</span>'}</div></div>`;}
+function miniTbl(title,rows){return `<div><div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:7px">${title}</div><table class="dtbl"><thead><tr><th>Name</th><th style="text-align:right">Count</th></tr></thead><tbody>${(rows||[]).map(r=>`<tr><td>${esc(r.name)}</td><td style="text-align:right">${r.working}</td></tr>`).join('')||'<tr><td colspan="2" style="color:var(--muted)">—</td></tr>'}</tbody></table></div>`;}
+
+function startEdit(targetId = 'profileModalContent'){
+  editing=true;
+  draft=DATA.employees.find(e=>e.kgid===selKgid);
+  draftPostings = [];
+  if (draft && draft.postings) {
+    draftPostings = draft.postings.filter(p => p.to !== 'Present' && p.to !== '').map((p, idx) => ({
+      id: idx,
+      from: p.from,
+      to: p.to,
+      station: p.station,
+      subDivision: p.subDivision,
+      district: p.district,
+      rank: p.rank,
+      orderNumber: p.orderNumber,
+      editing: false
+    }));
+  }
+  renderEditor(draft, targetId);
+}
+function promptDel(){const e=DATA.employees.find(e=>e.kgid===selKgid);if(e){delPending=e.kgid;$('delBody').textContent=`Delete "${e.name}" (${e.kgid})? Backup created automatically.`;$('delModal').classList.add('open');}}
+function doPrint(){const e=DATA.employees.find(e=>e.kgid===selKgid);if(e)printProfile(e);}
+
+function printProfile(e){const sp=e.sourceProfile||{},po=e.postings||[];const logoSrc=document.querySelector('.brand-logo')?.src||'logo.png';const w=window.open('','_blank');w.document.write(`<!doctype html><html><head><title>${e.name}</title><style>body{font-family:Arial,sans-serif;font-size:12px;color:#111;padding:16px}h1{font-size:18px;margin-bottom:4px}h2{font-size:13px;margin:14px 0 5px;color:#1a2744;border-bottom:1px solid #ccc;padding-bottom:3px}table{width:100%;border-collapse:collapse;margin-bottom:10px}th,td{border:1px solid #ccc;padding:5px 7px;text-align:left}th{background:#e8f0f8;font-weight:700;font-size:10px;text-transform:uppercase}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}.fc{border:1px solid #ccc;padding:6px;border-radius:3px}.lbl{font-size:9px;color:#666;font-weight:700;text-transform:uppercase;margin-bottom:2px}@media print{body{padding:0}}</style></head><body><div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:15px;border-bottom:2px solid #1a2744;padding-bottom:10px"><div><h1 style="margin:0 0 4px;font-size:18px">${esc(e.name)}</h1><p style="color:#555;font-size:11px;margin:0">${esc(e.kgid)} · ${esc(e.rank)} · ${esc(e.currentUnit||'—')} · Priority: ${e.priority}</p></div><img src="${logoSrc}" style="width:55px;height:55px;object-fit:cover;border-radius:50%;border:1px solid #ccc" /></div><h2>Basic Information</h2><div class="grid">${[['KGID',e.kgid],['Rank',e.rank],['Metal Number',sp.metalNumber],['Mobile',e.mobile],['DOB',e.dob],['DOA',e.doa],['Home District',e.homeDistrict],['Retirement',e.retirementDate]].map(([l,v])=>`<div class="fc"><div class="lbl">${l}</div><div>${v||'—'}</div></div>`).join('')}</div><h2>Current Posting</h2><div class="grid">${[['District',e.currentDistrict],['Sub-Division',e.currentSubDivision],['Station',e.currentUnit],['Since',e.currentSince],['Station Yrs',e.currentStationYears],['Total Yrs',e.totalServiceYears]].map(([l,v])=>`<div class="fc"><div class="lbl">${l}</div><div>${v||'—'}</div></div>`).join('')}</div><h2>Source Profile</h2><div class="grid">${[['Blood Group',sp.bloodGroup],['Email',sp.email],['Mobile 2',sp.mobile2],['Height',sp.height],['Weight',sp.weight],['Caste',sp.caste],['Sub-Caste',sp.subCaste],['Family Details',sp.familyDetails],['Education Details',sp.educationDetails]].map(([l,v])=>`<div class="fc"><div class="lbl">${l}</div><div>${v||'—'}</div></div>`).join('')}</div><h2>Posting History</h2><table><thead><tr><th>Sl</th><th>From</th><th>To</th><th>Station</th><th>Sub-Division</th><th>District</th><th>Rank</th><th>Duration</th><th>Order</th></tr></thead><tbody>${po.map((p,i)=>`<tr><td>${i+1}</td><td>${p.from||'—'}</td><td>${p.to||'—'}</td><td>${p.station||'—'}</td><td>${p.subDivision||'—'}</td><td>${p.district||'—'}</td><td>${p.rank||'—'}</td><td>${p.durationYears||'—'}</td><td>${p.orderNumber||'—'}</td></tr>`).join('')||'<tr><td colspan="9">No history</td></tr>'}</tbody></table><p style="font-size:10px;color:#aaa;margin-top:16px">Printed: ${new Date().toLocaleString('en-IN')} | Chikkaballapura Police DPDMS</p><script>window.print();<\/script></body></html>`);}
+
+/* ── Edit Form ─────────────────────────────────────── */
+function uploadLocalPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 120;
+      const MAX_HEIGHT = 120;
+      let width = img.width;
+      let height = img.height;
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      $('f_photoUrl').value = dataUrl;
+      const preview = $('editorPhotoPreview');
+      if (preview) {
+        preview.innerHTML = `<img src="${dataUrl}" style="width: 100%; height: 100%; object-fit: cover" />`;
+      }
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateEditorPhotoPreview(val) {
+  const preview = $('editorPhotoPreview');
+  if (!preview) return;
+  const cleanVal = String(val || '').trim();
+  if (cleanVal) {
+    preview.innerHTML = `<img src="${cleanVal}" style="width: 100%; height: 100%; object-fit: cover" onerror="this.parentNode.innerHTML='<span style=\'font-size:20px\'>⚠️</span>'" />`;
+  } else {
+    preview.innerHTML = `<span style="font-size: 20px">👮</span>`;
+  }
+}
+
+function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.sourceProfile)?e.sourceProfile:{};const isNew=!e||!e.kgid;
+  const role = getRole();
+  const showHistEdit = !getApiUrl() || role === 'Super Admin' || role === 'Admin';
+
+  $(targetId).innerHTML=`<div class="prof-hero"><div><div class="prof-name">${isNew?'➕ Add New Employee':'✏️ Edit Employee'}</div><div class="prof-meta">${DATA.editable?'Saves directly to Excel.':'Live dashboard required.'}</div></div><div class="prof-acts"><button class="btn btn-ghost btn-sm" onclick="cancelEdit('${esc(targetId)}')">✕ Cancel</button></div></div>
+    <form class="eform" id="empForm" onsubmit="saveEmp(event, '${esc(targetId)}')"><div class="ef-notice" id="efNotice"></div><div class="dup-warn" id="dupWarn"></div><input type="hidden" id="f_origKgid" value="${esc(e&&e.kgid||'')}" />
+    <div class="efsec"><div class="efsec-title">👤 Basic Information</div></div>${ei('kgid','KGID',e&&e.kgid,'',true)}${ei('name','Employee Name',e&&e.name,'',true)}${ei('rank','Rank',e&&e.rank)}${ei('metalNumber','Metal Number',sp.metalNumber)}${ei('mobile','Mobile Number',e&&e.mobile)}${ei('dob','Date of Birth',e&&e.dob,'dd-mm-yyyy')}${ei('doa','Date of Appointment',e&&e.doa,'dd-mm-yyyy')}${ei('homeDistrict','Home District',e&&e.homeDistrict||'Chikkaballapura')}
+    <div class="efsec"><div class="efsec-title">📍 Current Posting</div></div>${ei('currentDistrict','Current District',e&&e.currentDistrict||'Chikkaballapura')}${ei('currentSubDivision','Current Sub Division',e&&e.currentSubDivision)}${ei('currentUnit','Police Station / Unit',e&&e.currentUnit)}${ei('currentSince','Joining Date',e&&e.currentSince,'dd-mm-yyyy')}${ei('orderNumber','Transfer Order Number','')}
+    <div class="efsec"><div class="efsec-title">📜 Past Posting History</div></div>
+    <div class="hist-container" id="editorHistoryContainer"></div>
+    ${showHistEdit ? `<div class="hist-add-btn-wrap"><button type="button" class="btn btn-ghost btn-sm" onclick="addDraftPosting('${esc(targetId)}')">＋ Add Past Posting</button></div>` : ''}
+    <div class="efsec"><div class="efsec-title">🗃 Source Profile</div></div>${ei('bloodGroup','Blood Group',sp.bloodGroup)}${ei('email','Email',sp.email)}${ei('mobile2','Mobile 2',sp.mobile2)}${ei('height','Height',sp.height,'e.g. 175 cm')}${ei('weight','Weight',sp.weight,'e.g. 70 kg')}
+    <label class="flbl">Caste / Reservation Category
+      <select id="f_caste" onchange="updateSubCasteDropdown()">
+        <option value="">— Select Category —</option>
+        ${Object.keys(CASTE_DATABASE).map(c => `<option value="${esc(c)}" ${(sp.caste===c)?'selected':''}>${esc(c)}</option>`).join('')}
+      </select>
+    </label>
+    <label class="flbl">Sub-Caste / Community
+      <select id="f_subCaste" onchange="checkSubCasteOther()">
+        <option value="">— Select Sub-Caste —</option>
+      </select>
+    </label>
+    <label class="flbl" id="f_subCasteOtherContainer" style="display:none">Specify Sub-Caste
+      <input id="f_subCasteOther" placeholder="Enter sub-caste name" />
+    </label>
+    ${ei('familyDetails','Family Details',sp.familyDetails)}${ei('educationDetails','Education Details',sp.educationDetails)}
+    <div style="grid-column: span 2; display: flex; align-items: flex-end; gap: 12px">
+      <div id="editorPhotoPreview" style="width: 50px; height: 50px; border-radius: 50%; background: var(--surf3); border: 2.5px solid var(--gold-lt); flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden">
+        ${sp.photoUrl ? `<img src="${esc(sp.photoUrl)}" style="width: 100%; height: 100%; object-fit: cover" />` : `<span style="font-size: 20px">👮</span>`}
+      </div>
+      <div style="flex: 1">
+        <label class="flbl" style="display: flex; flex-direction: column; gap: 4px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .35px;">Profile Photo URL / Upload
+          <div style="display: flex; gap: 6px">
+            <input id="f_photoUrl" value="${esc(sp.photoUrl||'')}" placeholder="https://... or upload image" oninput="updateEditorPhotoPreview(this.value)" style="flex:1" />
+            <input type="file" id="f_photoFile" accept="image/*" style="display:none" onchange="uploadLocalPhoto(this)" />
+            <button type="button" class="btn btn-ghost btn-sm" onclick="$('f_photoFile').click()" style="min-height: 34px">📁 Upload</button>
+          </div>
+        </label>
+      </div>
+    </div>
+    ${ei('isApproved','Approved',sp.isApproved||'Yes')}${ei('isAdmin','Admin',sp.isAdmin||'No')}${ei('remarks','Remarks',e&&e.remarks)}
+    <div class="ef-actions"><button type="button" class="btn btn-ghost" onclick="cancelEdit('${esc(targetId)}')">Cancel</button><button type="submit" class="btn btn-gold" ${DATA.editable?'':'disabled'}>💾 Save to Excel</button></div></form>`;
+  ['kgid','mobile','mobile2','email'].forEach(id=>{const el=$('f_'+id);if(el)el.addEventListener('input',queueDup);});queueDup();
+  
+  // Disable fields if the user role is a regular 'User'
+  setTimeout(() => {
+    renderDraftPostings(targetId);
+    updateSubCasteDropdown(sp.subCaste || '');
+    if (getApiUrl() && role === 'User') {
+      const allowed = ['f_mobile', 'f_mobile2', 'f_email', 'f_bloodGroup', 'f_height', 'f_weight', 'f_caste', 'f_subCaste', 'f_subCasteOther', 'f_familyDetails', 'f_educationDetails', 'f_photoUrl', 'f_photoFile'];
+      const inputs = $(targetId).querySelectorAll('input, select, textarea');
+      inputs.forEach(input => {
+        if (!allowed.includes(input.id)) {
+          input.disabled = true;
+        }
+      });
+    }
+  }, 10);
+}
+
+function renderDraftPostings(targetId = 'profileModalContent') {
+  const container = $('editorHistoryContainer');
+  if (!container) return;
+  
+  if (draftPostings.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; color:var(--muted); font-size:12.5px; padding:10px 0; text-align:center;">No past posting history recorded. Click "Add Past Posting" to add one.</div>`;
+    return;
+  }
+  
+  const role = getRole();
+  const showHistEdit = !getApiUrl() || role === 'Super Admin' || role === 'Admin';
+  
+  container.innerHTML = draftPostings.map((p, idx) => {
+    if (p.editing) {
+      return `
+        <div class="hist-card editing">
+          <div class="hist-edit-grid">
+            <label>From Date <input type="date" id="h_from_${idx}" value="${toIsoDate(p.from)}" required /></label>
+            <label>To Date <input type="date" id="h_to_${idx}" value="${toIsoDate(p.to)}" required /></label>
+            <label>Police Station / Unit <input type="text" id="h_station_${idx}" value="${esc(p.station)}" required /></label>
+            <label>Sub Division <input type="text" id="h_subDivision_${idx}" value="${esc(p.subDivision)}" /></label>
+            <label>District <input type="text" id="h_district_${idx}" value="${esc(p.district || 'Chikkaballapura')}" required /></label>
+            <label>Rank Held <input type="text" id="h_rank_${idx}" value="${esc(p.rank)}" required /></label>
+            <label style="grid-column: span 3">Order Number / Notes <input type="text" id="h_order_${idx}" value="${esc(p.orderNumber)}" style="width:100%" /></label>
+          </div>
+          <div class="hist-card-actions">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="saveDraftPosting(${idx}, '${esc(targetId)}')">Done</button>
+            <button type="button" class="btn btn-red btn-sm" onclick="deleteDraftPosting(${idx}, '${esc(targetId)}')">Remove</button>
+          </div>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="hist-card">
+          <div class="hist-card-header">
+            <div>
+              <div class="hist-card-title">${esc(p.rank)} at ${esc(p.station)}</div>
+              <div class="hist-card-meta">
+                📅 ${text(p.from)} to ${text(p.to)}
+                ${p.subDivision ? ` · Sub Division: ${esc(p.subDivision)}` : ''}
+                ${p.district ? ` · District: ${esc(p.district)}` : ''}
+                ${p.orderNumber ? ` · Order: ${esc(p.orderNumber)}` : ''}
+              </div>
+            </div>
+            ${showHistEdit ? `
+              <div class="hist-card-actions" style="margin-top:0">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="editDraftPosting(${idx}, '${esc(targetId)}')">✏️ Edit</button>
+                <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteDraftPosting(${idx}, '${esc(targetId)}')">🗑</button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+  }).join('');
+}
+
+function addDraftPosting(targetId = 'profileModalContent') {
+  draftPostings.push({
+    id: draftPostings.length,
+    from: '',
+    to: '',
+    station: '',
+    subDivision: '',
+    district: 'Chikkaballapura',
+    rank: draft ? draft.rank : '',
+    orderNumber: '',
+    editing: true
+  });
+  renderDraftPostings(targetId);
+}
+
+function editDraftPosting(idx, targetId = 'profileModalContent') {
+  draftPostings[idx].editing = true;
+  renderDraftPostings(targetId);
+}
+
+function saveDraftPosting(idx, targetId = 'profileModalContent') {
+  const fromEl = $(`h_from_${idx}`);
+  const toEl = $(`h_to_${idx}`);
+  const stationEl = $(`h_station_${idx}`);
+  const subDivisionEl = $(`h_subDivision_${idx}`);
+  const districtEl = $(`h_district_${idx}`);
+  const rankEl = $(`h_rank_${idx}`);
+  const orderEl = $(`h_order_${idx}`);
+  
+  const fromVal = toDisplayDate(fromEl.value);
+  const toVal = toDisplayDate(toEl.value);
+  const stationVal = stationEl.value.trim();
+  const subDivisionVal = subDivisionEl.value.trim();
+  const districtVal = districtEl.value.trim();
+  const rankVal = rankEl.value.trim();
+  const orderVal = orderEl.value.trim();
+  
+  if (!fromVal || !toVal || !stationVal || !districtVal || !rankVal) {
+    alert("Please fill in all required fields (From Date, To Date, Station, District, Rank).");
+    return;
+  }
+  
+  try {
+    const fromParts = fromVal.split('-');
+    const toParts = toVal.split('-');
+    const fromDate = new Date(fromParts[2], fromParts[1] - 1, fromParts[0]);
+    const toDate = new Date(toParts[2], toParts[1] - 1, toParts[0]);
+    if (toDate < fromDate) {
+      alert("To Date cannot be before From Date.");
+      return;
+    }
+  } catch (e) {}
+
+  draftPostings[idx] = {
+    id: idx,
+    from: fromVal,
+    to: toVal,
+    station: stationVal,
+    subDivision: subDivisionVal,
+    district: districtVal,
+    rank: rankVal,
+    orderNumber: orderVal,
+    editing: false
+  };
+  renderDraftPostings(targetId);
+}
+
+function deleteDraftPosting(idx, targetId = 'profileModalContent') {
+  draftPostings.splice(idx, 1);
+  draftPostings.forEach((p, i) => p.id = i);
+  renderDraftPostings(targetId);
+}
+
+function toIsoDate(str) {
+  if (!str) return '';
+  const parts = String(str).trim().split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+  return str;
+}
+function toDisplayDate(str) {
+  if (!str) return '';
+  const parts = String(str).trim().split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+  return str;
+}
+function ei(id,label,val,ph='',req=false){
+  const isDate = (ph === 'dd-mm-yyyy');
+  const type = isDate ? 'date' : 'text';
+  const displayVal = isDate ? toIsoDate(val) : val;
+  return `<label class="flbl">${esc(label)}<input type="${type}" id="f_${id}" value="${esc(displayVal||'')}" ${ph && !isDate ? `placeholder="${esc(ph)}"` : ''} ${req?'required':''} /></label>`;
+}
+function cancelEdit(targetId = 'profileModalContent'){
+  editing=false;
+  draft=null;
+  if (targetId === 'userSelfServiceContainer') {
+    renderSearch();
+  } else {
+    const emp = DATA.employees.find(e => e.kgid === selKgid);
+    renderProfile(emp, targetId);
+  }
+}
+
+async function saveEmp(ev, targetId = 'profileModalContent'){ev.preventDefault();if(!DATA.editable){showNotice('efNotice','error','Open live dashboard to save.');return;}
+  const v=id=>{const el=$('f_'+id);return el?el.value.trim():''};
+  const getSubCaste = () => {
+    const selVal = v('subCaste');
+    return selVal === "Other" ? v('subCasteOther') : selVal;
+  };
+
+  // Verify all history cards are saved (not in editing mode)
+  for (let i = 0; i < draftPostings.length; i++) {
+    if (draftPostings[i].editing) {
+      alert("Please finish editing or remove all past posting history cards before saving.");
+      return;
+    }
+  }
+
+  // Active posting constructed from Current Posting fields
+  const activePosting = {
+    from: toDisplayDate(v('currentSince')),
+    to: 'Present',
+    station: v('currentUnit'),
+    subDivision: v('currentSubDivision'),
+    district: v('currentDistrict'),
+    rank: v('rank'),
+    orderNumber: v('orderNumber')
+  };
+
+  const consolidatedPostings = [activePosting, ...draftPostings.map(p => ({
+    from: p.from,
+    to: p.to,
+    station: p.station,
+    subDivision: p.subDivision,
+    district: p.district,
+    rank: p.rank,
+    orderNumber: p.orderNumber
+  }))];
+
+  const payload={kgid:v('kgid'),originalKgid:v('origKgid'),name:v('name'),rank:v('rank'),designation:v('designation'),mobile:v('mobile'),dob:toDisplayDate(v('dob')),doa:toDisplayDate(v('doa')),homeDistrict:v('homeDistrict'),category:v('category'),currentDistrict:v('currentDistrict'),currentSubDivision:v('currentSubDivision'),currentUnit:v('currentUnit'),currentSince:toDisplayDate(v('currentSince')),orderNumber:v('orderNumber'),remarks:v('remarks'),postings:consolidatedPostings,sourceProfile:{metalNumber:v('metalNumber'),bloodGroup:v('bloodGroup'),email:v('email'),mobile2:v('mobile2'),height:v('height'),weight:v('weight'),caste:v('caste'),subCaste:getSubCaste(),familyDetails:v('familyDetails'),educationDetails:v('educationDetails'),photoUrl:v('photoUrl'),isApproved:v('isApproved'),isAdmin:v('isAdmin')}};
+  if(!await checkDupNow()){showNotice('efNotice','error','Fix duplicates first.');return;}showNotice('efNotice','info','Saving…');
+
+  
+  try {
+    const result = await apiFetch('save', {}, {
+      method: 'POST',
+      body: { employee: payload }
+    });
+    if(!result.ok){showNotice('efNotice','error',result.error||'Failed.');return;}
+    selKgid=payload.kgid;editing=false;draft=null;await loadData();
+    if (targetId === 'userSelfServiceContainer') {
+      renderSearch();
+    } else {
+      const newEmp = DATA.employees.find(e => e.kgid === selKgid);
+      renderProfile(newEmp, targetId);
+    }
+  } catch(err) {
+    showNotice('efNotice','error','Error: ' + err.message);
+  }
+}
+function showNotice(id,type,msg){const el=$(id);if(!el)return;el.className='ef-notice '+type;el.textContent=msg;el.style.display='block';}
+let dupTmr=null;function queueDup(){clearTimeout(dupTmr);dupTmr=setTimeout(checkDupNow,280);}
+async function checkDupNow(){const w=$('dupWarn'),s=document.querySelector('#empForm button[type="submit"]');if(!w||!s)return true;const v=id=>$('f_'+id)?$('f_'+id).value.trim():'';const issues=dupIssues({kgid:v('kgid'),origKgid:v('origKgid'),mobile:v('mobile'),mobile2:v('mobile2'),email:v('email')});if(!v('kgid')&&!v('mobile')&&!v('mobile2')&&!v('email')){w.style.display='none';s.disabled=!DATA.editable;return true;}if(issues.length){w.innerHTML=issues.map(esc).join('<br>');w.style.display='block';s.disabled=true;return false;}w.style.display='none';s.disabled=!DATA.editable;return true;}
+function dupIssues(vals){const issues=[],orig=String(vals.origKgid||'').trim(),kgid=String(vals.kgid||'').trim(),mob=String(vals.mobile||'').trim(),mob2=String(vals.mobile2||'').trim(),email=String(vals.email||'').trim().toLowerCase();for(const e of DATA.employees||[]){if(orig&&String(e.kgid)===orig)continue;const sp=e.sourceProfile||{};if(kgid&&String(e.kgid)===kgid)issues.push(`KGID exists: ${kgid} — ${e.name}`);const mobs=[e.mobile,sp.mobile2].map(m=>String(m||'').trim()).filter(Boolean);if(mob&&mobs.includes(mob))issues.push(`Mobile exists: ${mob} — ${e.name}`);if(mob2&&mobs.includes(mob2))issues.push(`Mobile exists: ${mob2} — ${e.name}`);if(email&&String(sp.email||'').trim().toLowerCase()===email)issues.push(`Email exists: ${email} — ${e.name}`);}return[...new Set(issues)];}
+
+/* ── Delete ────────────────────────────────────────── */
+$('delCancel').addEventListener('click',()=>{$('delModal').classList.remove('open');delPending='';});
+$('delConfirm').addEventListener('click',async()=>{$('delModal').classList.remove('open');if(!delPending)return;try{const result=await apiFetch('delete', {kgid:delPending}, {method:'DELETE'});if(!result.ok){alert(result.error||'Failed.');return;}selKgid='';delPending='';await loadData();}catch(err){alert('Error: '+err.message);}});
+
+/* ── Reports ───────────────────────────────────────── */
+const RPT_TITLES={priority:'🔴 Transfer Priority List',retirement:'📅 Retirement Due List',seniority:'📜 Seniority List',strength:'🏢 Station-wise Strength',subdiv:'🗺️ Sub-Division Report'};
+function renderRpt(type){activeRpt=type;$('rptTitle').textContent=RPT_TITLES[type];document.querySelectorAll('.rpt-btn').forEach(b=>b.classList.toggle('act',b.dataset.rpt===type));const emps=DATA.employees||[];csvHeaders=[];csvRows=[];
+  if(type==='priority'){const pf=rptFilter.priority||'all';$('rptFilters').innerHTML=`<span class="rft-lbl">Priority:</span><div style="display:flex;gap:5px">${['all','High','Medium','Low'].map(p=>`<button class="chip${pf===p?' act':''}" onclick="rptFilter.priority='${p}';renderRpt('priority')">${p==='all'?'All':p}</button>`).join('')}</div>`;const rows=emps.filter(e=>e.transferEligible==='Yes'&&(pf==='all'||e.priority===pf)).sort((a,b)=>(b.currentStationYears||0)-(a.currentStationYears||0));$('rptCnt').textContent=rows.length+' employees';csvHeaders=['#','KGID','Name','Rank','Station','Sub-Division','Station (yrs)','Priority','Eligible'];csvRows=rows.map((e,i)=>[i+1,e.kgid,e.name,e.rank,e.currentUnit,e.currentSubDivision,e.currentStationYears,e.priority,e.transferEligible]);$('rptBody').innerHTML=rows.length?`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.kgid)}</td><td>${esc(e.name)}</td><td>${esc(e.rank)}</td><td>${esc(e.currentUnit)}</td><td>${esc(e.currentSubDivision||'—')}</td><td>${text(e.currentStationYears)}</td><td><span class="badge b-${pClass(e.priority)}" style="color:${e.priority==='High'?'var(--red)':e.priority==='Medium'?'var(--amb)':'var(--grn)'}; background:${e.priority==='High'?'var(--red-dim)':e.priority==='Medium'?'var(--amb-dim)':'var(--grn-dim)'}">${e.priority}</span></td><td>${e.transferEligible}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">No employees for this filter</div></div>`;}
+  else if(type==='retirement'){const rf=rptFilter.retirement||'12';const m=parseInt(rf);$('rptFilters').innerHTML=`<span class="rft-lbl">Within:</span><div style="display:flex;gap:5px">${[['3','3 months'],['6','6 months'],['12','1 year'],['24','2 years'],['60','5 years']].map(([v,l])=>`<button class="chip${rf===v?' act':''}" onclick="rptFilter.retirement='${v}';renderRpt('retirement')">${l}</button>`).join('')}</div>`;const rows=emps.filter(e=>typeof e.retirementMonthsLeft==='number'&&e.retirementMonthsLeft>=0&&e.retirementMonthsLeft<=m).sort((a,b)=>(a.retirementMonthsLeft||999)-(b.retirementMonthsLeft||999));$('rptCnt').textContent=rows.length+' employees';csvHeaders=['#','KGID','Name','Rank','Station','Retirement','Months Left'];csvRows=rows.map((e,i)=>[i+1,e.kgid,e.name,e.rank,e.currentUnit,e.retirementDate,e.retirementMonthsLeft]);$('rptBody').innerHTML=rows.length?`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.kgid)}</td><td>${esc(e.name)}</td><td>${esc(e.rank)}</td><td>${esc(e.currentUnit)}</td><td>${esc(e.retirementDate||'—')}</td><td class="${(e.retirementMonthsLeft||0)<=3?'r-urg':(e.retirementMonthsLeft||0)<=6?'r-soon':'r-ok'}">${e.retirementMonthsLeft}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty"><div class="empty-ico">🎉</div><div class="empty-txt">No retirements in this period</div></div>`;}
+  else if(type==='seniority'){$('rptFilters').innerHTML='';const parseD=s=>{if(!s)return Infinity;const[d,mo,y]=String(s).split('-');return new Date(+y,+mo-1,+d).getTime();};const rows=[...emps].filter(e=>e.doa).sort((a,b)=>parseD(a.doa)-parseD(b.doa));$('rptCnt').textContent=rows.length+' employees';csvHeaders=['Seniority','KGID','Name','Rank','Station','DOA','Total Service'];csvRows=rows.map((e,i)=>[i+1,e.kgid,e.name,e.rank,e.currentUnit,e.doa,e.totalServiceYears]);$('rptBody').innerHTML=`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.kgid)}</td><td>${esc(e.name)}</td><td>${esc(e.rank)}</td><td>${esc(e.currentUnit||'—')}</td><td>${esc(e.doa)}</td><td>${text(e.totalServiceYears)}</td></tr>`).join('')}</tbody></table></div>`;}
+  else if(type==='strength'){$('rptFilters').innerHTML='';const sts=[...new Set(emps.map(e=>e.currentUnit).filter(Boolean))].sort();const rows=sts.map(s=>{const wk=emps.filter(e=>e.currentUnit===s).length;const due=emps.filter(e=>e.currentUnit===s&&e.transferEligible==='Yes').length;const hi=emps.filter(e=>e.currentUnit===s&&e.priority==='High').length;return{s,wk,due,hi};}).sort((a,b)=>b.wk-a.wk);$('rptCnt').textContent=rows.length+' stations';csvHeaders=['#','Station','Working','Due','High','% Due'];csvRows=rows.map((r,i)=>[i+1,r.s,r.wk,r.due,r.hi,r.wk?Math.round(r.due/r.wk*100)+'%':'—']);$('rptBody').innerHTML=`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.s)}</td><td>${r.wk}</td><td style="color:var(--amb)">${r.due}</td><td style="color:var(--red)">${r.hi}</td><td style="color:var(--muted)">${r.wk?Math.round(r.due/r.wk*100)+'%':'—'}</td></tr>`).join('')}</tbody></table></div>`;}
+  else if(type==='subdiv'){$('rptFilters').innerHTML='';const sds=[...new Set(emps.map(e=>e.currentSubDivision).filter(Boolean))].sort();const rows=sds.map(sd=>({sd,total:emps.filter(e=>e.currentSubDivision===sd).length,due:emps.filter(e=>e.currentSubDivision===sd&&e.transferEligible==='Yes').length,hi:emps.filter(e=>e.currentSubDivision===sd&&e.priority==='High').length,sts:new Set(emps.filter(e=>e.currentSubDivision===sd).map(e=>e.currentUnit)).size})).sort((a,b)=>b.total-a.total);$('rptCnt').textContent=rows.length+' Sub-Divisions';csvHeaders=['#','Sub-Division','Stations','Staff','Due','High'];csvRows=rows.map((r,i)=>[i+1,r.sd,r.sts,r.total,r.due,r.hi]);$('rptBody').innerHTML=`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.sd)}</td><td>${r.sts}</td><td>${r.total}</td><td style="color:var(--amb)">${r.due}</td><td style="color:var(--red)">${r.hi}</td></tr>`).join('')}</tbody></table></div>`;}
+}
+
+/* ── CSV ───────────────────────────────────────────── */
+$('csvBtn').addEventListener('click',()=>{if(!csvRows.length){alert('No data.');return;}const lines=[csvHeaders,...csvRows].map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(','));const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:`${activeRpt}_${new Date().toISOString().slice(0,10)}.csv`});a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);});
+
+/* ── Tab Switch ────────────────────────────────────── */
+function switchTab(t){
+  activeTab=t;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('act',b.dataset.tab===t));
+  document.querySelectorAll('.tab-sec').forEach(s=>s.classList.toggle('act',s.id==='tab-'+t));
+  if(t==='employees')renderEmpDash();
+  if(t==='transfers')renderTxDash();
+  if(t==='search')renderSearch();
+  if(t==='kpi-view') {
+    kpiSearchQuery = '';
+    selectedCircleOffice = null;
+    selectedSdpo = null;
+    selectedPs = null;
+    selectedSb = null;
+    const input = $('kpiSearchInput');
+    if (input) input.value = '';
+    renderKpiView();
+  }
+  if(t==='reports')renderRpt(activeRpt);
+  if(t==='settings'){
+    renderSettings();
+    loadSaUsers();
+  }
+}
+
+// ── Super Admin Settings Handlers ───────────────────────────────
+function renderSettings() {
+  const perms = (DATA.permissions && DATA.permissions["Admin"]) || {
+    canViewDashboard: true,
+    canViewReports: true,
+    canAddEmployee: true,
+    canEditEmployee: true
+  };
+  $('chkPermDashboard').checked = perms.canViewDashboard !== false;
+  $('chkPermReports').checked = perms.canViewReports !== false;
+  $('chkPermAddEmployee').checked = perms.canAddEmployee !== false;
+  $('chkPermEditEmployee').checked = perms.canEditEmployee !== false;
+  $('permsNotice').style.display = 'none';
+}
+
+async function loadSaUsers() {
+  const tbody = $('usersListBody');
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted)">Loading users list…</td></tr>`;
+  try {
+    const res = await apiFetch('list-users', {});
+    const users = res.users || [];
+    $('userListCount').textContent = `${users.length} users registered`;
+    
+    if (!users.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted)">No registered users found.</td></tr>`;
+      return;
+    }
+    
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td><strong>${esc(u.kgid)}</strong></td>
+        <td><span class="badge b-neu" style="background:var(--surf2); border-color:var(--bdr2); color:var(--txt); border:1px solid">${esc(u.role)}</span></td>
+        <td>${esc(u.email || '—')}</td>
+        <td><span class="badge" style="background:${u.status === 'Active' ? 'var(--grn-dim)' : 'var(--red-dim)'}; color:${u.status === 'Active' ? 'var(--grn)' : 'var(--red)'}; border:1px solid ${u.status === 'Active' ? 'rgba(22,163,74,0.3)' : 'rgba(220,38,38,0.3)'}">${esc(u.status)}</span></td>
+        <td style="text-align:right">
+          <button class="btn btn-ghost btn-sm" onclick="SaEditUser('${esc(u.kgid)}', '${esc(u.role)}', '${esc(u.email)}', '${esc(u.status)}')" style="min-height:unset; padding:3px 8px; margin-right:4px">✏ Edit</button>
+          <button class="btn btn-red btn-sm" onclick="SaDeleteUser('${esc(u.kgid)}')" style="min-height:unset; padding:3px 8px; color:var(--red); font-weight:700">🗑</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--red)">Error: ${err.message}</td></tr>`;
+  }
+}
+
+function showAddUserModal() {
+  $('saUserModalTitle').textContent = "Create User Account";
+  $('saUserAction').value = "create";
+  $('saUserKgid').value = "";
+  $('saUserKgid').disabled = false;
+  $('saUserRole').value = "User";
+  $('saUserEmail').value = "";
+  $('saUserStatus').value = "Active";
+  $('saUserPassword').value = "";
+  $('saUserPassword').required = true;
+  $('saUserPasswordLabel').textContent = "Set Password";
+  $('saUserPasswordHelp').style.display = 'none';
+  $('saUserError').style.display = 'none';
+  $('saUserModal').classList.add('open');
+}
+
+function SaEditUser(kgid, role, email, status) {
+  $('saUserPassword').value = "";
+  $('saUserModalTitle').textContent = "Edit User Account: " + kgid;
+  $('saUserAction').value = "save";
+  $('saUserKgid').value = kgid;
+  $('saUserKgid').disabled = true;
+  $('saUserRole').value = role;
+  $('saUserEmail').value = (email === '—' || email === 'undefined') ? '' : email;
+  $('saUserStatus').value = status;
+  $('saUserPassword').required = false;
+  $('saUserPasswordLabel').textContent = "Reset Password";
+  $('saUserPasswordHelp').style.display = 'block';
+  $('saUserError').style.display = 'none';
+  $('saUserModal').classList.add('open');
+}
+
+async function saveSaUser(ev) {
+  ev.preventDefault();
+  $('saUserError').style.display = 'none';
+  
+  const action = $('saUserAction').value;
+  const kgid = $('saUserKgid').value.trim();
+  const role = $('saUserRole').value;
+  const email = $('saUserEmail').value.trim();
+  const status = $('saUserStatus').value;
+  const password = $('saUserPassword').value;
+  
+  const payload = { action, kgid, role, email, status };
+  if (password) {
+    payload.passwordHash = await sha256(password);
+  }
+  
+  try {
+    const res = await apiFetch('manage-user', {}, {
+      method: 'POST',
+      body: { userPayload: payload }
+    });
+    
+    if (!res.ok) {
+      $('saUserError').textContent = res.error || "Failed to save user account.";
+      $('saUserError').style.display = 'block';
+      return;
+    }
+    
+    $('saUserModal').classList.remove('open');
+    await loadSaUsers();
+  } catch (err) {
+    $('saUserError').textContent = "Error: " + err.message;
+    $('saUserError').style.display = 'block';
+  }
+}
+
+async function SaDeleteUser(kgid) {
+  if (kgid === getLoggedKgid()) {
+    alert("You cannot delete your own Super Admin account!");
+    return;
+  }
+  if (!confirm(`Are you sure you want to delete the user account for KGID ${kgid}?`)) {
+    return;
+  }
+  
+  try {
+    const res = await apiFetch('manage-user', {}, {
+      method: 'POST',
+      body: { userPayload: { action: 'delete', kgid } }
+    });
+    
+    if (!res.ok) {
+      alert(res.error || "Failed to delete user account.");
+      return;
+    }
+    
+    await loadSaUsers();
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+}
+
+async function saveAdminPermissions() {
+  const notice = $('permsNotice');
+  notice.style.display = 'none';
+  
+  const rolePermissions = {
+    canViewDashboard: $('chkPermDashboard').checked,
+    canViewReports: $('chkPermReports').checked,
+    canAddEmployee: $('chkPermAddEmployee').checked,
+    canEditEmployee: $('chkPermEditEmployee').checked
+  };
+  
+  try {
+    const res = await apiFetch('save-permissions', {}, {
+      method: 'POST',
+      body: { rolePermissions }
+    });
+    
+    if (!res.ok) {
+      notice.className = 'ef-notice error';
+      notice.textContent = res.error || "Failed to update permissions.";
+      notice.style.display = 'block';
+      return;
+    }
+    
+    notice.className = 'ef-notice success';
+    notice.textContent = "Permissions saved successfully!";
+    notice.style.display = 'block';
+    
+    if (!DATA.permissions) DATA.permissions = {};
+    DATA.permissions["Admin"] = rolePermissions;
+    applyRoleRules();
+  } catch (err) {
+    notice.className = 'ef-notice error';
+    notice.textContent = "Error: " + err.message;
+    notice.style.display = 'block';
+  }
+}
+
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{ customKpiFilter = null; switchTab(b.dataset.tab); }));
+document.querySelectorAll('.rpt-btn').forEach(b=>b.addEventListener('click',()=>renderRpt(b.dataset.rpt)));
+['fQuick','fRank','fStation','fEligible'].forEach(id=>{const el=$(id);el.addEventListener('input',()=>{customKpiFilter=null;renderSearch();});el.addEventListener('change',()=>{customKpiFilter=null;renderSearch();});});
+$('refreshBtn').addEventListener('click',()=>loadData().catch(e=>$('dataBadge').textContent='⚠ '+e.message));
+$('addBtn').addEventListener('click',()=>{
+  editing=true;
+  draft={kgid:'',name:'',rank:'',designation:'',dob:'',doa:'',mobile:'',homeDistrict:'Chikkaballapura',category:'',currentDistrict:'Chikkaballapura',currentSubDivision:'',currentUnit:'',currentSince:'',sourceProfile:{}};
+  draftPostings = [];
+  switchTab('search');
+  renderEditor(draft, 'profileModalContent');
+  $('profileModal').classList.add('open');
+});
+
+// ── Modals & Controls Listeners ─────────────────────────────────
+$('settingsBtn').addEventListener('click', showSettings);
+$('settingsCancel').addEventListener('click', () => $('settingsModal').classList.remove('open'));
+$('settingsSave').addEventListener('click', saveSettings);
+$('logoutBtn').addEventListener('click', doLogout);
+$('saUserCancel').addEventListener('click', () => $('saUserModal').classList.remove('open'));
+
+// Toggle Google-style profile dropdown
+$('profileAvatarBtn').addEventListener('click', (ev) => {
+  ev.stopPropagation();
+  $('profileDropdownCard').classList.toggle('open');
+});
+document.addEventListener('click', (ev) => {
+  const card = $('profileDropdownCard');
+  if (card && card.classList.contains('open') && !card.contains(ev.target)) {
+    card.classList.remove('open');
+  }
+});
+
+// Boot System
+(function() {
+  const savedTheme = localStorage.getItem('dpdms_theme') || (localStorage.getItem('dpdms_login_theme') === 'light' ? 'light' : 'light');
+  setTheme(savedTheme);
+})();
+initGoogleSignIn();
+// Initialize scroll lock observer for modals
+const scrollLockObserver = new MutationObserver(() => {
+  const hasOpenModal = Array.from(document.querySelectorAll('.modal-bg')).some(m => m.classList.contains('open'));
+  document.body.classList.toggle('modal-open', hasOpenModal);
+});
+document.querySelectorAll('.modal-bg').forEach(m => {
+  scrollLockObserver.observe(m, { attributes: true, attributeFilter: ['class'] });
+});
+document.body.classList.toggle('modal-open', Array.from(document.querySelectorAll('.modal-bg')).some(m => m.classList.contains('open')));
+
+loadData().catch(e=>{$('dataBadge').textContent='⚠ '+e.message;});
+</script>
+</body>
+</html>
