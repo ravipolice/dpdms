@@ -274,6 +274,7 @@ def load_data():
                 "familyDetails": as_text(source.get("familyDetails")),
                 "educationDetails": as_text(source.get("educationDetails")),
                 "photoUrl": as_text(source.get("photoUrl") or source.get("photo") or ""),
+                "lockedFields": as_text(source.get("lockedFields") or ""),
             },
             "category": category,
             "subDivisionYears": subdiv_years,
@@ -541,6 +542,7 @@ def save_employee(payload):
             "familyDetails": as_text(source.get("familyDetails")).strip(),
             "educationDetails": as_text(source.get("educationDetails")).strip(),
             "photoUrl": as_text(source.get("photoUrl")).strip(),
+            "lockedFields": as_text(source.get("lockedFields") or "").strip(),
         }
         imported_headers = headers_for(imported)
         if "email" not in imported_headers:
@@ -551,6 +553,10 @@ def save_employee(payload):
             new_col = len(imported_headers) + 1
             imported.cell(1, new_col).value = "photoUrl"
             imported_headers.append("photoUrl")
+        if "lockedFields" not in imported_headers:
+            new_col = len(imported_headers) + 1
+            imported.cell(1, new_col).value = "lockedFields"
+            imported_headers.append("lockedFields")
         for header, value in imported_values.items():
             if header in imported_headers:
                 imported.cell(imported_row, imported_headers.index(header) + 1).value = value

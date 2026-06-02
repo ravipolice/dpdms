@@ -3709,6 +3709,70 @@ function updateEditorPhotoPreview(val) {
 function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.sourceProfile)?e.sourceProfile:{};const isNew=!e||!e.kgid;
   const role = getRole();
   const showHistEdit = !getApiUrl() || role === 'Super Admin' || role === 'Admin';
+  const lockedFieldsStr = sp.lockedFields || '';
+  const lockedList = lockedFieldsStr.split(',').map(s => s.trim()).filter(Boolean);
+  const isAdminOrSuper = (role === 'Admin' || role === 'Super Admin');
+
+  function ei(id, label, val, ph = '', req = false) {
+    const isDate = (ph === 'dd-mm-yyyy');
+    const type = isDate ? 'date' : 'text';
+    const displayVal = isDate ? toIsoDate(val) : val;
+    const isFieldLocked = lockedList.includes(id);
+    
+    const lockHtml = isAdminOrSuper ? `
+      <label class="lock-toggle" style="display:inline-flex; align-items:center; gap:2px; cursor:pointer; user-select:none; font-size:11px; font-weight:normal; text-transform:none; letter-spacing:normal; margin-left:8px;" title="${isFieldLocked ? 'Field is locked' : 'Field is unlocked'}">
+        <input type="checkbox" class="lock-chk" data-field-id="${id}" ${isFieldLocked ? 'checked' : ''} onchange="this.nextElementSibling.textContent = this.checked ? '🔒' : '🔓'; this.nextElementSibling.style.opacity = this.checked ? '1' : '0.45'" style="display:none; width:auto; min-height:unset;" />
+        <span class="lock-icon" style="opacity: ${isFieldLocked ? '1' : '0.45'}; transition: opacity var(--trans);">${isFieldLocked ? '🔒' : '🔓'}</span>
+      </label>
+    ` : '';
+
+    let disabledAttr = '';
+    if (id === 'kgid' && !isNew && role !== 'Super Admin') {
+      disabledAttr = 'disabled';
+    } else if (role === 'User' && isFieldLocked) {
+      disabledAttr = 'disabled';
+    }
+
+    return `
+      <label class="flbl">
+        <span style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <span>${esc(label)}</span>
+          ${lockHtml}
+        </span>
+        <input type="${type}" id="f_${id}" value="${esc(displayVal||'')}" ${ph && !isDate ? `placeholder="${esc(ph)}"` : ''} ${req?'required':''} ${disabledAttr} />
+      </label>
+    `;
+  }
+
+  // Caste Lock Check
+  const casteLocked = lockedList.includes('caste');
+  const casteLockHtml = isAdminOrSuper ? `
+    <label class="lock-toggle" style="display:inline-flex; align-items:center; gap:2px; cursor:pointer; user-select:none; font-size:11px; font-weight:normal; text-transform:none; letter-spacing:normal; margin-left:8px;" title="${casteLocked ? 'Field is locked' : 'Field is unlocked'}">
+      <input type="checkbox" class="lock-chk" data-field-id="caste" ${casteLocked ? 'checked' : ''} onchange="this.nextElementSibling.textContent = this.checked ? '🔒' : '🔓'; this.nextElementSibling.style.opacity = this.checked ? '1' : '0.45'" style="display:none; width:auto; min-height:unset;" />
+      <span class="lock-icon" style="opacity: ${casteLocked ? '1' : '0.45'}; transition: opacity var(--trans);">${casteLocked ? '🔒' : '🔓'}</span>
+    </label>
+  ` : '';
+  const casteDisabled = (role === 'User' && casteLocked) ? 'disabled' : '';
+
+  // SubCaste Lock Check
+  const subCasteLocked = lockedList.includes('subCaste');
+  const subCasteLockHtml = isAdminOrSuper ? `
+    <label class="lock-toggle" style="display:inline-flex; align-items:center; gap:2px; cursor:pointer; user-select:none; font-size:11px; font-weight:normal; text-transform:none; letter-spacing:normal; margin-left:8px;" title="${subCasteLocked ? 'Field is locked' : 'Field is unlocked'}">
+      <input type="checkbox" class="lock-chk" data-field-id="subCaste" ${subCasteLocked ? 'checked' : ''} onchange="this.nextElementSibling.textContent = this.checked ? '🔒' : '🔓'; this.nextElementSibling.style.opacity = this.checked ? '1' : '0.45'" style="display:none; width:auto; min-height:unset;" />
+      <span class="lock-icon" style="opacity: ${subCasteLocked ? '1' : '0.45'}; transition: opacity var(--trans);">${subCasteLocked ? '🔒' : '🔓'}</span>
+    </label>
+  ` : '';
+  const subCasteDisabled = (role === 'User' && subCasteLocked) ? 'disabled' : '';
+
+  // Photo URL Lock Check
+  const photoUrlLocked = lockedList.includes('photoUrl');
+  const photoUrlLockHtml = isAdminOrSuper ? `
+    <label class="lock-toggle" style="display:inline-flex; align-items:center; gap:2px; cursor:pointer; user-select:none; font-size:11px; font-weight:normal; text-transform:none; letter-spacing:normal; margin-left:8px;" title="${photoUrlLocked ? 'Field is locked' : 'Field is unlocked'}">
+      <input type="checkbox" class="lock-chk" data-field-id="photoUrl" ${photoUrlLocked ? 'checked' : ''} onchange="this.nextElementSibling.textContent = this.checked ? '🔒' : '🔓'; this.nextElementSibling.style.opacity = this.checked ? '1' : '0.45'" style="display:none; width:auto; min-height:unset;" />
+      <span class="lock-icon" style="opacity: ${photoUrlLocked ? '1' : '0.45'}; transition: opacity var(--trans);">${photoUrlLocked ? '🔒' : '🔓'}</span>
+    </label>
+  ` : '';
+  const photoUrlDisabled = (role === 'User' && photoUrlLocked) ? 'disabled' : '';
 
   $(targetId).innerHTML=`<div class="prof-hero"><div><div class="prof-name">${isNew?'➕ Add New Employee':'✏️ Edit Employee'}</div><div class="prof-meta">${DATA.editable?'Saves directly to Excel.':'Live dashboard required.'}</div></div><div class="prof-acts"><button class="btn btn-ghost btn-sm" onclick="cancelEdit('${esc(targetId)}')">✕ Cancel</button></div></div>
     <form class="eform" id="empForm" onsubmit="saveEmp(event, '${esc(targetId)}')"><div class="ef-notice" id="efNotice"></div><div class="dup-warn" id="dupWarn"></div><input type="hidden" id="f_origKgid" value="${esc(e&&e.kgid||'')}" />
@@ -3718,19 +3782,27 @@ function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.source
     <div class="hist-container" id="editorHistoryContainer"></div>
     ${showHistEdit ? `<div class="hist-add-btn-wrap"><button type="button" class="btn btn-ghost btn-sm" onclick="addDraftPosting('${esc(targetId)}')">＋ Add Past Posting</button></div>` : ''}
     <div class="efsec"><div class="efsec-title">🗃 Source Profile</div></div>${ei('bloodGroup','Blood Group',sp.bloodGroup)}${ei('email','Email',sp.email)}${ei('mobile2','Mobile 2',sp.mobile2)}${ei('height','Height',sp.height,'e.g. 175 cm')}${ei('weight','Weight',sp.weight,'e.g. 70 kg')}
-    <label class="flbl">Caste / Reservation Category
-      <select id="f_caste" onchange="updateSubCasteDropdown()">
+    <label class="flbl">
+      <span style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <span>Caste / Reservation Category</span>
+        ${casteLockHtml}
+      </span>
+      <select id="f_caste" onchange="updateSubCasteDropdown()" ${casteDisabled}>
         <option value="">— Select Category —</option>
         ${Object.keys(CASTE_DATABASE).map(c => `<option value="${esc(c)}" ${(sp.caste===c)?'selected':''}>${esc(c)}</option>`).join('')}
       </select>
     </label>
-    <label class="flbl">Sub-Caste / Community
-      <select id="f_subCaste" onchange="checkSubCasteOther()">
+    <label class="flbl">
+      <span style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <span>Sub-Caste / Community</span>
+        ${subCasteLockHtml}
+      </span>
+      <select id="f_subCaste" onchange="checkSubCasteOther()" ${subCasteDisabled}>
         <option value="">— Select Sub-Caste —</option>
       </select>
     </label>
     <label class="flbl" id="f_subCasteOtherContainer" style="display:none">Specify Sub-Caste
-      <input id="f_subCasteOther" placeholder="Enter sub-caste name" />
+      <input id="f_subCasteOther" placeholder="Enter sub-caste name" ${subCasteDisabled} />
     </label>
     ${ei('familyDetails','Family Details',sp.familyDetails)}${ei('educationDetails','Education Details',sp.educationDetails)}
     <div style="grid-column: span 2; display: flex; align-items: flex-end; gap: 12px">
@@ -3738,11 +3810,15 @@ function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.source
         ${sp.photoUrl ? `<img src="${esc(sp.photoUrl)}" style="width: 100%; height: 100%; object-fit: cover" />` : `<span style="font-size: 20px">👮</span>`}
       </div>
       <div style="flex: 1">
-        <label class="flbl" style="display: flex; flex-direction: column; gap: 4px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .35px;">Profile Photo URL / Upload
+        <label class="flbl" style="display: flex; flex-direction: column; gap: 4px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .35px;">
+          <span style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <span>Profile Photo URL / Upload</span>
+            ${photoUrlLockHtml}
+          </span>
           <div style="display: flex; gap: 6px">
-            <input id="f_photoUrl" value="${esc(sp.photoUrl||'')}" placeholder="https://... or upload image" oninput="updateEditorPhotoPreview(this.value)" style="flex:1" />
-            <input type="file" id="f_photoFile" accept="image/*" style="display:none" onchange="uploadLocalPhoto(this)" />
-            <button type="button" class="btn btn-ghost btn-sm" onclick="$('f_photoFile').click()" style="min-height: 34px">📁 Upload</button>
+            <input id="f_photoUrl" value="${esc(sp.photoUrl||'')}" placeholder="https://... or upload image" oninput="updateEditorPhotoPreview(this.value)" style="flex:1" ${photoUrlDisabled} />
+            <input type="file" id="f_photoFile" accept="image/*" style="display:none" onchange="uploadLocalPhoto(this)" ${photoUrlDisabled} />
+            <button type="button" class="btn btn-ghost btn-sm" onclick="$('f_photoFile').click()" style="min-height: 34px" ${photoUrlDisabled}>📁 Upload</button>
           </div>
         </label>
       </div>
@@ -3761,6 +3837,12 @@ function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.source
       inputs.forEach(input => {
         if (!allowed.includes(input.id)) {
           input.disabled = true;
+        } else {
+          let fKey = input.id.replace('f_', '');
+          if (fKey === 'subCasteOther') fKey = 'subCaste';
+          if (lockedList.includes(fKey)) {
+            input.disabled = true;
+          }
         }
       });
     }
@@ -3966,7 +4048,16 @@ async function saveEmp(ev, targetId = 'profileModalContent'){ev.preventDefault()
     orderNumber: p.orderNumber
   }))];
 
-  const payload={kgid:v('kgid'),originalKgid:v('origKgid'),name:v('name'),rank:v('rank'),designation:v('designation'),mobile:v('mobile'),dob:toDisplayDate(v('dob')),doa:toDisplayDate(v('doa')),homeDistrict:v('homeDistrict'),category:v('category'),currentDistrict:v('currentDistrict'),currentSubDivision:v('currentSubDivision'),currentUnit:v('currentUnit'),currentSince:toDisplayDate(v('currentSince')),orderNumber:v('orderNumber'),remarks:v('remarks'),postings:consolidatedPostings,sourceProfile:{metalNumber:v('metalNumber'),bloodGroup:v('bloodGroup'),email:v('email'),mobile2:v('mobile2'),height:v('height'),weight:v('weight'),caste:v('caste'),subCaste:getSubCaste(),familyDetails:v('familyDetails'),educationDetails:v('educationDetails'),photoUrl:v('photoUrl'),isApproved:v('isApproved'),isAdmin:v('isAdmin')}};
+  const role = getRole();
+  const emp = DATA.employees.find(x => x.kgid === selKgid);
+  let lockedFieldsVal = '';
+  if (role === 'Admin' || role === 'Super Admin') {
+    lockedFieldsVal = Array.from(document.querySelectorAll('.lock-chk:checked')).map(el => el.dataset.fieldId).join(',');
+  } else {
+    lockedFieldsVal = (emp && emp.sourceProfile && emp.sourceProfile.lockedFields) || '';
+  }
+
+  const payload={kgid:v('kgid'),originalKgid:v('origKgid'),name:v('name'),rank:v('rank'),designation:v('designation'),mobile:v('mobile'),dob:toDisplayDate(v('dob')),doa:toDisplayDate(v('doa')),homeDistrict:v('homeDistrict'),category:v('category'),currentDistrict:v('currentDistrict'),currentSubDivision:v('currentSubDivision'),currentUnit:v('currentUnit'),currentSince:toDisplayDate(v('currentSince')),orderNumber:v('orderNumber'),remarks:v('remarks'),postings:consolidatedPostings,sourceProfile:{metalNumber:v('metalNumber'),bloodGroup:v('bloodGroup'),email:v('email'),mobile2:v('mobile2'),height:v('height'),weight:v('weight'),caste:v('caste'),subCaste:getSubCaste(),familyDetails:v('familyDetails'),educationDetails:v('educationDetails'),photoUrl:v('photoUrl'),isApproved:v('isApproved'),isAdmin:v('isAdmin'),lockedFields:lockedFieldsVal}};
   if(!await checkDupNow()){showNotice('efNotice','error','Fix duplicates first.');return;}showNotice('efNotice','info','Saving…');
 
   

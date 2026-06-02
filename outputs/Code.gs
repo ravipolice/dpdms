@@ -506,7 +506,8 @@ function loadData(loggedKgid, role) {
         "subCaste": asText(source["subCaste"]),
         "familyDetails": asText(source["familyDetails"]),
         "educationDetails": asText(source["educationDetails"]),
-        "photoUrl": asText(source["photoUrl"] || source["photo"] || source["photo_url"] || source["image"] || "")
+        "photoUrl": asText(source["photoUrl"] || source["photo"] || source["photo_url"] || source["image"] || ""),
+        "lockedFields": asText(source["lockedFields"] || "")
       },
       "category": category,
       "subDivisionYears": subdivYears,
@@ -628,12 +629,57 @@ function handleSaveEmployee(payload, session) {
   
   // Set values based on role limits
   // (User can only change mobile, email, bloodGroup)
+  var src = payload.sourceProfile || {};
+  if (!isAdd && importedSheet) {
+    var impData = importedSheet.getDataRange().getValues();
+    var impHeaders = impData[0].map(function(h) { return String(h).trim(); });
+    var impKIdx = impHeaders.indexOf("kgid");
+    var impRow = -1;
+    for (var r = 1; r < impData.length; r++) {
+      if (String(impData[r][impKIdx]).trim() === origKgid) {
+        impRow = r + 1;
+        break;
+      }
+    }
+    
+    var impCols = {};
+    impHeaders.forEach(function(h, idx) { impCols[h] = idx + 1; });
+    
+    var existingLockedFields = "";
+    if (impRow !== -1 && impCols["lockedFields"]) {
+      existingLockedFields = String(importedSheet.getRange(impRow, impCols["lockedFields"]).getValue() || "");
+    }
+    var lockedList = existingLockedFields.split(",").map(function(s) { return s.trim(); }).filter(Boolean);
+    
+    if (session.role === "User") {
+      // Revert locked fields to existing database values
+      if (lockedList.indexOf("mobile") !== -1) {
+        if (impRow !== -1 && impCols["mobile1"]) {
+          payload.mobile = String(importedSheet.getRange(impRow, impCols["mobile1"]).getValue() || "");
+        }
+      }
+      var fieldsToCheck = ["mobile2", "bloodGroup", "email", "height", "weight", "caste", "subCaste", "familyDetails", "educationDetails", "photoUrl"];
+      fieldsToCheck.forEach(function(fKey) {
+        if (lockedList.indexOf(fKey) !== -1) {
+          if (impRow !== -1 && impCols[fKey]) {
+            src[fKey] = String(importedSheet.getRange(impRow, impCols[fKey]).getValue() || "");
+          } else {
+            src[fKey] = "";
+          }
+        }
+      });
+      src.lockedFields = existingLockedFields;
+    } else {
+      src.lockedFields = src.lockedFields || "";
+    }
+  }
+
   var masterCols = {};
   masterHeaders.forEach(function(h, idx) { masterCols[h] = idx + 1; });
   
   if (session.role === "User") {
     // Restrict edits to contact info
-    if (masterCols["Mobile"]) masterSheet.getCell(targetRow, masterCols["Mobile"]).setValue(payload.mobile);
+    if (masterCols["Mobile"]) masterSheet.getRange(targetRow, masterCols["Mobile"]).setValue(payload.mobile);
   } else {
     // Admin & Super Admin have full master edit rights
     if (masterCols["KGID"]) masterSheet.getRange(targetRow, masterCols["KGID"]).setValue(kgid);
@@ -764,6 +810,15 @@ function handleSaveEmployee(payload, session) {
       impHeaders.push("photoUrl");
     }
     importedSheet.getRange(impRow, impCols["photoUrl"]).setValue(src.photoUrl || "");
+    
+    // Auto-create schema column for lockedFields if missing
+    if (!impCols["lockedFields"]) {
+      var nextCol = impHeaders.length + 1;
+      importedSheet.getRange(1, nextCol).setValue("lockedFields");
+      impCols["lockedFields"] = nextCol;
+      impHeaders.push("lockedFields");
+    }
+    importedSheet.getRange(impRow, impCols["lockedFields"]).setValue(src.lockedFields || "");
     
     if (impCols["updatedAt"]) importedSheet.getRange(impRow, impCols["updatedAt"]).setValue(formatDate(new Date()) + " " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "HH:mm"));
   }
