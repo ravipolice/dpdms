@@ -1622,7 +1622,25 @@ function onOpen() {
 
 function importExternalEmployeeData() {
   var ui = SpreadsheetApp.getUi();
-  var externalUrl = "https://docs.google.com/spreadsheets/d/199WoCqPzhSB-zS2qkM_TdmjYJ8oNFtHASLLyXf0VMBk/edit";
+  var defaultUrl = "https://docs.google.com/spreadsheets/d/199WoCqPzhSB-zS2qkM_TdmjYJ8oNFtHASLLyXf0VMBk/edit";
+  
+  var response = ui.prompt(
+    "Import External Employee Data",
+    "Please enter the URL of the external Google Sheet you want to import from.\n\n" +
+    "Suggested sheets:\n" +
+    "1. First Sheet: https://docs.google.com/spreadsheets/d/199WoCqPzhSB-zS2qkM_TdmjYJ8oNFtHASLLyXf0VMBk/edit\n" +
+    "2. Second Sheet: https://docs.google.com/spreadsheets/d/1Js_V1wmQdETvG02rWqIT4y3Pac3TnEVzVsQ1tOly7U0/edit",
+    ui.ButtonSet.OK_CANCEL
+  );
+  
+  if (response.getSelectedButton() !== ui.Button.OK) {
+    return;
+  }
+  
+  var externalUrl = response.getResponseText().trim();
+  if (!externalUrl) {
+    externalUrl = defaultUrl;
+  }
   
   try {
     var masterSs = SpreadsheetApp.getActiveSpreadsheet();
