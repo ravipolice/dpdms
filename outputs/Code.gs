@@ -27,13 +27,13 @@ var STATION_SUBDIVISION_MAP = {
   "CPI Off Gudibande": "Chikkaballapura",
   "CPI Off Gowribidanur": "Chikkaballapura",
   "Dysp Office Cbp": "Chikkaballapura",
-  "Dpo": "Chikkaballapura",
+  "DPO": "Chikkaballapura",
   "Control Room": "Chikkaballapura",
-  "Dsb": "Chikkaballapura",
+  "DSB": "Chikkaballapura",
   "Cen PS": "Chikkaballapura",
   "DAR Chikkaballapura": "Chikkaballapura",
   "Smmc": "Chikkaballapura",
-  "Dcrb": "Chikkaballapura",
+  "DCRB": "Chikkaballapura",
 
   "Chintamani Town PS": "Chintamani",
   "Chintamani Rural PS": "Chintamani",
@@ -161,6 +161,14 @@ function doPost(e) {
       return handleSaveEmployee(payload.employee, session);
     }
     
+    if (action === "save-transfer-request") {
+      return handleSaveTransferRequest(payload.transferRequest, session);
+    }
+    
+    if (action === "delete-transfer-request") {
+      return handleDeleteTransferRequest(payload, session);
+    }
+    
     if (action === "delete") {
       if (session.role !== "Super Admin") {
         return jsonResponse({ ok: false, error: "Access Denied. Super Admin role required." });
@@ -284,6 +292,15 @@ function asText(val) {
   return String(val).trim();
 }
 
+function normalizeStation(name) {
+  var n = asText(name).trim();
+  var nu = n.toUpperCase();
+  if (nu === "DSB") return "DSB";
+  if (nu === "DCRB") return "DCRB";
+  if (nu === "DPO") return "DPO";
+  return n;
+}
+
 function formatDate(dateObj) {
   if (!dateObj) return "";
   var d = new Date(dateObj);
@@ -367,6 +384,34 @@ function loadData(loggedKgid, role) {
     importedDicts = getSheetRowsAsDicts(importedSheet);
   }
   
+  var transferRequestsSheet = ss.getSheetByName("Transfer Requests");
+  var transferRequests = [];
+  if (transferRequestsSheet) {
+    var trDicts = getSheetRowsAsDicts(transferRequestsSheet);
+    trDicts.forEach(function(tr) {
+      var trKgid = asText(tr["KGID"]);
+      if (trKgid) {
+        transferRequests.push({
+          "kgid": trKgid,
+          "name": asText(tr["Employee Name"]),
+          "rank": asText(tr["Rank"]),
+          "currentStation": asText(tr["Current Station"]),
+          "preference1": asText(tr["Preference 1"]),
+          "preference2": asText(tr["Preference 2"]),
+          "preference3": asText(tr["Preference 3"]),
+          "preference4": asText(tr["Preference 4"]) || "",
+          "preference5": asText(tr["Preference 5"]) || "",
+          "transferCategory": asText(tr["Transfer Category"]) || "",
+          "reason": asText(tr["Reason"]),
+          "remarks": asText(tr["Remarks"]),
+          "applicationDate": asText(tr["Application Date"]),
+          "status": asText(tr["Status"]) || "Pending",
+          "approvedStation": asText(tr["Approved Station"]) || ""
+        });
+      }
+    });
+  }
+  
   var masterDicts = getSheetRowsAsDicts(masterSheet);
   var historyDicts = getSheetRowsAsDicts(historySheet);
   
@@ -424,10 +469,11 @@ function loadData(loggedKgid, role) {
     
     var retirementValue = emp["Retirement Date"] || getRetirementDate(dob);
     var category = asText(emp["Category"]);
+    var typeOfTransfer = asText(emp["Type of Transfer"]) || "Regular";
     
     var currentSubdivRaw = asText(emp["Current Sub-Division"]);
     if (!currentSubdivRaw) {
-      currentSubdivRaw = STATION_SUBDIVISION_MAP[asText(emp["Current Unit"])] || "";
+      currentSubdivRaw = STATION_SUBDIVISION_MAP[normalizeStation(emp["Current Unit"])] || "";
     }
     
     var currentDistrictRaw = asText(emp["Current District"]);
@@ -472,7 +518,7 @@ function loadData(loggedKgid, role) {
       "retirementDate": formatDate(retirementValue),
       "currentDistrict": asText(emp["Current District"]),
       "currentSubDivision": currentSubdivRaw,
-      "currentUnit": asText(emp["Current Unit"]),
+      "currentUnit": normalizeStation(emp["Current Unit"]),
       "currentSince": formatDate(currentSince),
       "totalServiceYears": totalService,
       "currentStationYears": currentStationYears,
@@ -483,8 +529,8 @@ function loadData(loggedKgid, role) {
         return {
           "from": p["_fromDisplay"],
           "to": p["_toDisplay"],
-          "station": asText(p["Police Station / Unit"]),
-          "subDivision": asText(p["Sub-Division"]) || STATION_SUBDIVISION_MAP[asText(p["Police Station / Unit"])] || "",
+          "station": normalizeStation(p["Police Station / Unit"]),
+          "subDivision": asText(p["Sub-Division"]) || STATION_SUBDIVISION_MAP[normalizeStation(p["Police Station / Unit"])] || "",
           "district": asText(p["District"]),
           "rank": asText(p["Rank Held"]),
           "orderNumber": asText(p["Order Number"]),
@@ -505,11 +551,11 @@ function loadData(loggedKgid, role) {
         "caste": asText(source["caste"]),
         "subCaste": asText(source["subCaste"]),
         "familyDetails": asText(source["familyDetails"]),
-        "educationDetails": asText(source["educationDetails"]),
         "photoUrl": asText(source["photoUrl"] || source["photo"] || source["photo_url"] || source["image"] || ""),
         "lockedFields": asText(source["lockedFields"] || "")
       },
       "category": category,
+      "typeOfTransfer": typeOfTransfer,
       "subDivisionYears": subdivYears,
       "districtServiceYears": districtYears,
       "retirementMonthsLeft": retirementMonthsLeft
@@ -570,7 +616,8 @@ function loadData(loggedKgid, role) {
     "lastLoaded": formatDate(new Date()) + " " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "HH:mm:ss"),
     "employees": employees,
     "summary": summary,
-    "permissions": permissions
+    "permissions": permissions,
+    "transferRequests": transferRequests
   };
 }
 
@@ -658,7 +705,7 @@ function handleSaveEmployee(payload, session) {
           payload.mobile = String(importedSheet.getRange(impRow, impCols["mobile1"]).getValue() || "");
         }
       }
-      var fieldsToCheck = ["mobile2", "bloodGroup", "email", "height", "weight", "caste", "subCaste", "familyDetails", "educationDetails", "photoUrl"];
+      var fieldsToCheck = ["mobile2", "bloodGroup", "email", "height", "weight", "caste", "subCaste", "familyDetails", "photoUrl"];
       fieldsToCheck.forEach(function(fKey) {
         if (lockedList.indexOf(fKey) !== -1) {
           if (impRow !== -1 && impCols[fKey]) {
@@ -692,9 +739,16 @@ function handleSaveEmployee(payload, session) {
     if (masterCols["Home District"]) masterSheet.getRange(targetRow, masterCols["Home District"]).setValue(payload.homeDistrict);
     if (masterCols["Current District"]) masterSheet.getRange(targetRow, masterCols["Current District"]).setValue(payload.currentDistrict || "Chikkaballapura");
     if (masterCols["Current Sub-Division"]) masterSheet.getRange(targetRow, masterCols["Current Sub-Division"]).setValue(payload.currentSubDivision);
-    if (masterCols["Current Unit"]) masterSheet.getRange(targetRow, masterCols["Current Unit"]).setValue(payload.currentUnit);
+    if (masterCols["Current Unit"]) masterSheet.getRange(targetRow, masterCols["Current Unit"]).setValue(normalizeStation(payload.currentUnit));
     if (masterCols["Present Posting Date"]) masterSheet.getRange(targetRow, masterCols["Present Posting Date"]).setValue(parseDateStr(payload.currentSince));
     if (masterCols["Category"]) masterSheet.getRange(targetRow, masterCols["Category"]).setValue(payload.category);
+    if (!masterCols["Type of Transfer"]) {
+      var nextCol = masterHeaders.length + 1;
+      masterSheet.getRange(1, nextCol).setValue("Type of Transfer");
+      masterCols["Type of Transfer"] = nextCol;
+      masterHeaders.push("Type of Transfer");
+    }
+    masterSheet.getRange(targetRow, masterCols["Type of Transfer"]).setValue(payload.typeOfTransfer || "Regular");
     if (masterCols["Remarks"]) masterSheet.getRange(targetRow, masterCols["Remarks"]).setValue(payload.remarks);
     
     // Set formulas
@@ -739,7 +793,7 @@ function handleSaveEmployee(payload, session) {
           historySheet.getRange(hRow, hCols["To Date"]).clearContent();
         }
       }
-      if (hCols["Police Station / Unit"]) historySheet.getRange(hRow, hCols["Police Station / Unit"]).setValue(p.station);
+      if (hCols["Police Station / Unit"]) historySheet.getRange(hRow, hCols["Police Station / Unit"]).setValue(normalizeStation(p.station));
       if (hCols["Sub-Division"]) historySheet.getRange(hRow, hCols["Sub-Division"]).setValue(p.subDivision);
       if (hCols["District"]) historySheet.getRange(hRow, hCols["District"]).setValue(p.district || "Chikkaballapura");
       if (hCols["Rank Held"]) historySheet.getRange(hRow, hCols["Rank Held"]).setValue(p.rank);
@@ -781,43 +835,30 @@ function handleSaveEmployee(payload, session) {
     if (impCols["mobile1"]) importedSheet.getRange(impRow, impCols["mobile1"]).setValue(payload.mobile);
     if (impCols["mobile2"]) importedSheet.getRange(impRow, impCols["mobile2"]).setValue(src.mobile2);
     if (impCols["rank"]) importedSheet.getRange(impRow, impCols["rank"]).setValue(payload.rank);
-    if (impCols["station"]) importedSheet.getRange(impRow, impCols["station"]).setValue(payload.currentUnit);
+    if (impCols["station"]) importedSheet.getRange(impRow, impCols["station"]).setValue(normalizeStation(payload.currentUnit));
     if (impCols["district"]) importedSheet.getRange(impRow, impCols["district"]).setValue(payload.currentDistrict || "Chikkaballapura");
     if (impCols["metalNumber"]) importedSheet.getRange(impRow, impCols["metalNumber"]).setValue(src.metalNumber);
     if (impCols["bloodGroup"]) importedSheet.getRange(impRow, impCols["bloodGroup"]).setValue(src.bloodGroup);
-    // Auto-create schema column for email if missing
-    if (!impCols["email"]) {
-      var nextCol = impHeaders.length + 1;
-      importedSheet.getRange(1, nextCol).setValue("email");
-      impCols["email"] = nextCol;
-      impHeaders.push("email");
-    }
+    // Auto-create missing schema columns if they are not in impCols
+    var schemaCols = ["email", "photoUrl", "lockedFields", "caste", "subCaste", "height", "weight", "familyDetails"];
+    schemaCols.forEach(function(col) {
+      if (!impCols[col]) {
+        var nextCol = impHeaders.length + 1;
+        importedSheet.getRange(1, nextCol).setValue(col);
+        impCols[col] = nextCol;
+        impHeaders.push(col);
+      }
+    });
+
     importedSheet.getRange(impRow, impCols["email"]).setValue(src.email || "");
     if (impCols["isAdmin"]) importedSheet.getRange(impRow, impCols["isAdmin"]).setValue(src.isAdmin || "No");
     if (impCols["isApproved"]) importedSheet.getRange(impRow, impCols["isApproved"]).setValue(src.isApproved || "Yes");
-    if (impCols["height"]) importedSheet.getRange(impRow, impCols["height"]).setValue(src.height);
-    if (impCols["weight"]) importedSheet.getRange(impRow, impCols["weight"]).setValue(src.weight);
-    if (impCols["caste"]) importedSheet.getRange(impRow, impCols["caste"]).setValue(src.caste);
-    if (impCols["subCaste"]) importedSheet.getRange(impRow, impCols["subCaste"]).setValue(src.subCaste);
-    if (impCols["familyDetails"]) importedSheet.getRange(impRow, impCols["familyDetails"]).setValue(src.familyDetails);
-    if (impCols["educationDetails"]) importedSheet.getRange(impRow, impCols["educationDetails"]).setValue(src.educationDetails);
-    
-    // Auto-create schema column for photoUrl if missing
-    if (!impCols["photoUrl"]) {
-      var nextCol = impHeaders.length + 1;
-      importedSheet.getRange(1, nextCol).setValue("photoUrl");
-      impCols["photoUrl"] = nextCol;
-      impHeaders.push("photoUrl");
-    }
+    importedSheet.getRange(impRow, impCols["height"]).setValue(src.height || "");
+    importedSheet.getRange(impRow, impCols["weight"]).setValue(src.weight || "");
+    importedSheet.getRange(impRow, impCols["caste"]).setValue(src.caste || "");
+    importedSheet.getRange(impRow, impCols["subCaste"]).setValue(src.subCaste || "");
+    importedSheet.getRange(impRow, impCols["familyDetails"]).setValue(src.familyDetails || "");
     importedSheet.getRange(impRow, impCols["photoUrl"]).setValue(src.photoUrl || "");
-    
-    // Auto-create schema column for lockedFields if missing
-    if (!impCols["lockedFields"]) {
-      var nextCol = impHeaders.length + 1;
-      importedSheet.getRange(1, nextCol).setValue("lockedFields");
-      impCols["lockedFields"] = nextCol;
-      impHeaders.push("lockedFields");
-    }
     importedSheet.getRange(impRow, impCols["lockedFields"]).setValue(src.lockedFields || "");
     
     if (impCols["updatedAt"]) importedSheet.getRange(impRow, impCols["updatedAt"]).setValue(formatDate(new Date()) + " " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "HH:mm"));
@@ -1460,4 +1501,113 @@ function handleGoogleLogin(idToken) {
   } catch(err) {
     return jsonResponse({ ok: false, error: "Google verification failed: " + err.toString() });
   }
+}
+
+
+function handleSaveTransferRequest(payload, session) {
+  var kgid = String(payload.kgid || "").trim();
+  if (!kgid) {
+    return jsonResponse({ ok: false, error: "KGID is required." });
+  }
+  
+  if (session.role === "User" && kgid !== session.kgid) {
+    return jsonResponse({ ok: false, error: "Access Denied. You can only apply for your own transfer." });
+  }
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Transfer Requests");
+  if (!sheet) {
+    sheet = ss.insertSheet("Transfer Requests");
+    sheet.appendRow(["KGID", "Employee Name", "Rank", "Current Station", "Preference 1", "Preference 2", "Preference 3", "Reason", "Remarks", "Application Date", "Status", "Approved Station"]);
+  }
+  
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0].map(function(h) { return String(h).trim(); });
+  var kIdx = headers.indexOf("KGID");
+  
+  var targetRow = -1;
+  for (var r = 1; r < data.length; r++) {
+    if (String(data[r][kIdx]).trim() === kgid) {
+      targetRow = r + 1;
+      break;
+    }
+  }
+  
+  if (targetRow === -1) {
+    targetRow = sheet.getLastRow() + 1;
+    sheet.appendRow([kgid]);
+  }
+  
+  var cols = {};
+  headers.forEach(function(h, idx) { cols[h] = idx + 1; });
+  
+  // Set values
+  if (cols["KGID"]) sheet.getRange(targetRow, cols["KGID"]).setValue(kgid);
+  if (cols["Employee Name"]) sheet.getRange(targetRow, cols["Employee Name"]).setValue(payload.name);
+  if (cols["Rank"]) sheet.getRange(targetRow, cols["Rank"]).setValue(payload.rank);
+  if (cols["Current Station"]) sheet.getRange(targetRow, cols["Current Station"]).setValue(normalizeStation(payload.currentStation));
+  if (cols["Preference 1"]) sheet.getRange(targetRow, cols["Preference 1"]).setValue(normalizeStation(payload.preference1));
+  if (cols["Preference 2"]) sheet.getRange(targetRow, cols["Preference 2"]).setValue(normalizeStation(payload.preference2));
+  if (cols["Preference 3"]) sheet.getRange(targetRow, cols["Preference 3"]).setValue(normalizeStation(payload.preference3));
+  if (cols["Preference 4"]) sheet.getRange(targetRow, cols["Preference 4"]).setValue(normalizeStation(payload.preference4 || ""));
+  if (cols["Preference 5"]) sheet.getRange(targetRow, cols["Preference 5"]).setValue(normalizeStation(payload.preference5 || ""));
+  if (cols["Transfer Category"]) sheet.getRange(targetRow, cols["Transfer Category"]).setValue(payload.transferCategory || "");
+  if (cols["Reason"]) sheet.getRange(targetRow, cols["Reason"]).setValue(payload.reason);
+  if (cols["Remarks"]) sheet.getRange(targetRow, cols["Remarks"]).setValue(payload.remarks);
+  if (cols["Application Date"]) sheet.getRange(targetRow, cols["Application Date"]).setValue(payload.applicationDate || formatDate(new Date()));
+  
+  // Admin can change status; user sets it to Pending
+  var status = payload.status || "Pending";
+  if (session.role === "User") {
+    status = "Pending";
+  }
+  if (cols["Status"]) sheet.getRange(targetRow, cols["Status"]).setValue(status);
+  
+  if (!cols["Approved Station"]) {
+    var nextCol = headers.length + 1;
+    sheet.getRange(1, nextCol).setValue("Approved Station");
+    cols["Approved Station"] = nextCol;
+    headers.push("Approved Station");
+  }
+  if (cols["Approved Station"]) {
+    sheet.getRange(targetRow, cols["Approved Station"]).setValue(payload.approvedStation || "");
+  }
+  
+  return jsonResponse({ ok: true, message: "Saved transfer request for " + payload.name + " (" + kgid + ")" });
+}
+
+function handleDeleteTransferRequest(payload, session) {
+  var kgid = String(payload.kgid || "").trim();
+  if (!kgid) {
+    return jsonResponse({ ok: false, error: "KGID is required." });
+  }
+  
+  if (session.role === "User" && kgid !== session.kgid) {
+    return jsonResponse({ ok: false, error: "Access Denied." });
+  }
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Transfer Requests");
+  if (!sheet) {
+    return jsonResponse({ ok: false, error: "Transfer Requests sheet not found." });
+  }
+  
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0].map(function(h) { return String(h).trim(); });
+  var kIdx = headers.indexOf("KGID");
+  
+  var targetRow = -1;
+  for (var r = 1; r < data.length; r++) {
+    if (String(data[r][kIdx]).trim() === kgid) {
+      targetRow = r + 1;
+      break;
+    }
+  }
+  
+  if (targetRow !== -1) {
+    sheet.deleteRow(targetRow);
+    return jsonResponse({ ok: true, message: "Withdrew transfer request for KGID " + kgid });
+  }
+  
+  return jsonResponse({ ok: false, error: "Transfer request not found." });
 }

@@ -51,13 +51,13 @@ STATION_SUBDIVISION_MAP = {
     "CPI Off Gudibande": "Chikkaballapura",
     "CPI Off Gowribidanur": "Chikkaballapura",
     "Dysp Office Cbp": "Chikkaballapura",
-    "Dpo": "Chikkaballapura",
+    "DPO": "Chikkaballapura",
     "Control Room": "Chikkaballapura",
-    "Dsb": "Chikkaballapura",
+    "DSB": "Chikkaballapura",
     "Cen PS": "Chikkaballapura",
     "DAR Chikkaballapura": "Chikkaballapura",
     "Smmc": "Chikkaballapura",
-    "Dcrb": "Chikkaballapura",
+    "DCRB": "Chikkaballapura",
 
     # Chintamani Subdivision
     "Chintamani Town PS": "Chintamani",
@@ -92,6 +92,18 @@ def as_text(value):
     if isinstance(value, date):
         return value.isoformat()
     return str(value)
+
+
+def normalize_station(value):
+    n = as_text(value).strip()
+    nu = n.upper()
+    if nu == "DSB":
+        return "DSB"
+    if nu == "DCRB":
+        return "DCRB"
+    if nu == "DPO":
+        return "DPO"
+    return n
 
 
 def parse_date(value):
@@ -175,6 +187,29 @@ def load_data():
     imported_rows = sheet_rows(wb["Imported Emp Profiles"]) if "Imported Emp Profiles" in wb.sheetnames else []
     source_by_kgid = {as_text(row.get("kgid")).strip(): row for row in imported_rows if as_text(row.get("kgid")).strip()}
 
+    transfer_requests = []
+    if "Transfer Requests" in wb.sheetnames:
+        for tr in sheet_rows(wb["Transfer Requests"]):
+            tr_kgid = as_text(tr.get("KGID")).strip()
+            if tr_kgid:
+                transfer_requests.append({
+                    "kgid": tr_kgid,
+                    "name": as_text(tr.get("Employee Name")),
+                    "rank": as_text(tr.get("Rank")),
+                    "currentStation": as_text(tr.get("Current Station")),
+                    "preference1": as_text(tr.get("Preference 1")),
+                    "preference2": as_text(tr.get("Preference 2")),
+                    "preference3": as_text(tr.get("Preference 3")),
+                    "preference4": as_text(tr.get("Preference 4")),
+                    "preference5": as_text(tr.get("Preference 5")),
+                    "transferCategory": as_text(tr.get("Transfer Category")),
+                    "reason": as_text(tr.get("Reason")),
+                    "remarks": as_text(tr.get("Remarks")),
+                    "applicationDate": as_text(tr.get("Application Date")),
+                    "status": as_text(tr.get("Status") or "Pending"),
+                    "approvedStation": as_text(tr.get("Approved Station") or "")
+                })
+
     history_by_kgid = {}
     for item in history:
         kgid = as_text(item.get("KGID")).strip()
@@ -204,14 +239,15 @@ def load_data():
         longest = max([p.get("_durationYears") or 0 for p in postings], default=0)
         retirement_value = usable_date(employee.get("Retirement Date"))
         category = as_text(employee.get("Category")).strip()
+        type_of_transfer = as_text(employee.get("Type of Transfer")).strip() or "Regular"
         current_subdiv_raw = as_text(employee.get("Current Sub-Division")).strip()
+        unit = normalize_station(employee.get("Current Unit"))
         if not current_subdiv_raw:
-            unit = as_text(employee.get("Current Unit")).strip()
             current_subdiv_raw = STATION_SUBDIVISION_MAP.get(unit, "")
         current_district_raw = as_text(employee.get("Current District")).strip()
         subdiv_years = round(sum(
             (p.get("_durationYears") or 0) for p in postings
-            if current_subdiv_raw and (as_text(p.get("Sub-Division")).strip() or STATION_SUBDIVISION_MAP.get(as_text(p.get("Police Station / Unit")).strip(), "")) == current_subdiv_raw
+            if current_subdiv_raw and (as_text(p.get("Sub-Division")).strip() or STATION_SUBDIVISION_MAP.get(normalize_station(p.get("Police Station / Unit")), "")) == current_subdiv_raw
         ), 1) if current_subdiv_raw else ""
         district_years_val = round(sum(
             (p.get("_durationYears") or 0) for p in postings
@@ -238,7 +274,7 @@ def load_data():
             "retirementDate": display_date(retirement_value) or retirement_display(dob),
             "currentDistrict": as_text(employee.get("Current District")),
             "currentSubDivision": current_subdiv_raw,
-            "currentUnit": as_text(employee.get("Current Unit")),
+            "currentUnit": unit,
             "currentSince": display_date(current_since),
             "totalServiceYears": total_service,
             "currentStationYears": current_station_years,
@@ -249,8 +285,8 @@ def load_data():
                 {
                     "from": item["_fromDisplay"],
                     "to": item["_toDisplay"],
-                    "station": as_text(item.get("Police Station / Unit")),
-                    "subDivision": as_text(item.get("Sub-Division")).strip() or STATION_SUBDIVISION_MAP.get(as_text(item.get("Police Station / Unit")).strip(), ""),
+                    "station": normalize_station(item.get("Police Station / Unit")),
+                    "subDivision": as_text(item.get("Sub-Division")).strip() or STATION_SUBDIVISION_MAP.get(normalize_station(item.get("Police Station / Unit")), ""),
                     "district": as_text(item.get("District")),
                     "rank": as_text(item.get("Rank Held")),
                     "orderNumber": as_text(item.get("Order Number")),
@@ -272,11 +308,11 @@ def load_data():
                 "caste": as_text(source.get("caste")),
                 "subCaste": as_text(source.get("subCaste")),
                 "familyDetails": as_text(source.get("familyDetails")),
-                "educationDetails": as_text(source.get("educationDetails")),
                 "photoUrl": as_text(source.get("photoUrl") or source.get("photo") or ""),
                 "lockedFields": as_text(source.get("lockedFields") or ""),
             },
             "category": category,
+            "typeOfTransfer": type_of_transfer,
             "subDivisionYears": subdiv_years,
             "districtServiceYears": district_years_val,
             "retirementMonthsLeft": retirement_months_left,
@@ -307,6 +343,7 @@ def load_data():
         "lastLoaded": datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
         "employees": employees,
         "summary": summary,
+        "transferRequests": transfer_requests,
     }
 
 
@@ -450,12 +487,17 @@ def save_employee(payload):
         "Home District": as_text(payload.get("homeDistrict")).strip(),
         "Current District": as_text(payload.get("currentDistrict")).strip() or "Chikkaballapura",
         "Current Sub-Division": as_text(payload.get("currentSubDivision")).strip(),
-        "Current Unit": as_text(payload.get("currentUnit")).strip(),
+        "Current Unit": normalize_station(payload.get("currentUnit")),
         "Present Posting Date": parse_date(payload.get("currentSince")),
         "Remarks": as_text(payload.get("remarks")).strip(),
         "Category": as_text(payload.get("category")).strip(),
+        "Type of Transfer": as_text(payload.get("typeOfTransfer")).strip() or "Regular",
     }
     master_headers = headers_for(master)
+    if "Type of Transfer" not in master_headers:
+        new_col = len(master_headers) + 1
+        master.cell(1, new_col).value = "Type of Transfer"
+        master_headers.append("Type of Transfer")
     for header, value in master_values.items():
         if header in master_headers:
             master.cell(master_row, master_headers.index(header) + 1).value = value
@@ -479,7 +521,7 @@ def save_employee(payload):
                 "KGID": kgid,
                 "From Date": p_from,
                 "To Date": p_to,
-                "Police Station / Unit": as_text(p.get("station")).strip(),
+                "Police Station / Unit": normalize_station(p.get("station")),
                 "Sub-Division": as_text(p.get("subDivision")).strip(),
                 "District": as_text(p.get("district")).strip() or "Chikkaballapura",
                 "Rank Held": as_text(p.get("rank")).strip(),
@@ -499,7 +541,7 @@ def save_employee(payload):
             "KGID": kgid,
             "From Date": parse_date(payload.get("currentSince")),
             "To Date": None,
-            "Police Station / Unit": as_text(payload.get("currentUnit")).strip(),
+            "Police Station / Unit": normalize_station(payload.get("currentUnit")),
             "Sub-Division": as_text(payload.get("currentSubDivision")).strip(),
             "District": as_text(payload.get("currentDistrict")).strip() or "Chikkaballapura",
             "Rank Held": as_text(payload.get("rank")).strip(),
@@ -514,8 +556,6 @@ def save_employee(payload):
         history[f"J{history_row}"] = f'=IF(A{history_row}="","",IF(COUNTIFS($A:$A,A{history_row},$B:$B,"<="&IF(C{history_row}="",TODAY(),C{history_row}),$C:$C,">="&B{history_row})>1,"Review","OK"))'
         history[f"K{history_row}"] = f'=IF(A{history_row}="","",IF(OR(B{history_row}="",D{history_row}="",F{history_row}="",G{history_row}=""),"Missing","OK"))'
 
-
-
     source = payload.get("sourceProfile") or {}
     if imported is not None:
         imported_row = find_row_by_value(imported, "kgid", kgid) or first_blank_row(imported)
@@ -525,7 +565,7 @@ def save_employee(payload):
             "mobile1": as_text(payload.get("mobile")).strip(),
             "mobile2": as_text(source.get("mobile2")).strip(),
             "rank": as_text(payload.get("rank")).strip(),
-            "station": as_text(payload.get("currentUnit")).strip(),
+            "station": normalize_station(payload.get("currentUnit")),
             "district": as_text(payload.get("currentDistrict")).strip() or "Chikkaballapura",
             "metalNumber": as_text(source.get("metalNumber")).strip(),
             "bloodGroup": as_text(source.get("bloodGroup")).strip(),
@@ -540,23 +580,15 @@ def save_employee(payload):
             "caste": as_text(source.get("caste")).strip(),
             "subCaste": as_text(source.get("subCaste")).strip(),
             "familyDetails": as_text(source.get("familyDetails")).strip(),
-            "educationDetails": as_text(source.get("educationDetails")).strip(),
             "photoUrl": as_text(source.get("photoUrl")).strip(),
             "lockedFields": as_text(source.get("lockedFields") or "").strip(),
         }
         imported_headers = headers_for(imported)
-        if "email" not in imported_headers:
-            new_col = len(imported_headers) + 1
-            imported.cell(1, new_col).value = "email"
-            imported_headers.append("email")
-        if "photoUrl" not in imported_headers:
-            new_col = len(imported_headers) + 1
-            imported.cell(1, new_col).value = "photoUrl"
-            imported_headers.append("photoUrl")
-        if "lockedFields" not in imported_headers:
-            new_col = len(imported_headers) + 1
-            imported.cell(1, new_col).value = "lockedFields"
-            imported_headers.append("lockedFields")
+        for col_name in ["email", "photoUrl", "lockedFields", "caste", "subCaste", "height", "weight", "familyDetails"]:
+            if col_name not in imported_headers:
+                new_col = len(imported_headers) + 1
+                imported.cell(1, new_col).value = col_name
+                imported_headers.append(col_name)
         for header, value in imported_values.items():
             if header in imported_headers:
                 imported.cell(imported_row, imported_headers.index(header) + 1).value = value
@@ -601,6 +633,283 @@ def delete_employee(kgid):
     update_table_refs(wb)
     wb.save(WORKBOOK_PATH)
     return {"ok": True, "message": f"Deleted {name} ({kgid})", "backupFolder": str(BACKUP_DIR)}
+
+
+def verify_payload_genuinity(payload):
+    kgid = as_text(payload.get("kgid")).strip()
+    dob_str = as_text(payload.get("dob")).strip()
+    doa_str = as_text(payload.get("doa")).strip()
+    current_since_str = as_text(payload.get("currentSince")).strip()
+    postings = payload.get("postings") or []
+
+    dob = parse_date(dob_str)
+    doa = parse_date(doa_str)
+    current_since = parse_date(current_since_str)
+    today = date.today()
+
+    errors = []
+
+    # 1. DOB checks
+    if dob_str:
+        if not isinstance(dob, (date, datetime)):
+            errors.append("Invalid Date of Birth format. Please use DD-MM-YYYY.")
+        elif dob > today:
+            errors.append("Date of Birth cannot be in the future.")
+        else:
+            age = (today - dob).days / 365.25
+            if age < 18:
+                errors.append("Employee must be at least 18 years old.")
+
+    # 2. Appointment checks
+    if doa_str:
+        if not isinstance(doa, (date, datetime)):
+            errors.append("Invalid Date of Appointment format. Please use DD-MM-YYYY.")
+        elif doa > today:
+            errors.append("Date of Appointment cannot be in the future.")
+
+    if dob and doa:
+        if isinstance(dob, (date, datetime)) and isinstance(doa, (date, datetime)):
+            if doa < dob:
+                errors.append("Date of Appointment cannot be before Date of Birth.")
+            elif (doa - dob).days / 365.25 < 18:
+                errors.append("Appointment Date must be at least 18 years after Date of Birth.")
+
+    # 3. Current joining date checks
+    if current_since_str:
+        if not isinstance(current_since, (date, datetime)):
+            errors.append("Invalid Joining Date format. Please use DD-MM-YYYY.")
+        elif current_since > today:
+            errors.append("Joining Date at current station cannot be in the future.")
+
+    if doa and current_since:
+        if isinstance(doa, (date, datetime)) and isinstance(current_since, (date, datetime)):
+            if current_since < doa:
+                errors.append("Joining Date at current station cannot be before Date of Appointment.")
+
+    # 4. Postings checks
+    parsed_postings = []
+    for idx, p in enumerate(postings):
+        p_from_str = as_text(p.get("from")).strip()
+        p_to_str = as_text(p.get("to")).strip()
+        p_station = as_text(p.get("station")).strip()
+        p_from = parse_date(p_from_str)
+        p_to = parse_date(p_to_str) if p_to_str and p_to_str != "Present" else None
+
+        if p_from_str and not isinstance(p_from, (date, datetime)):
+            errors.append(f"Posting #{idx+1} ({p_station}): Invalid From date format.")
+        if p_to_str and p_to_str != "Present" and not isinstance(p_to, (date, datetime)):
+            errors.append(f"Posting #{idx+1} ({p_station}): Invalid To date format.")
+
+        if p_from and p_to:
+            if isinstance(p_from, (date, datetime)) and isinstance(p_to, (date, datetime)):
+                if p_to < p_from:
+                    errors.append(f"Posting #{idx+1} ({p_station}): To date cannot be before From date.")
+                if doa and isinstance(doa, (date, datetime)) and p_from < doa:
+                    errors.append(f"Posting #{idx+1} ({p_station}): From date cannot be before Appointment Date.")
+                if current_since and isinstance(current_since, (date, datetime)) and p_to > current_since:
+                    errors.append(f"Posting #{idx+1} ({p_station}): To date cannot be after Current Unit Joining Date.")
+                parsed_postings.append((p_from, p_to, p_station, idx+1))
+
+    # Overlaps checks
+    parsed_postings.sort(key=lambda x: x[0])
+    for i in range(len(parsed_postings) - 1):
+        curr_from, curr_to, curr_station, curr_idx = parsed_postings[i]
+        next_from, next_to, next_station, next_idx = parsed_postings[i+1]
+        if curr_to and next_from and curr_to > next_from:
+            errors.append(f"Overlap detected between postings: '{curr_station}' (ends {curr_to.strftime('%d-%m-%Y')}) and '{next_station}' (starts {next_from.strftime('%d-%m-%Y')}).")
+
+    return errors
+
+
+def save_transfer_request(payload):
+    kgid = as_text(payload.get("kgid")).strip()
+    if not kgid:
+        raise ValueError("KGID is required.")
+    
+    # 1. Server-side genuinity verification
+    errors = verify_payload_genuinity(payload)
+    if errors:
+        raise ValueError("Verification failed:\n" + "\n".join(f"- {e}" for e in errors))
+
+    name = as_text(payload.get("name")).strip()
+    rank = as_text(payload.get("rank")).strip()
+    current_station = as_text(payload.get("currentStation")).strip()
+    pref1 = as_text(payload.get("preference1")).strip()
+    pref2 = as_text(payload.get("preference2")).strip()
+    pref3 = as_text(payload.get("preference3")).strip()
+    pref4 = as_text(payload.get("preference4")).strip()
+    pref5 = as_text(payload.get("preference5")).strip()
+    transfer_category = as_text(payload.get("transferCategory")).strip()
+    reason = as_text(payload.get("reason")).strip()
+    remarks = as_text(payload.get("remarks")).strip()
+    status = as_text(payload.get("status") or "Pending").strip()
+    apply_date = as_text(payload.get("applicationDate") or datetime.now().strftime("%d-%m-%Y")).strip()
+    approved_station = as_text(payload.get("approvedStation") or "").strip()
+
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    shutil.copy2(WORKBOOK_PATH, BACKUP_DIR / f"{WORKBOOK_PATH.stem}_{stamp}.xlsx")
+
+    wb = load_workbook(WORKBOOK_PATH)
+    
+    # 2. Crosscheck and sync with Employee Master
+    warnings = []
+    if "Employee Master" in wb.sheetnames:
+        master = wb["Employee Master"]
+        master_headers = headers_for(master)
+        master_row = find_row_by_value(master, "KGID", kgid)
+        if master_row:
+            def check_field(header_name, payload_val, friendly_name):
+                if header_name in master_headers:
+                    col_idx = master_headers.index(header_name) + 1
+                    sheet_val = master.cell(master_row, col_idx).value
+                    sheet_norm = as_text(sheet_val).strip()
+                    pay_norm = as_text(payload_val).strip()
+                    
+                    if isinstance(sheet_val, (date, datetime)):
+                        sheet_norm = sheet_val.strftime("%d-%m-%Y")
+                    
+                    parsed_pay = parse_date(pay_norm)
+                    if isinstance(parsed_pay, (date, datetime)):
+                        pay_norm = parsed_pay.strftime("%d-%m-%Y")
+                        
+                    if sheet_norm and pay_norm and sheet_norm != pay_norm:
+                        warnings.append(f"{friendly_name}: entered '{pay_norm}' does not match profile '{sheet_norm}'")
+
+            check_field("DOB", payload.get("dob"), "DOB")
+            check_field("Appointment Date", payload.get("doa"), "DOA")
+            check_field("Current Unit", payload.get("currentStation"), "Current Station")
+            check_field("Present Posting Date", payload.get("currentSince"), "Joining Date")
+            check_field("Type of Transfer", payload.get("typeOfTransfer"), "Type of Transfer")
+
+            # Update Employee Master
+            if "dob" in payload:
+                master.cell(master_row, master_headers.index("DOB") + 1).value = parse_date(payload.get("dob"))
+            if "doa" in payload:
+                master.cell(master_row, master_headers.index("Appointment Date") + 1).value = parse_date(payload.get("doa"))
+            if "currentStation" in payload:
+                master.cell(master_row, master_headers.index("Current Unit") + 1).value = normalize_station(payload.get("currentStation"))
+            if "currentSince" in payload:
+                master.cell(master_row, master_headers.index("Present Posting Date") + 1).value = parse_date(payload.get("currentSince"))
+            if "typeOfTransfer" in payload:
+                if "Type of Transfer" not in master_headers:
+                    new_col = len(master_headers) + 1
+                    master.cell(1, new_col).value = "Type of Transfer"
+                    master_headers.append("Type of Transfer")
+                master.cell(master_row, master_headers.index("Type of Transfer") + 1).value = as_text(payload.get("typeOfTransfer")).strip() or "Regular"
+            
+            set_master_formulas(master, master_row)
+
+    # 3. Update Posting History if provided
+    if "postings" in payload and "Posting History" in wb.sheetnames:
+        history = wb["Posting History"]
+        history_rows = sorted(find_rows_by_value(history, "KGID", kgid), reverse=True)
+        for r in history_rows:
+            history.delete_rows(r)
+            
+        history_headers = headers_for(history)
+        for p in payload.get("postings", []):
+            history_row = first_blank_row(history)
+            p_from = parse_date(p.get("from"))
+            p_to = parse_date(p.get("to")) if p.get("to") and p.get("to") != "Present" else None
+            
+            history_values = {
+                "KGID": kgid,
+                "From Date": p_from,
+                "To Date": p_to,
+                "Police Station / Unit": normalize_station(p.get("station")),
+                "Sub-Division": as_text(p.get("subDivision")).strip() or STATION_SUBDIVISION_MAP.get(normalize_station(p.get("station")), ""),
+                "District": as_text(p.get("district")).strip() or "Chikkaballapura",
+                "Rank Held": as_text(p.get("rank")).strip() or rank,
+                "Order Number": as_text(p.get("orderNumber")).strip(),
+                "Notes": "Maintained from transfer application.",
+            }
+            for header, value in history_values.items():
+                if header in history_headers:
+                    history.cell(history_row, history_headers.index(header) + 1).value = value
+            history[f"I{history_row}"] = f'=IF(B{history_row}="","",ROUND((IF(C{history_row}="",TODAY(),C{history_row})-B{history_row})/365.25,1))'
+            history[f"J{history_row}"] = f'=IF(A{history_row}="","",IF(COUNTIFS($A:$A,A{history_row},$B:$B,"<="&IF(C{history_row}="",TODAY(),C{history_row}),$C:$C,">="&B{history_row})>1,"Review","OK"))'
+            history[f"K{history_row}"] = f'=IF(A{history_row}="","",IF(OR(B{history_row}="",D{history_row}="",F{history_row}="",G{history_row}=""),"Missing","OK"))'
+
+    # 4. Save Transfer Request to Transfer Requests sheet
+    if "Transfer Requests" not in wb.sheetnames:
+        ws = wb.create_sheet("Transfer Requests")
+        ws.append(["KGID", "Employee Name", "Rank", "Current Station", "Transfer Category", "Preference 1", "Preference 2", "Preference 3", "Preference 4", "Preference 5", "Reason", "Remarks", "Application Date", "Status", "Approved Station"])
+    else:
+        ws = wb["Transfer Requests"]
+    
+    headers = headers_for(ws)
+    # Migrate: add new columns if missing
+    for new_col in ["Preference 4", "Preference 5", "Transfer Category", "Approved Station"]:
+        if new_col not in headers:
+            ws.cell(1, len(headers) + 1).value = new_col
+            headers = headers_for(ws)
+    row_idx = find_row_by_value(ws, "KGID", kgid)
+    if not row_idx:
+        row_idx = first_blank_row(ws)
+    
+    values = {
+        "KGID": kgid,
+        "Employee Name": name,
+        "Rank": rank,
+        "Current Station": current_station,
+        "Transfer Category": transfer_category,
+        "Preference 1": pref1,
+        "Preference 2": pref2,
+        "Preference 3": pref3,
+        "Preference 4": pref4,
+        "Preference 5": pref5,
+        "Reason": reason,
+        "Remarks": remarks,
+        "Application Date": apply_date,
+        "Status": status,
+        "Approved Station": approved_station
+    }
+    
+    for header, value in values.items():
+        if header in headers:
+            ws.cell(row_idx, headers.index(header) + 1).value = value
+            
+    if "tblTransferRequests" in ws.tables:
+        last_row = max(2, ws.max_row)
+        last_col = get_column_letter(ws.max_column)
+        ws.tables["tblTransferRequests"].ref = f"A1:{last_col}{last_row}"
+    else:
+        from openpyxl.worksheet.table import Table, TableStyleInfo
+        last_row = max(2, ws.max_row)
+        last_col = get_column_letter(ws.max_column)
+        tab = Table(displayName="tblTransferRequests", ref=f"A1:{last_col}{last_row}")
+        style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
+        tab.tableStyleInfo = style
+        ws.add_table(tab)
+        
+    update_table_refs(wb)
+    wb.save(WORKBOOK_PATH)
+    return {"ok": True, "message": f"Saved transfer request for {name} ({kgid})", "backupFolder": str(BACKUP_DIR), "warnings": warnings}
+
+
+def delete_transfer_request(kgid):
+    if not kgid:
+        raise ValueError("KGID is required.")
+        
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    shutil.copy2(WORKBOOK_PATH, BACKUP_DIR / f"{WORKBOOK_PATH.stem}_{stamp}.xlsx")
+
+    wb = load_workbook(WORKBOOK_PATH)
+    if "Transfer Requests" in wb.sheetnames:
+        ws = wb["Transfer Requests"]
+        row_idx = find_row_by_value(ws, "KGID", kgid)
+        if row_idx:
+            ws.delete_rows(row_idx)
+            if "tblTransferRequests" in ws.tables:
+                last_row = max(2, ws.max_row)
+                last_col = get_column_letter(ws.max_column)
+                ws.tables["tblTransferRequests"].ref = f"A1:{last_col}{last_row}"
+            wb.save(WORKBOOK_PATH)
+            return {"ok": True, "message": f"Withdrew transfer request for KGID {kgid}", "backupFolder": str(BACKUP_DIR)}
+            
+    return {"ok": False, "error": f"Transfer request for KGID {kgid} not found."}
 
 
 def duplicate_status(query):
@@ -701,49 +1010,89 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         parsed = urlparse(self.path)
-        if parsed.path != "/api/employee":
-            self.send_error(404)
+        if parsed.path == "/api/employee":
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                payload = json.loads(self.rfile.read(length).decode("utf-8"))
+                emp_data = payload.get("employee") if isinstance(payload, dict) and "employee" in payload else payload
+                result = save_employee(emp_data)
+                body = json.dumps(result).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            except Exception as exc:
+                body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
             return
-        try:
-            length = int(self.headers.get("Content-Length", "0"))
-            payload = json.loads(self.rfile.read(length).decode("utf-8"))
-            result = save_employee(payload)
-            body = json.dumps(result).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-        except Exception as exc:
-            body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
-            self.send_response(400)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+        elif parsed.path == "/api/transfer-request":
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                payload = json.loads(self.rfile.read(length).decode("utf-8"))
+                tr_data = payload.get("transferRequest") if isinstance(payload, dict) and "transferRequest" in payload else payload
+                result = save_transfer_request(tr_data)
+                body = json.dumps(result).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            except Exception as exc:
+                body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            return
+        self.send_error(404)
 
     def do_DELETE(self):
         parsed = urlparse(self.path)
-        if parsed.path != "/api/employee":
-            self.send_error(404)
+        if parsed.path == "/api/employee":
+            try:
+                query = parse_qs(parsed.query)
+                kgid = as_text(query.get("kgid", [""])[0]).strip()
+                result = delete_employee(kgid)
+                body = json.dumps(result).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            except Exception as exc:
+                body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
             return
-        try:
-            query = parse_qs(parsed.query)
-            kgid = as_text(query.get("kgid", [""])[0]).strip()
-            result = delete_employee(kgid)
-            body = json.dumps(result).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-        except Exception as exc:
-            body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
-            self.send_response(400)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+        elif parsed.path == "/api/transfer-request":
+            try:
+                query = parse_qs(parsed.query)
+                kgid = as_text(query.get("kgid", [""])[0]).strip()
+                result = delete_transfer_request(kgid)
+                body = json.dumps(result).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            except Exception as exc:
+                body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            return
+        self.send_error(404)
 
     def serve_file(self, path):
         if path in ("/", "/dashboard"):

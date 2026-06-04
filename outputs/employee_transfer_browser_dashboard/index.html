@@ -619,22 +619,23 @@
     /* ── Employee Cards Grid ─────────────────────── */
     .employee-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 20px;
     }
     .emp-card {
       background: var(--surf);
       border: 1px solid var(--bdr);
       border-radius: var(--r);
-      padding: 20px;
+      padding: 16px;
       cursor: pointer;
       position: relative;
       transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
       box-shadow: var(--sh);
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 130px;
+      display: grid;
+      grid-template-columns: 80px 1.15fr 1.25fr;
+      gap: 16px;
+      align-items: start;
+      min-height: 138px;
     }
     .emp-card:hover {
       transform: translateY(-4px);
@@ -644,86 +645,134 @@
     .emp-card:active {
       transform: translateY(-2px) scale(0.99);
     }
-    .emp-card-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .emp-card-header {
+    .emp-card-photo-col {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 16px;
+      justify-content: center;
     }
     .emp-card-avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
+      width: 80px;
+      height: 105px;
+      border-radius: var(--r-sm);
       background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
       color: var(--gold-lt);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 22px;
-      border: 2.5px solid var(--gold-lt);
+      font-size: 24px;
+      border: 2px solid var(--gold-lt);
       box-shadow: 0 2px 8px rgba(26, 39, 68, 0.15);
       flex-shrink: 0;
       object-fit: cover;
+      transition: transform var(--trans);
     }
-    .emp-card-info {
-      flex: 1;
-      min-width: 0;
+    .emp-card:hover .emp-card-avatar {
+      transform: scale(1.03);
+    }
+    .emp-card-details-col {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .emp-card-detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+    .emp-card-detail-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+    }
+    .emp-card-detail-value {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--txt);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .emp-card-identity-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+      height: 100%;
+      justify-content: flex-start;
+      min-width: 0;
+      gap: 4px;
     }
     .emp-card-name {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 15.5px;
+      font-weight: 800;
       color: var(--navy);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      width: 100%;
     }
     .emp-card-rank {
-      font-size: 12px;
-      color: var(--muted);
+      font-size: 11px;
+      color: var(--gold);
       font-weight: 700;
       text-transform: uppercase;
-      margin-top: 3px;
-    }
-    .emp-card-details {
-      font-size: 13px;
-      color: var(--txt2);
-      display: grid;
-      gap: 7px;
-      margin-bottom: 16px;
-    }
-    .emp-card-detail-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .emp-card-detail-label {
-      color: var(--muted);
-    }
-    .emp-card-detail-value {
-      font-weight: 600;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 190px;
-      text-align: right;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
     }
     .emp-card-badges {
       display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      border-top: 1px solid var(--bdr);
-      padding-top: 14px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+      width: 100%;
       margin-top: auto;
     }
+    .emp-card-badges .badge {
+      font-size: 10px;
+      padding: 3px 8px;
+    }
+
+    @media(max-width: 400px) {
+      .employee-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .emp-card {
+        grid-template-columns: 80px 1fr;
+        grid-template-rows: auto auto;
+        gap: 12px;
+      }
+      .emp-card-photo-col {
+        grid-row: 1 / span 2;
+      }
+      .emp-card-identity-col {
+        grid-column: 2;
+        grid-row: 1;
+        align-items: flex-start;
+        text-align: left;
+        height: auto;
+      }
+      .emp-card-name {
+        font-size: 15px;
+      }
+      .emp-card-details-col {
+        grid-column: 2;
+        grid-row: 2;
+        gap: 4px;
+      }
+      .emp-card-badges {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: flex-start;
+        margin-top: 6px;
+      }
+    }
+
 
     @media(max-width: 1024px) {
       .filter-grid {
@@ -746,12 +795,26 @@
     .prof-acts .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.2)}.prof-acts .btn-ghost:hover{background:rgba(255,255,255,.22)}
     .prof-acts .btn-red{background:rgba(255,255,255,.12);color:#fca5a5;border-color:rgba(255,255,255,.2)}.prof-acts .btn-red:hover{background:rgba(248,113,113,.25)}
     .badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent}
-    .b-hi{background:rgba(220,38,38,.15);color:#fca5a5;border-color:rgba(220,38,38,.3)}
-    .b-med{background:rgba(217,119,6,.15);color:#fde68a;border-color:rgba(217,119,6,.3)}
-    .b-lo{background:rgba(22,163,74,.15);color:#86efac;border-color:rgba(22,163,74,.3)}
-    .b-yes{background:rgba(220,38,38,.15);color:#fca5a5;border-color:rgba(220,38,38,.3)}
-    .b-no{background:rgba(22,163,74,.15);color:#86efac;border-color:rgba(22,163,74,.3)}
-    .b-neu{background:rgba(37,99,235,.15);color:#93c5fd;border-color:rgba(37,99,235,.3)}
+    .b-hi{background:rgba(220,38,38,.12);color:#b91c1c;border-color:rgba(220,38,38,.35)}
+    .b-med{background:rgba(217,119,6,.12);color:#b45309;border-color:rgba(217,119,6,.35)}
+    .b-lo{background:rgba(22,163,74,.12);color:#15803d;border-color:rgba(22,163,74,.35)}
+    .b-yes{background:rgba(220,38,38,.12);color:#b91c1c;border-color:rgba(220,38,38,.35)}
+    .b-no{background:rgba(22,163,74,.12);color:#15803d;border-color:rgba(22,163,74,.35)}
+    .b-neu{background:rgba(37,99,235,.12);color:#1d4ed8;border-color:rgba(37,99,235,.35)}
+    /* Status badge aliases (b-grn / b-red / b-amb) */
+    .b-grn{background:rgba(22,163,74,.12);color:#15803d;border-color:rgba(22,163,74,.35)}
+    .b-red{background:rgba(220,38,38,.12);color:#b91c1c;border-color:rgba(220,38,38,.35)}
+    .b-amb{background:rgba(217,119,6,.12);color:#b45309;border-color:rgba(217,119,6,.35)}
+    /* Dark theme badge overrides */
+    body.dark-theme .b-hi{background:rgba(220,38,38,.20);color:#fca5a5;border-color:rgba(220,38,38,.4)}
+    body.dark-theme .b-med{background:rgba(217,119,6,.20);color:#fde68a;border-color:rgba(217,119,6,.4)}
+    body.dark-theme .b-lo{background:rgba(22,163,74,.20);color:#86efac;border-color:rgba(22,163,74,.4)}
+    body.dark-theme .b-yes{background:rgba(220,38,38,.20);color:#fca5a5;border-color:rgba(220,38,38,.4)}
+    body.dark-theme .b-no{background:rgba(22,163,74,.20);color:#86efac;border-color:rgba(22,163,74,.4)}
+    body.dark-theme .b-neu{background:rgba(37,99,235,.20);color:#93c5fd;border-color:rgba(37,99,235,.4)}
+    body.dark-theme .b-grn{background:rgba(22,163,74,.20);color:#86efac;border-color:rgba(22,163,74,.4)}
+    body.dark-theme .b-red{background:rgba(220,38,38,.20);color:#fca5a5;border-color:rgba(220,38,38,.4)}
+    body.dark-theme .b-amb{background:rgba(217,119,6,.20);color:#fde68a;border-color:rgba(217,119,6,.4)}
 
     /* ── Collapsible Sections ────────────────────── */
     .cs{border-bottom:1px solid var(--bdr)}.cs:last-child{border-bottom:none}
@@ -802,6 +865,26 @@
     .hist-edit-grid input{height:34px;padding:0 10px;border-radius:var(--r-sm);border:1px solid var(--bdr);background:var(--surf);color:var(--txt);font-size:12.5px}
     .hist-edit-grid input:focus{border-color:var(--navy);outline:none}
     .hist-add-btn-wrap{grid-column:1/-1;display:flex;justify-content:flex-start;margin-top:4px}
+
+    /* ── Transfer Application Form ─────────────────────────────── */
+    .transfer-section{margin-bottom:20px;border:1px solid var(--bdr2);border-radius:var(--r-sm);overflow:hidden}
+    .transfer-section-head{background:var(--surf2);padding:9px 14px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bdr2)}
+    .transfer-section > .fgrid,.transfer-section > div.fgrid{padding:14px}
+    .transfer-section > label.flbl,.transfer-section > .flbl{padding:0 14px 14px}
+
+    /* Previous Working Places table */
+    .prev-post-table{width:100%;border-collapse:collapse;font-size:12.5px}
+    .prev-post-table th{background:var(--surf);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.35px;padding:7px 10px;border-bottom:1px solid var(--bdr2);text-align:left;white-space:nowrap}
+    .prev-post-table td{padding:7px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
+    .prev-post-table tr:last-child td{border-bottom:none}
+    .prev-post-table tr:hover td{background:var(--surf2)}
+    .prev-post-table input,.prev-post-table select{background:var(--surf);color:var(--txt);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:4px 8px;font-size:12px}
+    .prev-post-table input:focus,.prev-post-table select:focus{border-color:var(--navy);outline:none}
+    .prev-post-empty{color:var(--muted);font-size:12px;text-align:center;padding:16px!important;font-style:italic}
+
+    /* View-mode labels */
+    .tview-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.35px;margin-bottom:3px}
+    .tview-val{font-size:14px;font-weight:500;color:var(--txt)}
 
 
     /* ── Reports ─────────────────────────────────── */
@@ -1623,6 +1706,7 @@
       <button class="tab-btn" data-tab="transfers"><span class="ti">🔄</span>Transfers</button>
       <button class="tab-btn" data-tab="search"><span class="ti">👥</span>Employees</button>
       <button class="tab-btn" data-tab="reports"><span class="ti">📋</span>Reports</button>
+      <button class="tab-btn" data-tab="apply-transfer"><span class="ti">📝</span>Apply Transfer</button>
       <button class="tab-btn" data-tab="settings" id="tabBtnSettings" style="display:none"><span class="ti">⚙️</span>Users & Roles</button>
     </nav>
   </div>
@@ -1654,6 +1738,8 @@
       <div class="chart-card"><div class="cc-head"><span class="cc-title">📅 Retirement Timeline</span></div><div class="cc-body" id="txRetire"></div></div>
       <div class="chart-card"><div class="cc-head"><span class="cc-title">🗺️ Sub-Division Transfer Load</span></div><div class="cc-body" id="txSubdiv"></div></div>
     </div>
+    <!-- Admin Transfer Applications Registry (admin-only, injected by renderTxDash) -->
+    <div id="txAdminRegistryContainer" style="margin-top:24px;"></div>
   </section>
 
   <!-- ═══ TAB 3 · SEARCH ══════════════════════════════ -->
@@ -1704,6 +1790,20 @@
     <div class="employee-grid" id="kpiEmployeeGrid"></div>
   </section>
 
+  <!-- ═══ DEDICATED EMPLOYEE PROFILE FULL-PAGE VIEW ════ -->
+  <section class="tab-sec" id="tab-profile-view">
+    <div class="kpi-view-header" style="margin-bottom: 20px;">
+      <div class="kpi-view-header-top">
+        <div class="kpi-view-title-group">
+          <div class="kpi-view-title" id="profileViewHeaderTitle">👮 Employee Profile</div>
+          <div class="kpi-view-subtitle">Detailed service record and history</div>
+        </div>
+        <button class="kpi-view-back-btn" onclick="closeProfileFullPage()">← Back to List</button>
+      </div>
+    </div>
+    <div class="prof-panel" id="profileFullPageContent"></div>
+  </section>
+
   <!-- ═══ TAB 4 · REPORTS ══════════════════════════════ -->
   <section class="tab-sec" id="tab-reports">
     <div class="rpt-nav">
@@ -1717,7 +1817,11 @@
       <div class="rpt-head"><div><div class="rpt-title" id="rptTitle">Transfer Priority List</div><div class="rpt-cnt" id="rptCnt"></div></div><button class="btn btn-ghost btn-sm" id="csvBtn">⬇ Export CSV</button></div>
       <div class="rpt-filters" id="rptFilters"></div>
       <div class="rpt-body" id="rptBody"></div>
-    </div>
+  </section>
+
+  <!-- ═══ TAB · APPLY FOR TRANSFER ════════════════════ -->
+  <section class="tab-sec" id="tab-apply-transfer">
+    <div id="applyTransferTabContainer"></div>
   </section>
 
   <!-- ═══ TAB 5 · SUPER ADMIN SETTINGS ═════════════════ -->
@@ -2182,13 +2286,7 @@
   </div>
 </div>
 
-<!-- Profile Details Modal -->
-<div class="modal-bg" id="profileModal" style="z-index:900">
-  <div class="modal profile-modal">
-    <button class="profile-modal-close" onclick="closeProfileModal()">✕</button>
-    <div id="profileModalContent"></div>
-  </div>
-</div>
+<!-- Profile Details Modal Removed (Converted to Full Page) -->
 
 <!-- API Settings Modal -->
 <div class="modal-bg" id="settingsModal" style="z-index:1000">
@@ -2212,12 +2310,21 @@
 </div>
 
 <script>
-let DATA={employees:[],summary:{}},selKgid='',editing=false,draft=null,draftPostings=[];
+let DATA={employees:[],summary:{},transferRequests:[]},selKgid='',editing=false,draft=null,draftPostings=[],draftFamily=[],draftFamilyLocked=false,draftHistoryLocked=false;
 let activeTab='employees',activeRpt='priority';
 let rptFilter={priority:'all',retirement:'12'};
 let delPending='',csvRows=[],csvHeaders=[];
 let customKpiFilter=null;
 let kpiSearchQuery='';
+
+const RANK_SENIORITY = {
+  'CPI': 1, 'PSI': 2, 'RSI': 3, 'ARSI': 4, 'ASI': 5, 'WASI': 6,
+  'CHC': 7, 'HC': 8, 'AHC': 9, 'WHC': 10, 'CPC': 11, 'PC': 12, 'APC': 13, 'WPC': 14, 'SDA': 15
+};
+
+const STANDARD_RANKS = [
+  'CPI', 'PSI', 'RSI', 'ARSI', 'ASI', 'WASI', 'CHC', 'HC', 'AHC', 'WHC', 'CPC', 'PC', 'APC', 'WPC', 'SDA'
+];
 let selectedCircleOffice=null;
 let selectedSdpo=null;
 let selectedPs=null;
@@ -2227,6 +2334,154 @@ const $=id=>document.getElementById(id);
 const text=v=>(v===null||v===undefined||v==='')?'—':v;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const pClass=p=>({High:'hi',Medium:'med',Low:'lo'}[p]||'lo');
+
+function renderEmployeeCardHtml(e) {
+  var initials = e.name ? e.name.split(' ').map(function(n) { return n[0]; }).join('').slice(0, 2).toUpperCase() : '👮';
+  var showPriority = e.priority === 'High' || e.priority === 'Medium';
+  var showDue = e.transferEligible === 'Yes';
+  var showOod = e.typeOfTransfer === 'OOD';
+  var badgesHtml = '';
+  if (showPriority || showDue || showOod) {
+    badgesHtml += '<div class="emp-card-badges">';
+    if (showPriority) {
+      badgesHtml += '<span class="badge b-' + pClass(e.priority) + '">Priority: ' + text(e.priority) + '</span>';
+    }
+    if (showDue) {
+      badgesHtml += '<span class="badge b-yes">Due: Yes</span>';
+    }
+    if (showOod) {
+      badgesHtml += '<span class="badge" style="background:var(--pur-dim); color:var(--pur); border:1px solid rgba(124,58,237,0.25)">OOD</span>';
+    }
+    badgesHtml += '</div>';
+  }
+
+  var hasPhoto = e.sourceProfile && e.sourceProfile.photoUrl;
+  var avatarHtml = '';
+  if (hasPhoto) {
+    avatarHtml = '<img class="emp-card-avatar" src="' + esc(e.sourceProfile.photoUrl) + '" alt="' + esc(e.name) + '" />';
+  } else {
+    avatarHtml = '<div class="emp-card-avatar">' + esc(initials) + '</div>';
+  }
+
+  return '<div class="emp-card" onclick="openProfile(\'' + esc(e.kgid) + '\')">' +
+    '<div class="emp-card-photo-col">' +
+      avatarHtml +
+    '</div>' +
+    '<div class="emp-card-details-col">' +
+      '<div class="emp-card-detail-item">' +
+        '<span class="emp-card-detail-label">KGID</span>' +
+        '<span class="emp-card-detail-value">' + esc(e.kgid) + '</span>' +
+      '</div>' +
+      '<div class="emp-card-detail-item">' +
+        '<span class="emp-card-detail-label">Station</span>' +
+        '<span class="emp-card-detail-value" title="' + esc(e.currentUnit || '—') + '">' + esc(e.currentUnit || '—') + '</span>' +
+      '</div>' +
+      '<div class="emp-card-detail-item">' +
+        '<span class="emp-card-detail-label">Mobile</span>' +
+        '<span class="emp-card-detail-value">' + esc(e.mobile || '—') + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="emp-card-identity-col">' +
+      '<div class="emp-card-name" title="' + esc(e.name) + '">' + esc(e.name) + '</div>' +
+      '<div class="emp-card-rank">' + esc(e.rank || '—') + '</div>' +
+      badgesHtml +
+    '</div>' +
+  '</div>';
+}
+
+const FRONTEND_STATION_SUBDIVISION_MAP = {
+  // Chikkaballapura Subdivision
+  "Chikkaballapura Town PS": "Chikkaballapura",
+  "Chikkaballapura Rural PS": "Chikkaballapura",
+  "Chikkaballapura Women PS": "Chikkaballapura",
+  "Chikkaballapura Traffic PS": "Chikkaballapura",
+  "Gowribidanur Town PS": "Chikkaballapura",
+  "Gowribidanur Rural PS": "Chikkaballapura",
+  "Manchenahalli PS": "Chikkaballapura",
+  "Gudibanda PS": "Chikkaballapura",
+  "Nandigiridhama PS": "Chikkaballapura",
+  "Peresandra PS": "Chikkaballapura",
+  "Sdpo Cbpura": "Chikkaballapura",
+  "CPI Office Cbpura": "Chikkaballapura",
+  "CPI Off Gudibande": "Chikkaballapura",
+  "CPI Off Gowribidanur": "Chikkaballapura",
+  "Dysp Office Cbp": "Chikkaballapura",
+  "DPO": "Chikkaballapura",
+  "Control Room": "Chikkaballapura",
+  "DSB": "Chikkaballapura",
+  "Cen PS": "Chikkaballapura",
+  "DAR Chikkaballapura": "Chikkaballapura",
+  "Smmc": "Chikkaballapura",
+  "DCRB": "Chikkaballapura",
+
+  // Chintamani Subdivision
+  "Chintamani Town PS": "Chintamani",
+  "Chintamani Rural PS": "Chintamani",
+  "Sidlaghatta Town PS": "Chintamani",
+  "Sidlaghatta Rural PS": "Chintamani",
+  "Bagepalli PS": "Chintamani",
+  "Chelur PS": "Chintamani",
+  "Pathapalya PS": "Chintamani",
+  "Dibburahalli PS": "Chintamani",
+  "Batlahalli PS": "Chintamani",
+  "Kencharlahalli PS": "Chintamani",
+  "Dysp Off Cmi": "Chintamani",
+  "CPI Office Cheluru": "Chintamani",
+  "CPI Off Kencharlahalli": "Chintamani",
+  "CPI Off Sidlaghatta": "Chintamani"
+};
+
+function onCurrentUnitChange() {
+  const unit = $('f_currentUnit').value;
+  const subDiv = FRONTEND_STATION_SUBDIVISION_MAP[unit] || '';
+  const subDivInput = $('f_currentSubDivision');
+  if (subDivInput) {
+    subDivInput.value = subDiv;
+  }
+}
+
+function onPastUnitChange(idx) {
+  const unit = $('h_station_' + idx).value;
+  const subDiv = FRONTEND_STATION_SUBDIVISION_MAP[unit] || '';
+  const subDivInput = $('h_subDivision_' + idx);
+  if (subDivInput) {
+    subDivInput.value = subDiv;
+  }
+}
+
+function getStationsOptions(selectedVal) {
+  const stations = [
+    "Chikkaballapura Town PS", "Chikkaballapura Rural PS", "Chikkaballapura Women PS", "Chikkaballapura Traffic PS",
+    "Gowribidanur Town PS", "Gowribidanur Rural PS", "Manchenahalli PS", "Gudibanda PS", "Nandigiridhama PS",
+    "Peresandra PS", "Sdpo Cbpura", "CPI Office Cbpura", "CPI Off Gudibande", "CPI Off Gowribidanur",
+    "Dysp Office Cbp", "DPO", "Control Room", "DSB", "Cen PS", "DAR Chikkaballapura", "Smmc", "DCRB",
+    "Chintamani Town PS", "Chintamani Rural PS", "Sidlaghatta Town PS", "Sidlaghatta Rural PS",
+    "Bagepalli PS", "Chelur PS", "Pathapalya PS", "Dibburahalli PS", "Batlahalli PS", "Kencharlahalli PS",
+    "Dysp Off Cmi", "CPI Office Cheluru", "CPI Off Kencharlahalli", "CPI Off Sidlaghatta"
+  ];
+  
+  if (DATA && DATA.employees) {
+    DATA.employees.forEach(e => {
+      if (e.currentUnit && !stations.includes(e.currentUnit)) {
+        stations.push(e.currentUnit);
+      }
+    });
+  }
+  stations.sort();
+
+  return stations.map(s => {
+    const isSel = (s === selectedVal) ? 'selected' : '';
+    return '<option value="' + esc(s) + '" ' + isSel + '>' + esc(s) + '</option>';
+  }).join('');
+}
+
+function getSubdivisionsOptions(selectedVal) {
+  const subdivisions = ["Chikkaballapura", "Chintamani"];
+  return subdivisions.map(s => {
+    const isSel = (s === selectedVal) ? 'selected' : '';
+    return '<option value="' + esc(s) + '" ' + isSel + '>' + esc(s) + '</option>';
+  }).join('');
+}
 
 // ── Native SHA-256 Hashing ─────────────────────────────────────
 async function sha256(message) {
@@ -2376,7 +2631,14 @@ function checkSubCasteOther() {
 }
 
 // ── API Configurations ─────────────────────────────────────────
-const getApiUrl = () => localStorage.getItem('dpdms_api_url') || 'https://script.google.com/macros/s/AKfycbzTbIFC6kfiQSMY-NzQ0vr19oveT-Qyz2xICG2h1KY6nmP10-8B_AKeQJU30uPK0w3f/exec';
+const getApiUrl = () => {
+  const stored = localStorage.getItem('dpdms_api_url');
+  if (stored !== null) return stored;
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return '';
+  }
+  return 'https://script.google.com/macros/s/AKfycbzTbIFC6kfiQSMY-NzQ0vr19oveT-Qyz2xICG2h1KY6nmP10-8B_AKeQJU30uPK0w3f/exec';
+};
 const getToken = () => localStorage.getItem('dpdms_token') || '';
 const getRole = () => localStorage.getItem('dpdms_role') || '';
 const getLoggedKgid = () => localStorage.getItem('dpdms_kgid') || '';
@@ -2410,7 +2672,17 @@ async function apiFetch(action, params = {}, options = {}) {
     }
   } else {
     // Local Python Server Fallback
-    if (options.method === 'DELETE') {
+    if (action === 'save-transfer-request') {
+      const res = await fetch(`/api/transfer-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options.body)
+      });
+      return await res.json();
+    } else if (action === 'delete-transfer-request') {
+      const res = await fetch(`/api/transfer-request?kgid=${params.kgid}`, { method: 'DELETE' });
+      return await res.json();
+    } else if (options.method === 'DELETE') {
       const res = await fetch(`/api/employee?kgid=${params.kgid}`, { method: 'DELETE' });
       return await res.json();
     } else if (options.method === 'POST') {
@@ -2977,7 +3249,14 @@ function normalizeLoadedData(data) {
   data.employees.forEach(e => {
     if (e.currentUnit) {
       const u = e.currentUnit;
-      if (u === 'Shidlagatta Town PS' || u === 'Shidlaghatta Town PS' || u === 'Sidlagatta Town PS') {
+      const lower = u.trim().toLowerCase();
+      if (lower === 'dpo') {
+        e.currentUnit = 'DPO';
+      } else if (lower === 'dsb') {
+        e.currentUnit = 'DSB';
+      } else if (lower === 'dcrb') {
+        e.currentUnit = 'DCRB';
+      } else if (u === 'Shidlagatta Town PS' || u === 'Shidlaghatta Town PS' || u === 'Sidlagatta Town PS') {
         e.currentUnit = 'Sidlaghatta Town PS';
       } else if (u === 'Shidlagatta Rural PS' || u === 'Shidlaghatta Rural PS' || u === 'Sidlagatta Rural PS') {
         e.currentUnit = 'Sidlaghatta Rural PS';
@@ -2989,7 +3268,14 @@ function normalizeLoadedData(data) {
       e.postings.forEach(p => {
         if (p.station) {
           const u = p.station;
-          if (u === 'Shidlagatta Town PS' || u === 'Shidlaghatta Town PS' || u === 'Sidlagatta Town PS') {
+          const lower = u.trim().toLowerCase();
+          if (lower === 'dpo') {
+            p.station = 'DPO';
+          } else if (lower === 'dsb') {
+            p.station = 'DSB';
+          } else if (lower === 'dcrb') {
+            p.station = 'DCRB';
+          } else if (u === 'Shidlagatta Town PS' || u === 'Shidlaghatta Town PS' || u === 'Sidlagatta Town PS') {
             p.station = 'Sidlaghatta Town PS';
           } else if (u === 'Shidlagatta Rural PS' || u === 'Shidlaghatta Rural PS' || u === 'Sidlagatta Rural PS') {
             p.station = 'Sidlaghatta Rural PS';
@@ -3053,7 +3339,9 @@ async function loadData() {
 function boot(){hydrateFilters();renderEmpDash();renderTxDash();renderSearch();if(activeTab==='reports')renderRpt(activeRpt);}
 
 function hydrateFilters(){
-  const ranks=[...new Set(DATA.employees.map(e=>e.rank).filter(Boolean))].sort();
+  const ranks=[...new Set(DATA.employees.map(e=>e.rank).filter(Boolean))].sort((a,b)=>{
+    return (RANK_SENIORITY[a] || 99) - (RANK_SENIORITY[b] || 99);
+  });
   const stations=[...new Set(DATA.employees.map(e=>e.currentUnit).filter(Boolean))].sort();
   const pr=$('fRank').value,ps=$('fStation').value;
   $('fRank').innerHTML=`<option value="">All Ranks</option>`+ranks.map(v=>`<option>${esc(v)}</option>`).join('');
@@ -3063,7 +3351,7 @@ function hydrateFilters(){
 function filtered(){
   const q=$('fQuick').value.trim().toLowerCase(),rk=$('fRank').value,st=$('fStation').value,el=$('fEligible').value;
   return DATA.employees.filter(e=>{
-    if (customKpiFilter === 'dpo' && (!e.currentUnit || !e.currentUnit.toLowerCase().includes('dpo'))) return false;
+    if (customKpiFilter === 'dpo' && (!e.currentUnit || !e.currentUnit.toLowerCase().includes('dpo') || e.currentUnit.toLowerCase().includes('sdpo'))) return false;
     if (customKpiFilter === 'special_branch' && (!e.currentUnit || (!e.currentUnit.toLowerCase().includes('dcrb') && !e.currentUnit.toLowerCase().includes('dsb')))) return false;
     if (customKpiFilter === 'circle_office' && (!e.currentUnit || (!e.currentUnit.toLowerCase().includes('cpi') && !e.currentUnit.toLowerCase().includes('circle')))) return false;
     if (customKpiFilter === 'pure_ps' && (!e.currentUnit || !e.currentUnit.toLowerCase().endsWith(' ps'))) return false;
@@ -3085,13 +3373,13 @@ function renderEmpDash(){
   const sts=[...new Set(emps.map(e=>e.currentUnit).filter(Boolean))];
   const sds=[...new Set(emps.map(e=>e.currentSubDivision).filter(Boolean))];
   
-  const dpoUnits = sts.filter(s => s.toLowerCase() === 'dpo' || s.toLowerCase().includes('dpo'));
+  const dpoUnits = sts.filter(s => s.toLowerCase() === 'dpo' || (s.toLowerCase().includes('dpo') && !s.toLowerCase().includes('sdpo')));
   const specialBranches = sts.filter(s => s.toLowerCase().includes('dcrb') || s.toLowerCase().includes('dsb'));
   const circleOffices = sts.filter(s => s.toLowerCase().includes('cpi') || s.toLowerCase().includes('circle'));
   const pureSts = sts.filter(s => s.toLowerCase().endsWith(' ps'));
   const darUnits = sts.filter(s => s.toLowerCase().includes('dar'));
 
-  const dpoStr = emps.filter(e => e.currentUnit && e.currentUnit.toLowerCase().includes('dpo')).length;
+  const dpoStr = emps.filter(e => e.currentUnit && e.currentUnit.toLowerCase().includes('dpo') && !e.currentUnit.toLowerCase().includes('sdpo')).length;
   const sbStr = emps.filter(e => e.currentUnit && (e.currentUnit.toLowerCase().includes('dcrb') || e.currentUnit.toLowerCase().includes('dsb'))).length;
   const sdpoStr = emps.filter(e => e.currentUnit && (e.currentUnit.toLowerCase().includes('dysp') || e.currentUnit.toLowerCase().includes('sdpo'))).length;
   const coStr = emps.filter(e => e.currentUnit && (e.currentUnit.toLowerCase().includes('cpi') || e.currentUnit.toLowerCase().includes('circle'))).length;
@@ -3143,6 +3431,127 @@ function renderTxDash(){
   const sds=[...new Set(emps.map(e=>e.currentSubDivision).filter(Boolean))];
   const sdL=sds.map(sd=>{const t=emps.filter(e=>e.currentSubDivision===sd).length;const d=emps.filter(e=>e.currentSubDivision===sd&&e.transferEligible==='Yes').length;return{n:sd,t,d,pct:t?Math.round(d/t*100):0};}).sort((a,b)=>b.d-a.d);const mxSdL=sdL[0]?.d||1;
   $('txSubdiv').innerHTML=sdL.length?sdL.map(s=>{const c=s.pct>=50?'bar-red':s.pct>=25?'bar-amber':'bar-green';return `<div class="bar-row"><div class="bar-lbl" title="${esc(s.n)}">${esc(s.n)}</div><div class="bar-track"><div class="bar-fill ${c}" style="width:${Math.round(s.d/mxSdL*100)}%"></div></div><div class="bar-n">${s.d}/${s.t}</div></div>`;}).join(''):'<div class="empty"><div class="empty-txt">No Sub-Division data</div></div>';
+
+  // ── Inject admin Transfer Applications Registry ───────────────────────────
+  const adminReg = $('txAdminRegistryContainer');
+  if (!adminReg) return;
+  const txRole = getRole();
+  const isTxAdmin = !getApiUrl() || txRole === 'Super Admin' || txRole === 'Admin';
+  if (!isTxAdmin) { adminReg.innerHTML = ''; return; }
+
+  adminReg.innerHTML = `
+    <div class="rpt-card">
+      <div class="rpt-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div class="rpt-title">📋 Transfer Applications Registry</div>
+          <div class="rpt-cnt" id="adminApplicationsCount">Loading applications…</div>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="showOnBehalfForm()">➕ Apply on Behalf of Officer</button>
+      </div>
+      <div class="rpt-filters" style="padding:15px;border-bottom:1px solid var(--bdr2);display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span class="rft-lbl">Search:</span>
+        <input type="text" id="trSearchInput" placeholder="Search by KGID, Name, Station…" oninput="filterTransferRequestsTable()" style="max-width:300px;min-height:30px;padding:5px 10px;">
+        <span class="rft-lbl" style="margin-left:10px;">Status:</span>
+        <div style="display:flex;gap:5px;" id="trStatusFilterChips">
+          <button class="chip act" onclick="filterTrStatus('All',this)">All</button>
+          <button class="chip" onclick="filterTrStatus('Pending',this)">Pending</button>
+          <button class="chip" onclick="filterTrStatus('Approved',this)">Approved</button>
+          <button class="chip" onclick="filterTrStatus('Rejected',this)">Rejected</button>
+          <button class="chip" onclick="filterTrStatus('Review',this)">Under Review</button>
+        </div>
+      </div>
+      <div class="rpt-body" style="padding:0;overflow-x:auto;">
+        <table class="sa-tbl dtbl" id="adminTransferRequestsTable">
+          <thead><tr>
+            <th>Date</th><th>Officer</th><th>Current Station</th>
+            <th>Preferences</th><th>Reason &amp; Remarks</th>
+            <th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="adminTransferRequestsBody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted);">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="onBehalfFormContainer" style="display:none;margin-top:20px;" class="rpt-card">
+      <div class="rpt-head" style="background:linear-gradient(135deg,rgba(234,179,8,.1),rgba(234,179,8,.03));border-bottom:1px solid var(--bdr2);">
+        <div class="rpt-title">📝 Apply on Behalf of Officer</div>
+        <div class="rpt-cnt">Fill officer details, previous postings, preferences and reason.</div>
+      </div>
+      <div class="rpt-body" style="padding:24px;">
+        <form id="onBehalfForm" onsubmit="saveOnBehalfRequest(event)">
+          <div class="transfer-section">
+            <div class="transfer-section-head">👮 Officer Identity</div>
+            <div style="padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+              <label class="flbl">Officer KGID *<input type="text" id="obKgid" placeholder="Enter KGID" required oninput="autoFillOfficerDetails()"></label>
+              <label class="flbl">Officer Name<input type="text" id="obName" placeholder="Auto-filled" readonly style="background:var(--surf2);color:var(--muted);"></label>
+              <label class="flbl">Rank<input type="text" id="obRank" placeholder="Auto-filled" readonly style="background:var(--surf2);color:var(--muted);"></label>
+              <label class="flbl">Current Station<input type="text" id="obCurrentStation" placeholder="Auto-filled" readonly style="background:var(--surf2);color:var(--muted);"></label>
+              <label class="flbl">Date of Birth (DOB)
+                <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:100%;">
+                  <input type="text" id="obDob" placeholder="DD-MM-YYYY" style="padding-right:34px; width:100%;" oninput="onDateInputMask(this, event)">
+                  <input type="date" style="position:absolute; right:8px; width:24px; height:24px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));">
+                  <span style="position:absolute; right:10px; pointer-events:none; font-size:16px;">📅</span>
+                </div>
+              </label>
+              <label class="flbl">Date of Appointment (DOA)
+                <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:100%;">
+                  <input type="text" id="obDoa" placeholder="DD-MM-YYYY" style="padding-right:34px; width:100%;" oninput="onDateInputMask(this, event)">
+                  <input type="date" style="position:absolute; right:8px; width:24px; height:24px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));">
+                  <span style="position:absolute; right:10px; pointer-events:none; font-size:16px;">📅</span>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="transfer-section">
+            <div class="transfer-section-head" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>📋 Previous Working Places</span>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="addObPosting()" style="font-size:12px;">＋ Add Place</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="prev-post-table">
+                <thead><tr><th>#</th><th>Station</th><th>From</th><th>To</th><th>Rank Held</th><th></th></tr></thead>
+                <tbody id="obPostingsTbody"><tr id="obPostingsEmpty"><td colspan="6" class="prev-post-empty">No entries. Click ＋ Add Place.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="transfer-section">
+            <div class="transfer-section-head">🔄 Transfer Details</div>
+            <div style="padding:14px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+              <label class="flbl">Transfer Category *
+                <select id="obTransferCategory" required>
+                  <option value="">— Select —</option>
+                  <option>Medical / Health Grounds</option><option>Family / Spouse Proximity</option>
+                  <option>Children Education</option><option>Mutual Transfer</option>
+                  <option>Own Request (General)</option><option>Administrative</option><option>Other</option>
+                </select>
+              </label>
+              <label class="flbl">Reason *<input type="text" id="obReason" placeholder="Brief reason…" required></label>
+            </div>
+            <div style="padding:0 14px 14px;">
+              <label class="flbl">Remarks<textarea id="obRemarks" rows="2" placeholder="Supporting details…"></textarea></label>
+            </div>
+          </div>
+          <div class="transfer-section">
+            <div class="transfer-section-head">🏢 Preferred Stations (1–3 required)</div>
+            <div style="padding:14px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+              ${[1,2,3,4,5].map(n=>`
+              <label class="flbl">
+                <span style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+                  <span style="background:var(--gold);color:#000;border-radius:50%;width:17px;height:17px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">${n}</span>
+                  Pref ${n}${n<=3?' *':''}
+                </span>
+                <select id="obPreference${n}" ${n<=3?'required':''}><option value="">— Choice ${n} —</option>${getStationsOptions('')}</select>
+              </label>`).join('')}
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+            <button type="button" class="btn btn-ghost" onclick="hideOnBehalfForm()">Cancel</button>
+            <button type="submit" class="btn btn-gold" style="padding:10px 24px;">📤 Submit Request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+  renderAdminTransferRequestsTable();
 }
 
 function handleKpiClick(lbl) {
@@ -3380,7 +3789,7 @@ function renderKpiView() {
   
   // 1. Filter by KPI category
   emps = emps.filter(e => {
-    if (f === 'dpo') return e.currentUnit && e.currentUnit.toLowerCase().includes('dpo');
+    if (f === 'dpo') return e.currentUnit && e.currentUnit.toLowerCase().includes('dpo') && !e.currentUnit.toLowerCase().includes('sdpo');
     if (f === 'special_branch') return e.currentUnit && (e.currentUnit.toLowerCase().includes('dcrb') || e.currentUnit.toLowerCase().includes('dsb'));
     if (f === 'circle_office') return e.currentUnit && (e.currentUnit.toLowerCase().includes('cpi') || e.currentUnit.toLowerCase().includes('circle'));
     if (f === 'pure_ps') return e.currentUnit && e.currentUnit.toLowerCase().endsWith(' ps');
@@ -3427,58 +3836,14 @@ function renderKpiView() {
     return;
   }
 
-  grid.innerHTML = emps.map(e => {
-    const initials = e.name ? e.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '👮';
-    const showPriority = e.priority === 'High' || e.priority === 'Medium';
-    const showDue = e.transferEligible === 'Yes';
-    const badgesHtml = (showPriority || showDue) ? `
-      <div class="emp-card-badges">
-        ${showPriority ? `<span class="badge b-${pClass(e.priority)}">Priority: ${text(e.priority)}</span>` : ''}
-        ${showDue ? `<span class="badge b-yes">Due: Yes</span>` : ''}
-      </div>
-    ` : '';
+  grid.innerHTML = emps.map(renderEmployeeCardHtml).join('');
 
-    const hasPhoto = e.sourceProfile && e.sourceProfile.photoUrl;
-    const avatarHtml = hasPhoto ?
-      `<img class="emp-card-avatar" src="${esc(e.sourceProfile.photoUrl)}" alt="${esc(e.name)}" />` :
-      `<div class="emp-card-avatar">${esc(initials)}</div>`;
-
-    return `
-      <div class="emp-card" onclick="openProfile('${esc(e.kgid)}')">
-        <div class="emp-card-body">
-          <div class="emp-card-header">
-            ${avatarHtml}
-            <div class="emp-card-info">
-              <div class="emp-card-name" title="${esc(e.name)}">${esc(e.name)}</div>
-              <div class="emp-card-rank">${esc(e.rank || '—')}</div>
-            </div>
-          </div>
-          <div class="emp-card-details">
-            <div class="emp-card-detail-item">
-              <span class="emp-card-detail-label">KGID:</span>
-              <span class="emp-card-detail-value">${esc(e.kgid)}</span>
-            </div>
-            <div class="emp-card-detail-item">
-              <span class="emp-card-detail-label">Station:</span>
-              <span class="emp-card-detail-value" title="${esc(e.currentUnit || '—')}">${esc(e.currentUnit || '—')}</span>
-            </div>
-            <div class="emp-card-detail-item">
-              <span class="emp-card-detail-label">Mobile:</span>
-              <span class="emp-card-detail-value">${esc(e.mobile || '—')}</span>
-            </div>
-          </div>
-        </div>
-        ${badgesHtml}
-      </div>
-    `;
-  }).join('');
-
-  if ($('profileModal').classList.contains('open') && selKgid) {
+  if (activeTab === 'profile-view' && selKgid) {
     const emp = DATA.employees.find(e => e.kgid === selKgid);
     if (emp) {
-      editing ? renderEditor(draft || emp, 'profileModalContent') : renderProfile(emp, 'profileModalContent');
+      editing ? renderEditor(draft || emp, 'profileFullPageContent') : renderProfile(emp, 'profileFullPageContent');
     } else {
-      closeProfileModal();
+      closeProfileFullPage();
     }
   }
 }
@@ -3509,79 +3874,37 @@ function renderSearch(){
     return;
   }
   
-  grid.innerHTML = emps.map(e => {
-    const initials = e.name ? e.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '👮';
-    const showPriority = e.priority === 'High' || e.priority === 'Medium';
-    const showDue = e.transferEligible === 'Yes';
-    const badgesHtml = (showPriority || showDue) ? `
-      <div class="emp-card-badges">
-        ${showPriority ? `<span class="badge b-${pClass(e.priority)}">Priority: ${text(e.priority)}</span>` : ''}
-        ${showDue ? `<span class="badge b-yes">Due: Yes</span>` : ''}
-      </div>
-    ` : '';
+  grid.innerHTML = emps.map(renderEmployeeCardHtml).join('');
 
-    const hasPhoto = e.sourceProfile && e.sourceProfile.photoUrl;
-    const avatarHtml = hasPhoto ?
-      `<img class="emp-card-avatar" src="${esc(e.sourceProfile.photoUrl)}" alt="${esc(e.name)}" />` :
-      `<div class="emp-card-avatar">${esc(initials)}</div>`;
-
-    return `
-      <div class="emp-card" onclick="openProfile('${esc(e.kgid)}')">
-        <div class="emp-card-body">
-          <div class="emp-card-header">
-            ${avatarHtml}
-            <div class="emp-card-info">
-              <div class="emp-card-name" title="${esc(e.name)}">${esc(e.name)}</div>
-              <div class="emp-card-rank">${esc(e.rank || '—')}</div>
-            </div>
-          </div>
-          <div class="emp-card-details">
-            <div class="emp-card-detail-item">
-              <span class="emp-card-detail-label">KGID:</span>
-              <span class="emp-card-detail-value">${esc(e.kgid)}</span>
-            </div>
-            <div class="emp-card-detail-item">
-              <span class="emp-card-detail-label">Station:</span>
-              <span class="emp-card-detail-value" title="${esc(e.currentUnit || '—')}">${esc(e.currentUnit || '—')}</span>
-            </div>
-            <div class="emp-card-detail-item">
-              <span class="emp-card-detail-label">Mobile:</span>
-              <span class="emp-card-detail-value">${esc(e.mobile || '—')}</span>
-            </div>
-          </div>
-        </div>
-        ${badgesHtml}
-      </div>
-    `;
-  }).join('');
-
-  if ($('profileModal').classList.contains('open') && selKgid) {
+  if (activeTab === 'profile-view' && selKgid) {
     const emp = DATA.employees.find(e => e.kgid === selKgid);
     if (emp) {
-      editing ? renderEditor(draft || emp, 'profileModalContent') : renderProfile(emp, 'profileModalContent');
+      editing ? renderEditor(draft || emp, 'profileFullPageContent') : renderProfile(emp, 'profileFullPageContent');
     } else {
-      closeProfileModal();
+      closeProfileFullPage();
     }
   }
 }
 
+let previousTab = 'search';
 function openProfile(kgid) {
   selKgid = kgid;
   editing = false;
   draft = null;
   const emp = DATA.employees.find(e => e.kgid === kgid);
-  renderProfile(emp, 'profileModalContent');
-  $('profileModal').classList.add('open');
+  if (activeTab !== 'profile-view') {
+    previousTab = activeTab;
+  }
+  renderProfile(emp, 'profileFullPageContent');
+  switchTab('profile-view');
 }
-function closeProfileModal() {
-  $('profileModal').classList.remove('open');
+function closeProfileFullPage() {
   editing = false;
   draft = null;
-  if (activeTab === 'kpi-view') {
-    renderKpiView();
-  } else {
-    renderSearch();
-  }
+  switchTab(previousTab);
+}
+function closeProfileModal() {
+  closeProfileFullPage();
 }
 
 function renderProfile(e, targetId = 'profileModalContent'){
@@ -3619,10 +3942,43 @@ function renderProfile(e, targetId = 'profileModalContent'){
       </div>
     </div>
     <div class="cs">${cs('👤','Basic Information',`<div class="fgrid">${f('KGID',e.kgid)}${f('Name',e.name)}${f('Rank',e.rank)}${f('Metal Number',sp.metalNumber)}${f('Mobile',e.mobile)}${f('Date of Birth',e.dob)}${f('Date of Appointment',e.doa)}${f('Home District',e.homeDistrict)}${f('Retirement Date',e.retirementDate)}${typeof e.retirementMonthsLeft==='number'?f('Months to Retirement',`<span class="${e.retirementMonthsLeft<=3?'r-urg':e.retirementMonthsLeft<=6?'r-soon':'r-ok'}">${e.retirementMonthsLeft}</span>`):f('Months to Retirement','—')}</div>`,true)}</div>
-    <div class="cs">${cs('📍','Current Posting',`<div class="fgrid">${f('District',e.currentDistrict)}${f('Sub Division',e.currentSubDivision)}${f('Station / Unit',e.currentUnit)}${f('Joined On',e.currentSince)}${f('Station Service',text(e.currentStationYears)+' yrs')}${f('Sub Division Service',text(e.subDivisionYears)+' yrs')}${f('District Service',text(e.districtServiceYears)+' yrs')}${f('Total Service',text(e.totalServiceYears)+' yrs')}</div>`,true)}</div>
+    <div class="cs">${cs('📍','Current Posting',`<div class="fgrid">${f('District',e.currentDistrict)}${f('Sub Division',e.currentSubDivision)}${f('Station / Unit',e.currentUnit)}${f('Joined On',e.currentSince)}${f('Station Service',text(e.currentStationYears)+' yrs')}${f('Sub Division Service',text(e.subDivisionYears)+' yrs')}${f('District Service',text(e.districtServiceYears)+' yrs')}${f('Total Service',text(e.totalServiceYears)+' yrs')}${f('Type of Transfer',e.typeOfTransfer === 'OOD' ? '<span style="color:var(--pur); font-weight:700">OOD</span>' : 'Regular')}</div>`,true)}</div>
     <div class="cs">${cs('📜','Complete Posting History',`<div style="overflow-x:auto"><table class="dtbl"><thead><tr><th>Sl</th><th>From</th><th>To</th><th>Station</th><th>Sub Division</th><th>District</th><th>Rank</th><th>Duration</th><th>Order</th></tr></thead><tbody>${po.length?po.map((p,i)=>`<tr><td>${i+1}</td><td>${text(p.from)}</td><td>${text(p.to)}</td><td>${text(p.station)}</td><td>${text(p.subDivision)}</td><td>${text(p.district)}</td><td>${text(p.rank)}</td><td>${text(p.durationYears)} yrs</td><td>${text(p.orderNumber)}</td></tr>`).join(''):`<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:18px">No posting history</td></tr>`}</tbody></table></div>`)}</div>
     <div class="cs">${cs('🔄','Transfer Analysis',`<div class="fgrid">${f('Total Service',text(e.totalServiceYears)+' yrs')}${f('Stations Served',po.length)}${f('Longest Posting',text(e.longestPostingYears)+' yrs')}${f('Eligible',e.transferEligible)}${f('Priority',`<span class="badge b-${pClass(e.priority)}" style="font-size:12px">${text(e.priority)}</span>`)}${f('Station Years',text(e.currentStationYears))}</div>`)}</div>
-    <div class="cs">${cs('🗃','Source Profile',`<div class="fgrid">${f('Blood Group',sp.bloodGroup)}${f('Email',sp.email)}${f('Mobile 2',sp.mobile2)}${f('Height',sp.height)}${f('Weight',sp.weight)}${f('Caste',sp.caste)}${f('Sub-Caste',sp.subCaste)}${f('Family Details',sp.familyDetails)}${f('Education Details',sp.educationDetails)}${f('Photo URL',sp.photoUrl)}${f('Approved',sp.isApproved)}${f('Admin',sp.isAdmin)}${f('Created',sp.createdAt)}${f('Updated',sp.updatedAt)}</div>`)}</div>
+    <div class="cs">${cs('🗃','Source Profile',`<div class="fgrid">${f('Blood Group',sp.bloodGroup)}${f('Email',sp.email)}${f('Mobile 2',sp.mobile2)}${f('Height',sp.height)}${f('Weight',sp.weight)}${f('Caste',sp.caste)}${f('Sub-Caste',sp.subCaste)}${f('Photo URL',sp.photoUrl)}${f('Approved',sp.isApproved)}${f('Admin',sp.isAdmin)}${f('Created',sp.createdAt)}${f('Updated',sp.updatedAt)}</div>`)}</div>
+    <div class="cs">${cs('👨‍👩‍👧‍👦','Family Details', (() => {
+      const familyList = getFamilyList(sp.familyDetails);
+      return familyList.length ? `
+        <div style="overflow-x:auto">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Relation</th>
+                <th>Contact</th>
+                <th>Education</th>
+                <th>Status</th>
+                <th>Sector</th>
+                <th>Work Place</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${familyList.map(f => `
+                <tr>
+                  <td><strong>${esc(f.name)}</strong></td>
+                  <td>${esc(f.relation)}</td>
+                  <td>${esc(f.contact || '—')}</td>
+                  <td>${esc(f.education || '—')}</td>
+                  <td><span class="badge ${f.status === 'Working' ? 'b-lo' : 'b-neu'}" style="${f.status === 'Working' ? '' : 'background:var(--surf2); border-color:var(--bdr2); color:var(--txt); border:1px solid'}">${esc(f.status || 'Dependent')}</span></td>
+                  <td>${esc(f.sector || '—')}</td>
+                  <td>${esc(f.workPlace || '—')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : `<div style="color:var(--muted); font-size:12.5px; padding:10px 0; text-align:center;">No family details recorded.</div>`;
+    })())}</div>
     <div class="cs">${cs('📊','District Snapshot',`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${miniTbl('Station Strength',DATA.summary.stations)}${miniTbl('Rank Distribution',DATA.summary.ranks)}${miniTbl('Sub-Division',DATA.summary.subdivisions)}</div>`)}</div>`;
   $(targetId).querySelectorAll('.cs-trigger').forEach(b=>b.addEventListener('click',()=>{b.classList.toggle('open');b.nextElementSibling.classList.toggle('open');}));
 }
@@ -3648,12 +4004,23 @@ function startEdit(targetId = 'profileModalContent'){
       editing: false
     }));
   }
+  draftFamily = getFamilyList((draft && draft.sourceProfile && draft.sourceProfile.familyDetails) || '');
   renderEditor(draft, targetId);
 }
 function promptDel(){const e=DATA.employees.find(e=>e.kgid===selKgid);if(e){delPending=e.kgid;$('delBody').textContent=`Delete "${e.name}" (${e.kgid})? Backup created automatically.`;$('delModal').classList.add('open');}}
 function doPrint(){const e=DATA.employees.find(e=>e.kgid===selKgid);if(e)printProfile(e);}
 
-function printProfile(e){const sp=e.sourceProfile||{},po=e.postings||[];const logoSrc=document.querySelector('.brand-logo')?.src||'logo.png';const w=window.open('','_blank');w.document.write(`<!doctype html><html><head><title>${e.name}</title><style>body{font-family:Arial,sans-serif;font-size:12px;color:#111;padding:16px}h1{font-size:18px;margin-bottom:4px}h2{font-size:13px;margin:14px 0 5px;color:#1a2744;border-bottom:1px solid #ccc;padding-bottom:3px}table{width:100%;border-collapse:collapse;margin-bottom:10px}th,td{border:1px solid #ccc;padding:5px 7px;text-align:left}th{background:#e8f0f8;font-weight:700;font-size:10px;text-transform:uppercase}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}.fc{border:1px solid #ccc;padding:6px;border-radius:3px}.lbl{font-size:9px;color:#666;font-weight:700;text-transform:uppercase;margin-bottom:2px}@media print{body{padding:0}}</style></head><body><div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:15px;border-bottom:2px solid #1a2744;padding-bottom:10px"><div><h1 style="margin:0 0 4px;font-size:18px">${esc(e.name)}</h1><p style="color:#555;font-size:11px;margin:0">${esc(e.kgid)} · ${esc(e.rank)} · ${esc(e.currentUnit||'—')} · Priority: ${e.priority}</p></div><img src="${logoSrc}" style="width:55px;height:55px;object-fit:cover;border-radius:50%;border:1px solid #ccc" /></div><h2>Basic Information</h2><div class="grid">${[['KGID',e.kgid],['Rank',e.rank],['Metal Number',sp.metalNumber],['Mobile',e.mobile],['DOB',e.dob],['DOA',e.doa],['Home District',e.homeDistrict],['Retirement',e.retirementDate]].map(([l,v])=>`<div class="fc"><div class="lbl">${l}</div><div>${v||'—'}</div></div>`).join('')}</div><h2>Current Posting</h2><div class="grid">${[['District',e.currentDistrict],['Sub-Division',e.currentSubDivision],['Station',e.currentUnit],['Since',e.currentSince],['Station Yrs',e.currentStationYears],['Total Yrs',e.totalServiceYears]].map(([l,v])=>`<div class="fc"><div class="lbl">${l}</div><div>${v||'—'}</div></div>`).join('')}</div><h2>Source Profile</h2><div class="grid">${[['Blood Group',sp.bloodGroup],['Email',sp.email],['Mobile 2',sp.mobile2],['Height',sp.height],['Weight',sp.weight],['Caste',sp.caste],['Sub-Caste',sp.subCaste],['Family Details',sp.familyDetails],['Education Details',sp.educationDetails]].map(([l,v])=>`<div class="fc"><div class="lbl">${l}</div><div>${v||'—'}</div></div>`).join('')}</div><h2>Posting History</h2><table><thead><tr><th>Sl</th><th>From</th><th>To</th><th>Station</th><th>Sub-Division</th><th>District</th><th>Rank</th><th>Duration</th><th>Order</th></tr></thead><tbody>${po.map((p,i)=>`<tr><td>${i+1}</td><td>${p.from||'—'}</td><td>${p.to||'—'}</td><td>${p.station||'—'}</td><td>${p.subDivision||'—'}</td><td>${p.district||'—'}</td><td>${p.rank||'—'}</td><td>${p.durationYears||'—'}</td><td>${p.orderNumber||'—'}</td></tr>`).join('')||'<tr><td colspan="9">No history</td></tr>'}</tbody></table><p style="font-size:10px;color:#aaa;margin-top:16px">Printed: ${new Date().toLocaleString('en-IN')} | Chikkaballapura Police DPDMS</p><script>window.print();<\/script></body></html>`);}
+function printProfile(e){
+  const sp=e.sourceProfile||{},po=e.postings||[];
+  const logoSrc=document.querySelector('.brand-logo')?.src||'logo.png';
+  const formatFamilyPrint = raw => {
+    const list = getFamilyList(raw);
+    if (!list.length) return '—';
+    if (list.length === 1 && list[0].relation === 'Legacy Record') return list[0].name;
+    return list.map(fm => `${fm.name} (${fm.relation})`).join(', ');
+  };
+  const w=window.open('','_blank');
+  w.document.write(`<!doctype html><html><head><title>${e.name}</title><style>body{font-family:Arial,sans-serif;font-size:12px;color:#111;padding:16px}h1{font-size:18px;margin-bottom:4px}h2{font-size:13px;margin:14px 0 5px;color:#1a2744;border-bottom:1px solid #ccc;padding-bottom:3px}table{width:100%;border-collapse:collapse;margin-bottom:10px}th,td{border:1px solid #ccc;padding:5px 7px;text-align:left}th{background:#e8f0f8;font-weight:700;font-size:10px;text-transform:uppercase}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}.fc{border:1px solid #ccc;padding:6px;border-radius:3px}.lbl{font-size:9px;color:#666;font-weight:700;text-transform:uppercase;margin-bottom:2px}@media print{body{padding:0}}</style></head><body><div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:15px;border-bottom:2px solid #1a2744;padding-bottom:10px"><div><h1 style="margin:0 0 4px;font-size:18px">${esc(e.name)}</h1><p style="color:#555;font-size:11px;margin:0">${esc(e.kgid)} · ${esc(e.rank)} · ${esc(e.currentUnit||'—')} · Priority: ${e.priority}</p></div><img src="${logoSrc}" style="width:55px;height:55px;object-fit:cover;border-radius:50%;border:1px solid #ccc" /></div><h2>Basic Information</h2><div class="grid">${[['KGID',e.kgid],['Rank',e.rank],['Metal Number',sp.metalNumber],['Mobile',e.mobile],['DOB',e.dob],['DOA',e.doa],['Home District',e.homeDistrict],['Retirement',e.retirementDate]].map(([l,v])=>`<div class="fc"><div class="lbl">${l}</div><div>${v||'—'}</div></div>`).join('')}</div><h2>Current Posting</h2><div class="grid">${[['District',e.currentDistrict],['Sub-Division',e.currentSubDivision],['Station',e.currentUnit],['Since',e.currentSince],['Station Yrs',e.currentStationYears],['Total Yrs',e.totalServiceYears],['Type of Transfer',e.typeOfTransfer||'Regular']].map(([l,v])=>`<div class="fc"><div class="lbl">${l}</div><div>${v||'—'}</div></div>`).join('')}</div><h2>Source Profile</h2><div class="grid">${[['Blood Group',sp.bloodGroup],['Email',sp.email],['Mobile 2',sp.mobile2],['Height',sp.height],['Weight',sp.weight],['Caste',sp.caste],['Sub-Caste',sp.subCaste],['Family Details',formatFamilyPrint(sp.familyDetails)]].map(([l,v])=>`<div class="fc"><div class="lbl">${l}</div><div>${v||'—'}</div></div>`).join('')}</div><h2>Posting History</h2><table><thead><tr><th>Sl</th><th>From</th><th>To</th><th>Station</th><th>Sub-Division</th><th>District</th><th>Rank</th><th>Duration</th><th>Order</th></tr></thead><tbody>${po.map((p,i)=>`<tr><td>${i+1}</td><td>${p.from||'—'}</td><td>${p.to||'—'}</td><td>${p.station||'—'}</td><td>${p.subDivision||'—'}</td><td>${p.district||'—'}</td><td>${p.rank||'—'}</td><td>${p.durationYears||'—'}</td><td>${p.orderNumber||'—'}</td></tr>`).join('')||'<tr><td colspan="9">No history</td></tr>'}</tbody></table><p style="font-size:10px;color:#aaa;margin-top:16px">Printed: ${new Date().toLocaleString('en-IN')} | Chikkaballapura Police DPDMS</p><script>window.print();<\/script></body></html>`);}
 
 /* ── Edit Form ─────────────────────────────────────── */
 function uploadLocalPhoto(input) {
@@ -3715,8 +4082,6 @@ function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.source
 
   function ei(id, label, val, ph = '', req = false) {
     const isDate = (ph === 'dd-mm-yyyy');
-    const type = isDate ? 'date' : 'text';
-    const displayVal = isDate ? toIsoDate(val) : val;
     const isFieldLocked = lockedList.includes(id);
     
     const lockHtml = isAdminOrSuper ? `
@@ -3733,13 +4098,31 @@ function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.source
       disabledAttr = 'disabled';
     }
 
+    if (isDate) {
+      const displayVal = toDisplayDate(val);
+      const isoVal = toIsoDate(val);
+      return `
+        <label class="flbl">
+          <span style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <span>${esc(label)}</span>
+            ${lockHtml}
+          </span>
+          <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:100%;">
+            <input type="text" id="f_${id}" placeholder="DD-MM-YYYY" value="${esc(displayVal||'')}" style="padding-right:34px; width:100%;" ${req?'required':''} ${disabledAttr} oninput="onDateInputMask(this, event)" />
+            <input type="date" style="position:absolute; right:8px; width:24px; height:24px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));" value="${esc(isoVal||'')}" ${disabledAttr}>
+            <span style="position:absolute; right:10px; pointer-events:none; font-size:16px;">📅</span>
+          </div>
+        </label>
+      `;
+    }
+
     return `
       <label class="flbl">
         <span style="display:flex; justify-content:space-between; align-items:center; width:100%;">
           <span>${esc(label)}</span>
           ${lockHtml}
         </span>
-        <input type="${type}" id="f_${id}" value="${esc(displayVal||'')}" ${ph && !isDate ? `placeholder="${esc(ph)}"` : ''} ${req?'required':''} ${disabledAttr} />
+        <input type="text" id="f_${id}" value="${esc(val||'')}" ${ph ? `placeholder="${esc(ph)}"` : ''} ${req?'required':''} ${disabledAttr} />
       </label>
     `;
   }
@@ -3774,11 +4157,21 @@ function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.source
   ` : '';
   const photoUrlDisabled = (role === 'User' && photoUrlLocked) ? 'disabled' : '';
 
+  const postingsLocked = lockedList.includes('postings');
+  const postingsLockHtml = isAdminOrSuper ? `
+    <label class="lock-toggle" style="display:inline-flex; align-items:center; gap:2px; cursor:pointer; user-select:none; font-size:11px; font-weight:normal; text-transform:none; letter-spacing:normal; margin-left:8px;" title="${postingsLocked ? 'Posting History is locked' : 'Posting History is unlocked'}">
+      <input type="checkbox" class="lock-chk" data-field-id="postings" ${postingsLocked ? 'checked' : ''} onchange="onPostingsLockChange(this)" style="display:none; width:auto; min-height:unset;" />
+      <span class="lock-icon" style="opacity: ${postingsLocked ? '1' : '0.45'}; transition: opacity var(--trans);">${postingsLocked ? '🔒' : '🔓'}</span>
+    </label>
+  ` : '';
+
+  const rankDisabled = (role === 'User') ? 'disabled' : '';
+
   $(targetId).innerHTML=`<div class="prof-hero"><div><div class="prof-name">${isNew?'➕ Add New Employee':'✏️ Edit Employee'}</div><div class="prof-meta">${DATA.editable?'Saves directly to Excel.':'Live dashboard required.'}</div></div><div class="prof-acts"><button class="btn btn-ghost btn-sm" onclick="cancelEdit('${esc(targetId)}')">✕ Cancel</button></div></div>
     <form class="eform" id="empForm" onsubmit="saveEmp(event, '${esc(targetId)}')"><div class="ef-notice" id="efNotice"></div><div class="dup-warn" id="dupWarn"></div><input type="hidden" id="f_origKgid" value="${esc(e&&e.kgid||'')}" />
-    <div class="efsec"><div class="efsec-title">👤 Basic Information</div></div>${ei('kgid','KGID',e&&e.kgid,'',true)}${ei('name','Employee Name',e&&e.name,'',true)}${ei('rank','Rank',e&&e.rank)}${ei('metalNumber','Metal Number',sp.metalNumber)}${ei('mobile','Mobile Number',e&&e.mobile)}${ei('dob','Date of Birth',e&&e.dob,'dd-mm-yyyy')}${ei('doa','Date of Appointment',e&&e.doa,'dd-mm-yyyy')}${ei('homeDistrict','Home District',e&&e.homeDistrict||'Chikkaballapura')}
-    <div class="efsec"><div class="efsec-title">📍 Current Posting</div></div>${ei('currentDistrict','Current District',e&&e.currentDistrict||'Chikkaballapura')}${ei('currentSubDivision','Current Sub Division',e&&e.currentSubDivision)}${ei('currentUnit','Police Station / Unit',e&&e.currentUnit)}${ei('currentSince','Joining Date',e&&e.currentSince,'dd-mm-yyyy')}${ei('orderNumber','Transfer Order Number','')}
-    <div class="efsec"><div class="efsec-title">📜 Past Posting History</div></div>
+    <div class="efsec"><div class="efsec-title">👤 Basic Information</div></div>${ei('kgid','KGID',e&&e.kgid,'',true)}${ei('name','Employee Name',e&&e.name,'',true)}<label class="flbl">Rank<select id="f_rank" ${rankDisabled}><option value="">— Select Rank —</option>${STANDARD_RANKS.map(r=>`<option value="${esc(r)}" ${(e&&e.rank===r)?'selected':''}>${esc(r)}</option>`).join('')}</select></label>${ei('metalNumber','Metal Number',sp.metalNumber)}${ei('mobile','Mobile Number',e&&e.mobile)}${ei('dob','Date of Birth',e&&e.dob,'dd-mm-yyyy')}${ei('doa','Date of Appointment',e&&e.doa,'dd-mm-yyyy')}${ei('homeDistrict','Home District',e&&e.homeDistrict||'Chikkaballapura')}
+    <div class="efsec"><div class="efsec-title">📍 Current Posting</div></div>${ei('currentDistrict','Current District',e&&e.currentDistrict||'Chikkaballapura')}<label class="flbl">Current Sub Division<select id="f_currentSubDivision"><option value="">— Select Sub Division —</option>${getSubdivisionsOptions(e&&e.currentSubDivision)}</select></label><label class="flbl">Police Station / Unit<select id="f_currentUnit" onchange="onCurrentUnitChange()"><option value="">— Select Station —</option>${getStationsOptions(e&&e.currentUnit)}</select></label>${ei('currentSince','Joining Date',e&&e.currentSince,'dd-mm-yyyy')}${ei('orderNumber','Transfer Order Number','')}<label class="flbl">Type of Transfer<select id="f_typeOfTransfer"><option value="Regular" ${(!e || e.typeOfTransfer==='Regular')?'selected':''}>Regular</option><option value="OOD" ${(e && e.typeOfTransfer==='OOD')?'selected':''}>OOD</option></select></label>
+    <div class="efsec"><div class="efsec-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;"><span>📜 Past Posting History</span>${postingsLockHtml}</div></div>
     <div class="hist-container" id="editorHistoryContainer"></div>
     ${showHistEdit ? `<div class="hist-add-btn-wrap"><button type="button" class="btn btn-ghost btn-sm" onclick="addDraftPosting('${esc(targetId)}')">＋ Add Past Posting</button></div>` : ''}
     <div class="efsec"><div class="efsec-title">🗃 Source Profile</div></div>${ei('bloodGroup','Blood Group',sp.bloodGroup)}${ei('email','Email',sp.email)}${ei('mobile2','Mobile 2',sp.mobile2)}${ei('height','Height',sp.height,'e.g. 175 cm')}${ei('weight','Weight',sp.weight,'e.g. 70 kg')}
@@ -3804,7 +4197,9 @@ function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.source
     <label class="flbl" id="f_subCasteOtherContainer" style="display:none">Specify Sub-Caste
       <input id="f_subCasteOther" placeholder="Enter sub-caste name" ${subCasteDisabled} />
     </label>
-    ${ei('familyDetails','Family Details',sp.familyDetails)}${ei('educationDetails','Education Details',sp.educationDetails)}
+    <div class="efsec"><div class="efsec-title">👨‍👩‍👧‍👦 Family Details</div></div>
+    <div class="hist-container" id="editorFamilyContainer"></div>
+    <div class="hist-add-btn-wrap" style="margin-bottom: 8px;"><button type="button" class="btn btn-ghost btn-sm" id="addFamilyBtn" onclick="addDraftFamilyMember()">＋ Add Family Member</button></div>
     <div style="grid-column: span 2; display: flex; align-items: flex-end; gap: 12px">
       <div id="editorPhotoPreview" style="width: 50px; height: 50px; border-radius: 50%; background: var(--surf3); border: 2.5px solid var(--gold-lt); flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden">
         ${sp.photoUrl ? `<img src="${esc(sp.photoUrl)}" style="width: 100%; height: 100%; object-fit: cover" />` : `<span style="font-size: 20px">👮</span>`}
@@ -3828,11 +4223,14 @@ function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.source
   ['kgid','mobile','mobile2','email'].forEach(id=>{const el=$('f_'+id);if(el)el.addEventListener('input',queueDup);});queueDup();
   
   // Disable fields if the user role is a regular 'User'
+  draftFamilyLocked = lockedList.includes('familyDetails');
+  draftHistoryLocked = lockedList.includes('postings');
   setTimeout(() => {
     renderDraftPostings(targetId);
+    renderDraftFamily();
     updateSubCasteDropdown(sp.subCaste || '');
     if (getApiUrl() && role === 'User') {
-      const allowed = ['f_mobile', 'f_mobile2', 'f_email', 'f_bloodGroup', 'f_height', 'f_weight', 'f_caste', 'f_subCaste', 'f_subCasteOther', 'f_familyDetails', 'f_educationDetails', 'f_photoUrl', 'f_photoFile'];
+      const allowed = ['f_mobile', 'f_mobile2', 'f_email', 'f_bloodGroup', 'f_height', 'f_weight', 'f_caste', 'f_subCaste', 'f_subCasteOther', 'f_familyDetails', 'f_photoUrl', 'f_photoFile'];
       const inputs = $(targetId).querySelectorAll('input, select, textarea');
       inputs.forEach(input => {
         if (!allowed.includes(input.id)) {
@@ -3849,6 +4247,15 @@ function renderEditor(e, targetId = 'profileModalContent'){const sp=(e&&e.source
   }, 10);
 }
 
+function onPostingsLockChange(chk) {
+  const isLocked = chk.checked;
+  chk.nextElementSibling.textContent = isLocked ? '🔒' : '🔓';
+  chk.nextElementSibling.style.opacity = isLocked ? '1' : '0.45';
+  chk.parentElement.title = isLocked ? 'Posting History is locked' : 'Posting History is unlocked';
+  draftHistoryLocked = isLocked;
+  renderDraftPostings(editing ? 'profileFullPageContent' : 'profileModalContent');
+}
+
 function renderDraftPostings(targetId = 'profileModalContent') {
   const container = $('editorHistoryContainer');
   if (!container) return;
@@ -3859,7 +4266,7 @@ function renderDraftPostings(targetId = 'profileModalContent') {
   }
   
   const role = getRole();
-  const showHistEdit = !getApiUrl() || role === 'Super Admin' || role === 'Admin';
+  const showHistEdit = (!getApiUrl() || role === 'Super Admin' || role === 'Admin') && !draftHistoryLocked;
   
   container.innerHTML = draftPostings.map((p, idx) => {
     if (p.editing) {
@@ -3868,8 +4275,8 @@ function renderDraftPostings(targetId = 'profileModalContent') {
           <div class="hist-edit-grid">
             <label>From Date <input type="date" id="h_from_${idx}" value="${toIsoDate(p.from)}" required /></label>
             <label>To Date <input type="date" id="h_to_${idx}" value="${toIsoDate(p.to)}" required /></label>
-            <label>Police Station / Unit <input type="text" id="h_station_${idx}" value="${esc(p.station)}" required /></label>
-            <label>Sub Division <input type="text" id="h_subDivision_${idx}" value="${esc(p.subDivision)}" /></label>
+            <label>Police Station / Unit <select id="h_station_${idx}" required onchange="onPastUnitChange(${idx})"><option value="">— Select Station —</option>${getStationsOptions(p.station)}</select></label>
+            <label>Sub Division <select id="h_subDivision_${idx}"><option value="">— Select Sub Division —</option>${getSubdivisionsOptions(p.subDivision)}</select></label>
             <label>District <input type="text" id="h_district_${idx}" value="${esc(p.district || 'Chikkaballapura')}" required /></label>
             <label>Rank Held <input type="text" id="h_rank_${idx}" value="${esc(p.rank)}" required /></label>
             <label style="grid-column: span 3">Order Number / Notes <input type="text" id="h_order_${idx}" value="${esc(p.orderNumber)}" style="width:100%" /></label>
@@ -3979,10 +4386,212 @@ function deleteDraftPosting(idx, targetId = 'profileModalContent') {
   renderDraftPostings(targetId);
 }
 
+/* ── Family Details Editor Helpers ── */
+function getFamilyList(familyDetailsRaw) {
+  if (!familyDetailsRaw) return [];
+  try {
+    const parsed = JSON.parse(familyDetailsRaw);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (e) {}
+  if (typeof familyDetailsRaw === 'string' && familyDetailsRaw.trim()) {
+    return [{
+      name: familyDetailsRaw,
+      relation: 'Legacy Record',
+      contact: '—',
+      education: '—',
+      status: '—',
+      sector: '—',
+      workPlace: '—'
+    }];
+  }
+  return [];
+}
+
+function renderDraftFamily() {
+  const container = $('editorFamilyContainer');
+  if (!container) return;
+  
+  if (draftFamily.length === 0) {
+    draftFamily.push({
+      name: '',
+      relation: '',
+      contact: '',
+      education: '',
+      status: 'Dependent',
+      sector: '—',
+      workPlace: ''
+    });
+  }
+  
+  const role = getRole();
+  const isFamilyLocked = draftFamilyLocked && role === 'User';
+  
+  container.innerHTML = `
+    <div style="overflow-x: auto; width: 100%; border: 1px solid var(--bdr); border-radius: var(--r-md); background: var(--surf); margin-bottom: 8px;">
+      <table class="dtbl family-edit-table" style="margin: 0; width: 100%; border-collapse: collapse; min-width: 900px;">
+        <thead>
+          <tr style="background: var(--surf2);">
+            <th style="padding: 10px; border-bottom: 2px solid var(--bdr); font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); text-align: left;">Name</th>
+            <th style="padding: 10px; border-bottom: 2px solid var(--bdr); font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); text-align: left; width: 140px;">Relation</th>
+            <th style="padding: 10px; border-bottom: 2px solid var(--bdr); font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); text-align: left; width: 130px;">Contact Number</th>
+            <th style="padding: 10px; border-bottom: 2px solid var(--bdr); font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); text-align: left;">Education</th>
+            <th style="padding: 10px; border-bottom: 2px solid var(--bdr); font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); text-align: left; width: 160px;">Working / Dependent</th>
+            <th style="padding: 10px; border-bottom: 2px solid var(--bdr); font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); text-align: left; width: 140px;">Govt / Private</th>
+            <th style="padding: 10px; border-bottom: 2px solid var(--bdr); font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); text-align: left;">Place of Work</th>
+            <th style="padding: 10px; border-bottom: 2px solid var(--bdr); font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); text-align: center; width: 50px;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="familyTableBody">
+          ${draftFamily.map((f, idx) => {
+            const isWorking = f.status === 'Working';
+            const disableActions = isFamilyLocked;
+            return `
+              <tr class="family-row" data-idx="${idx}">
+                <td style="padding: 6px; border-bottom: 1px solid var(--bdr);">
+                  <input type="text" class="fm-name" value="${esc(f.name)}" placeholder="Enter Name" required style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px;" ${disableActions ? 'disabled' : ''} />
+                </td>
+                <td style="padding: 6px; border-bottom: 1px solid var(--bdr);">
+                  <select class="fm-relation" required style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px;" ${disableActions ? 'disabled' : ''}>
+                    <option value="">— Select —</option>
+                    <option value="Spouse" ${f.relation === 'Spouse' ? 'selected' : ''}>Spouse</option>
+                    <option value="Son" ${f.relation === 'Son' ? 'selected' : ''}>Son</option>
+                    <option value="Daughter" ${f.relation === 'Daughter' ? 'selected' : ''}>Daughter</option>
+                    <option value="Father" ${f.relation === 'Father' ? 'selected' : ''}>Father</option>
+                    <option value="Mother" ${f.relation === 'Mother' ? 'selected' : ''}>Mother</option>
+                    <option value="Other" ${!['Spouse','Son','Daughter','Father','Mother'].includes(f.relation) && f.relation ? 'selected' : ''}>Other</option>
+                  </select>
+                </td>
+                <td style="padding: 6px; border-bottom: 1px solid var(--bdr);">
+                  <input type="text" class="fm-contact" value="${esc(f.contact || '')}" placeholder="Contact Number" style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px;" ${disableActions ? 'disabled' : ''} />
+                </td>
+                <td style="padding: 6px; border-bottom: 1px solid var(--bdr);">
+                  <input type="text" class="fm-education" value="${esc(f.education || '')}" placeholder="Education" style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px;" ${disableActions ? 'disabled' : ''} />
+                </td>
+                <td style="padding: 6px; border-bottom: 1px solid var(--bdr);">
+                  <select class="fm-status" onchange="onFamilyStatusChange(${idx}, this)" style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px;" ${disableActions ? 'disabled' : ''}>
+                    <option value="Dependent" ${f.status === 'Dependent' ? 'selected' : ''}>Dependent</option>
+                    <option value="Working" ${f.status === 'Working' ? 'selected' : ''}>Working</option>
+                  </select>
+                </td>
+                <td style="padding: 6px; border-bottom: 1px solid var(--bdr);">
+                  <select class="fm-sector" id="fm_sector_select_${idx}" ${isWorking && !disableActions ? '' : 'disabled'} style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px; opacity: ${isWorking ? '1' : '0.5'};">
+                    <option value="—" ${f.sector === '—' || !f.sector ? 'selected' : ''}>—</option>
+                    <option value="Govt" ${f.sector === 'Govt' ? 'selected' : ''}>Govt</option>
+                    <option value="Private" ${f.sector === 'Private' ? 'selected' : ''}>Private</option>
+                  </select>
+                </td>
+                <td style="padding: 6px; border-bottom: 1px solid var(--bdr);">
+                  <input type="text" class="fm-workPlace" id="fm_workPlace_input_${idx}" value="${esc(f.workPlace || '')}" placeholder="Place of Work" ${isWorking && !disableActions ? '' : 'disabled'} style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px; opacity: ${isWorking ? '1' : '0.5'};" />
+                </td>
+                <td style="padding: 6px; border-bottom: 1px solid var(--bdr); text-align: center;">
+                  <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red); padding: 4px 8px;" onclick="deleteDraftFamilyRow(${idx})" ${disableActions ? 'disabled' : ''}>🗑</button>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  const addFamilyBtn = $('addFamilyBtn');
+  if (addFamilyBtn) addFamilyBtn.style.display = isFamilyLocked ? 'none' : 'inline-block';
+}
+
+function onFamilyStatusChange(idx, selectEl) {
+  const status = selectEl.value;
+  const row = selectEl.closest('tr');
+  const sectorSelect = row.querySelector('.fm-sector');
+  const workInput = row.querySelector('.fm-workPlace');
+
+  if (status === 'Working') {
+    sectorSelect.disabled = false;
+    sectorSelect.style.opacity = '1';
+    workInput.disabled = false;
+    workInput.style.opacity = '1';
+  } else {
+    sectorSelect.disabled = true;
+    sectorSelect.value = '—';
+    sectorSelect.style.opacity = '0.5';
+    workInput.disabled = true;
+    workInput.value = '';
+    workInput.style.opacity = '0.5';
+  }
+}
+
+function getFamilyListFromDOM() {
+  const rows = document.querySelectorAll('#familyTableBody .family-row');
+  const familyList = [];
+  let validationError = null;
+
+  rows.forEach((row, index) => {
+    const name = row.querySelector('.fm-name').value.trim();
+    const relation = row.querySelector('.fm-relation').value;
+    const contact = row.querySelector('.fm-contact').value.trim();
+    const education = row.querySelector('.fm-education').value.trim();
+    const status = row.querySelector('.fm-status').value;
+    const sector = row.querySelector('.fm-sector').value;
+    const workPlace = row.querySelector('.fm-workPlace').value.trim();
+
+    const hasAnyValue = name || relation || contact || education || (status === 'Working') || (sector !== '—') || workPlace;
+    
+    if (hasAnyValue) {
+      if (!name) {
+        validationError = `Row ${index + 1}: Name is required for family member.`;
+      } else if (!relation) {
+        validationError = `Row ${index + 1} (${name}): Relation is required.`;
+      }
+      
+      familyList.push({
+        name,
+        relation,
+        contact,
+        education,
+        status,
+        sector: status === 'Working' ? sector : '—',
+        workPlace: status === 'Working' ? workPlace : ''
+      });
+    }
+  });
+
+  if (validationError) {
+    alert(validationError);
+    return null;
+  }
+  return familyList;
+}
+
+function addDraftFamilyMember() {
+  const currentList = getFamilyListFromDOM();
+  if (currentList === null) return;
+  
+  draftFamily = currentList;
+  draftFamily.push({
+    name: '',
+    relation: '',
+    contact: '',
+    education: '',
+    status: 'Dependent',
+    sector: '—',
+    workPlace: ''
+  });
+  renderDraftFamily();
+}
+
+function deleteDraftFamilyRow(idx) {
+  const currentList = getFamilyListFromDOM();
+  if (currentList === null) return;
+  
+  draftFamily = currentList;
+  draftFamily.splice(idx, 1);
+  renderDraftFamily();
+}
+
 function toIsoDate(str) {
   if (!str) return '';
   const parts = String(str).trim().split('-');
   if (parts.length === 3) {
+    if (parts[0].length === 4) return str; // already YYYY-MM-DD
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
   }
   return str;
@@ -3991,15 +4600,27 @@ function toDisplayDate(str) {
   if (!str) return '';
   const parts = String(str).trim().split('-');
   if (parts.length === 3) {
+    if (parts[0].length === 2) return str; // already DD-MM-YYYY
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
   }
   return str;
 }
 function ei(id,label,val,ph='',req=false){
   const isDate = (ph === 'dd-mm-yyyy');
-  const type = isDate ? 'date' : 'text';
-  const displayVal = isDate ? toIsoDate(val) : val;
-  return `<label class="flbl">${esc(label)}<input type="${type}" id="f_${id}" value="${esc(displayVal||'')}" ${ph && !isDate ? `placeholder="${esc(ph)}"` : ''} ${req?'required':''} /></label>`;
+  if (isDate) {
+    const displayVal = toDisplayDate(val);
+    const isoVal = toIsoDate(val);
+    return `
+      <label class="flbl">${esc(label)}
+        <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:100%;">
+          <input type="text" id="f_${id}" placeholder="DD-MM-YYYY" value="${esc(displayVal||'')}" style="padding-right:34px; width:100%;" ${req?'required':''} oninput="onDateInputMask(this, event)" />
+          <input type="date" style="position:absolute; right:8px; width:24px; height:24px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));" value="${esc(isoVal||'')}">
+          <span style="position:absolute; right:10px; pointer-events:none; font-size:16px;">📅</span>
+        </div>
+      </label>
+    `;
+  }
+  return `<label class="flbl">${esc(label)}<input type="text" id="f_${id}" value="${esc(val||'')}" ${ph ? `placeholder="${esc(ph)}"` : ''} ${req?'required':''} /></label>`;
 }
 function cancelEdit(targetId = 'profileModalContent'){
   editing=false;
@@ -4008,7 +4629,11 @@ function cancelEdit(targetId = 'profileModalContent'){
     renderSearch();
   } else {
     const emp = DATA.employees.find(e => e.kgid === selKgid);
-    renderProfile(emp, targetId);
+    if (emp) {
+      renderProfile(emp, targetId);
+    } else {
+      closeProfileFullPage();
+    }
   }
 }
 
@@ -4057,7 +4682,11 @@ async function saveEmp(ev, targetId = 'profileModalContent'){ev.preventDefault()
     lockedFieldsVal = (emp && emp.sourceProfile && emp.sourceProfile.lockedFields) || '';
   }
 
-  const payload={kgid:v('kgid'),originalKgid:v('origKgid'),name:v('name'),rank:v('rank'),designation:v('designation'),mobile:v('mobile'),dob:toDisplayDate(v('dob')),doa:toDisplayDate(v('doa')),homeDistrict:v('homeDistrict'),category:v('category'),currentDistrict:v('currentDistrict'),currentSubDivision:v('currentSubDivision'),currentUnit:v('currentUnit'),currentSince:toDisplayDate(v('currentSince')),orderNumber:v('orderNumber'),remarks:v('remarks'),postings:consolidatedPostings,sourceProfile:{metalNumber:v('metalNumber'),bloodGroup:v('bloodGroup'),email:v('email'),mobile2:v('mobile2'),height:v('height'),weight:v('weight'),caste:v('caste'),subCaste:getSubCaste(),familyDetails:v('familyDetails'),educationDetails:v('educationDetails'),photoUrl:v('photoUrl'),isApproved:v('isApproved'),isAdmin:v('isAdmin'),lockedFields:lockedFieldsVal}};
+  const familyList = getFamilyListFromDOM();
+  if (familyList === null) return;
+  const familyJsonStr = JSON.stringify(familyList);
+
+  const payload={kgid:v('kgid'),originalKgid:v('origKgid'),name:v('name'),rank:v('rank'),designation:v('designation'),mobile:v('mobile'),dob:toDisplayDate(v('dob')),doa:toDisplayDate(v('doa')),homeDistrict:v('homeDistrict'),category:v('category'),currentDistrict:v('currentDistrict'),currentSubDivision:v('currentSubDivision'),currentUnit:v('currentUnit'),currentSince:toDisplayDate(v('currentSince')),orderNumber:v('orderNumber'),typeOfTransfer:v('typeOfTransfer'),remarks:v('remarks'),postings:consolidatedPostings,sourceProfile:{metalNumber:v('metalNumber'),bloodGroup:v('bloodGroup'),email:v('email'),mobile2:v('mobile2'),height:v('height'),weight:v('weight'),caste:v('caste'),subCaste:getSubCaste(),familyDetails:familyJsonStr,photoUrl:v('photoUrl'),isApproved:v('isApproved'),isAdmin:v('isAdmin'),lockedFields:lockedFieldsVal}};
   if(!await checkDupNow()){showNotice('efNotice','error','Fix duplicates first.');return;}showNotice('efNotice','info','Saving…');
 
   
@@ -4085,14 +4714,23 @@ function dupIssues(vals){const issues=[],orig=String(vals.origKgid||'').trim(),k
 
 /* ── Delete ────────────────────────────────────────── */
 $('delCancel').addEventListener('click',()=>{$('delModal').classList.remove('open');delPending='';});
-$('delConfirm').addEventListener('click',async()=>{$('delModal').classList.remove('open');if(!delPending)return;try{const result=await apiFetch('delete', {kgid:delPending}, {method:'DELETE'});if(!result.ok){alert(result.error||'Failed.');return;}selKgid='';delPending='';await loadData();}catch(err){alert('Error: '+err.message);}});
+$('delConfirm').addEventListener('click',async()=>{$('delModal').classList.remove('open');if(!delPending)return;try{const result=await apiFetch('delete', {kgid:delPending}, {method:'DELETE'});if(!result.ok){alert(result.error||'Failed.');return;}selKgid='';delPending='';await loadData();if(activeTab==='profile-view')closeProfileFullPage();}catch(err){alert('Error: '+err.message);}});
 
 /* ── Reports ───────────────────────────────────────── */
 const RPT_TITLES={priority:'🔴 Transfer Priority List',retirement:'📅 Retirement Due List',seniority:'📜 Seniority List',strength:'🏢 Station-wise Strength',subdiv:'🗺️ Sub-Division Report'};
 function renderRpt(type){activeRpt=type;$('rptTitle').textContent=RPT_TITLES[type];document.querySelectorAll('.rpt-btn').forEach(b=>b.classList.toggle('act',b.dataset.rpt===type));const emps=DATA.employees||[];csvHeaders=[];csvRows=[];
   if(type==='priority'){const pf=rptFilter.priority||'all';$('rptFilters').innerHTML=`<span class="rft-lbl">Priority:</span><div style="display:flex;gap:5px">${['all','High','Medium','Low'].map(p=>`<button class="chip${pf===p?' act':''}" onclick="rptFilter.priority='${p}';renderRpt('priority')">${p==='all'?'All':p}</button>`).join('')}</div>`;const rows=emps.filter(e=>e.transferEligible==='Yes'&&(pf==='all'||e.priority===pf)).sort((a,b)=>(b.currentStationYears||0)-(a.currentStationYears||0));$('rptCnt').textContent=rows.length+' employees';csvHeaders=['#','KGID','Name','Rank','Station','Sub-Division','Station (yrs)','Priority','Eligible'];csvRows=rows.map((e,i)=>[i+1,e.kgid,e.name,e.rank,e.currentUnit,e.currentSubDivision,e.currentStationYears,e.priority,e.transferEligible]);$('rptBody').innerHTML=rows.length?`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.kgid)}</td><td>${esc(e.name)}</td><td>${esc(e.rank)}</td><td>${esc(e.currentUnit)}</td><td>${esc(e.currentSubDivision||'—')}</td><td>${text(e.currentStationYears)}</td><td><span class="badge b-${pClass(e.priority)}" style="color:${e.priority==='High'?'var(--red)':e.priority==='Medium'?'var(--amb)':'var(--grn)'}; background:${e.priority==='High'?'var(--red-dim)':e.priority==='Medium'?'var(--amb-dim)':'var(--grn-dim)'}">${e.priority}</span></td><td>${e.transferEligible}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">No employees for this filter</div></div>`;}
   else if(type==='retirement'){const rf=rptFilter.retirement||'12';const m=parseInt(rf);$('rptFilters').innerHTML=`<span class="rft-lbl">Within:</span><div style="display:flex;gap:5px">${[['3','3 months'],['6','6 months'],['12','1 year'],['24','2 years'],['60','5 years']].map(([v,l])=>`<button class="chip${rf===v?' act':''}" onclick="rptFilter.retirement='${v}';renderRpt('retirement')">${l}</button>`).join('')}</div>`;const rows=emps.filter(e=>typeof e.retirementMonthsLeft==='number'&&e.retirementMonthsLeft>=0&&e.retirementMonthsLeft<=m).sort((a,b)=>(a.retirementMonthsLeft||999)-(b.retirementMonthsLeft||999));$('rptCnt').textContent=rows.length+' employees';csvHeaders=['#','KGID','Name','Rank','Station','Retirement','Months Left'];csvRows=rows.map((e,i)=>[i+1,e.kgid,e.name,e.rank,e.currentUnit,e.retirementDate,e.retirementMonthsLeft]);$('rptBody').innerHTML=rows.length?`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.kgid)}</td><td>${esc(e.name)}</td><td>${esc(e.rank)}</td><td>${esc(e.currentUnit)}</td><td>${esc(e.retirementDate||'—')}</td><td class="${(e.retirementMonthsLeft||0)<=3?'r-urg':(e.retirementMonthsLeft||0)<=6?'r-soon':'r-ok'}">${e.retirementMonthsLeft}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty"><div class="empty-ico">🎉</div><div class="empty-txt">No retirements in this period</div></div>`;}
-  else if(type==='seniority'){$('rptFilters').innerHTML='';const parseD=s=>{if(!s)return Infinity;const[d,mo,y]=String(s).split('-');return new Date(+y,+mo-1,+d).getTime();};const rows=[...emps].filter(e=>e.doa).sort((a,b)=>parseD(a.doa)-parseD(b.doa));$('rptCnt').textContent=rows.length+' employees';csvHeaders=['Seniority','KGID','Name','Rank','Station','DOA','Total Service'];csvRows=rows.map((e,i)=>[i+1,e.kgid,e.name,e.rank,e.currentUnit,e.doa,e.totalServiceYears]);$('rptBody').innerHTML=`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.kgid)}</td><td>${esc(e.name)}</td><td>${esc(e.rank)}</td><td>${esc(e.currentUnit||'—')}</td><td>${esc(e.doa)}</td><td>${text(e.totalServiceYears)}</td></tr>`).join('')}</tbody></table></div>`;}
+  else if(type==='seniority'){
+    $('rptFilters').innerHTML='';
+    const parseD=s=>{if(!s)return Infinity;const[d,mo,y]=String(s).split('-');return new Date(+y,+mo-1,+d).getTime();};
+    const rows=[...emps].filter(e=>e.doa).sort((a,b)=>{
+      const rA = RANK_SENIORITY[a.rank] || 99;
+      const rB = RANK_SENIORITY[b.rank] || 99;
+      if(rA !== rB) return rA - rB;
+      return parseD(a.doa)-parseD(b.doa);
+    });
+    $('rptCnt').textContent=rows.length+' employees';csvHeaders=['Seniority','KGID','Name','Rank','Station','DOA','Total Service'];csvRows=rows.map((e,i)=>[i+1,e.kgid,e.name,e.rank,e.currentUnit,e.doa,e.totalServiceYears]);$('rptBody').innerHTML=`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.kgid)}</td><td>${esc(e.name)}</td><td>${esc(e.rank)}</td><td>${esc(e.currentUnit||'—')}</td><td>${esc(e.doa)}</td><td>${text(e.totalServiceYears)}</td></tr>`).join('')}</tbody></table></div>`;}
   else if(type==='strength'){$('rptFilters').innerHTML='';const sts=[...new Set(emps.map(e=>e.currentUnit).filter(Boolean))].sort();const rows=sts.map(s=>{const wk=emps.filter(e=>e.currentUnit===s).length;const due=emps.filter(e=>e.currentUnit===s&&e.transferEligible==='Yes').length;const hi=emps.filter(e=>e.currentUnit===s&&e.priority==='High').length;return{s,wk,due,hi};}).sort((a,b)=>b.wk-a.wk);$('rptCnt').textContent=rows.length+' stations';csvHeaders=['#','Station','Working','Due','High','% Due'];csvRows=rows.map((r,i)=>[i+1,r.s,r.wk,r.due,r.hi,r.wk?Math.round(r.due/r.wk*100)+'%':'—']);$('rptBody').innerHTML=`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.s)}</td><td>${r.wk}</td><td style="color:var(--amb)">${r.due}</td><td style="color:var(--red)">${r.hi}</td><td style="color:var(--muted)">${r.wk?Math.round(r.due/r.wk*100)+'%':'—'}</td></tr>`).join('')}</tbody></table></div>`;}
   else if(type==='subdiv'){$('rptFilters').innerHTML='';const sds=[...new Set(emps.map(e=>e.currentSubDivision).filter(Boolean))].sort();const rows=sds.map(sd=>({sd,total:emps.filter(e=>e.currentSubDivision===sd).length,due:emps.filter(e=>e.currentSubDivision===sd&&e.transferEligible==='Yes').length,hi:emps.filter(e=>e.currentSubDivision===sd&&e.priority==='High').length,sts:new Set(emps.filter(e=>e.currentSubDivision===sd).map(e=>e.currentUnit)).size})).sort((a,b)=>b.total-a.total);$('rptCnt').textContent=rows.length+' Sub-Divisions';csvHeaders=['#','Sub-Division','Stations','Staff','Due','High'];csvRows=rows.map((r,i)=>[i+1,r.sd,r.sts,r.total,r.due,r.hi]);$('rptBody').innerHTML=`<div style="overflow-x:auto"><table class="dtbl"><thead><tr>${csvHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.sd)}</td><td>${r.sts}</td><td>${r.total}</td><td style="color:var(--amb)">${r.due}</td><td style="color:var(--red)">${r.hi}</td></tr>`).join('')}</tbody></table></div>`;}
 }
@@ -4108,6 +4746,7 @@ function switchTab(t){
   if(t==='employees')renderEmpDash();
   if(t==='transfers')renderTxDash();
   if(t==='search')renderSearch();
+  if(t==='apply-transfer')renderApplyTransferTab();
   if(t==='kpi-view') {
     kpiSearchQuery = '';
     selectedCircleOffice = null;
@@ -4302,17 +4941,1116 @@ async function saveAdminPermissions() {
   }
 }
 
+// ── TRANSFER APPLICATIONS TAB ──────────────────────────────────
+let trSearchQuery = '';
+let trStatusFilter = 'All';
+let trDraftPostings = [];  // posting history entries for the transfer application form
+let isEditingOwnTransfer = false;
+
+function renderApplyTransferTab() {
+  const container = $('applyTransferTabContainer');
+  if (!container) return;
+
+  const loggedKgid = getLoggedKgid();
+  let html = '';
+
+  // ── Employee-only: show own form or own status only ─────────────────────
+  const emp = DATA.employees.find(e => e.kgid === loggedKgid);
+  if (!emp) {
+    html += `
+      <div class="rpt-card" style="max-width:600px;margin:0 auto;padding:20px;">
+        <div class="empty">
+          <div class="empty-ico" style="color:var(--red);">⚠</div>
+          <div class="empty-txt">Employee record not found for KGID: <strong>${esc(loggedKgid)}</strong></div>
+          <p style="color:var(--muted);font-size:13px;text-align:center;margin-top:10px;">Please contact your supervisor or super admin.</p>
+      </div>
+    `;
+  } else {
+      const requests = DATA.transferRequests || [];
+      const tr = requests.find(r => r.kgid === loggedKgid);
+
+      if (tr && !isEditingOwnTransfer) {
+        let badgeClass = 'b-neu';
+        if (tr.status === 'Approved') badgeClass = 'b-grn';
+        else if (tr.status === 'Rejected') badgeClass = 'b-red';
+        else if (tr.status === 'Pending') badgeClass = 'b-amb';
+        else if (tr.status === 'Review') badgeClass = 'b-ind';
+
+        html += `
+          <div class="rpt-card" style="max-width: 800px; margin: 0 auto;">
+            <div class="rpt-head" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div class="rpt-title">📝 Your Transfer Application</div>
+                <div class="rpt-cnt">Applied on ${esc(tr.applicationDate || '—')}</div>
+              </div>
+              <span class="badge ${badgeClass}" style="font-size: 14px; padding: 6px 12px; ${getStatusStyle(tr.status)}">${esc(tr.status || 'Pending')}</span>
+            </div>
+            <div class="rpt-body" style="padding: 20px;">
+
+              <!-- Officer Info -->
+              <div class="transfer-section">
+                <div class="transfer-section-head">👮 Officer Details</div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+                  <div><div class="tview-label">Name & KGID</div><div class="tview-val">${esc(emp.name)} (${esc(emp.kgid)})</div></div>
+                  <div><div class="tview-label">Rank & Present Unit</div><div class="tview-val">${esc(emp.rank)} — ${esc(emp.currentUnit||'—')}</div></div>
+                  ${tr.transferCategory ? `<div style="grid-column:span 2;"><div class="tview-label">Transfer Category</div><div class="tview-val">${esc(tr.transferCategory)}</div></div>` : ''}
+                </div>
+              </div>
+
+              ${tr.status === 'Approved' ? `
+              <div class="transfer-section">
+                <div style="font-size:12px;font-weight:700;color:var(--grn);text-transform:uppercase;margin-bottom:8px;">✅ Approved Transfer Station</div>
+                <div style="font-size:16px;font-weight:bold;color:var(--grn);background:var(--grn-dim);padding:12px 16px;border-radius:var(--r-sm);border:1px solid rgba(22,163,74,.3);">
+                  🎉 ${esc(tr.approvedStation || 'Pending Allocation')}
+                </div>
+              </div>` : ''}
+
+              <!-- Previous Postings -->
+              ${(emp.postings||[]).filter(p=>p.to!=='Present'&&p.to!=='').length > 0 ? `
+              <div class="transfer-section">
+                <div class="transfer-section-head">📋 Previous Working Places</div>
+                <div style="overflow-x:auto;">
+                  <table class="prev-post-table">
+                    <thead><tr><th>#</th><th>Station</th><th>From</th><th>To</th><th>Rank Held</th></tr></thead>
+                    <tbody>
+                      ${(emp.postings||[]).filter(p=>p.to!=='Present'&&p.to!=='').map((p,i)=>`
+                      <tr>
+                        <td style="color:var(--muted);font-size:11px;">${i+1}</td>
+                        <td style="font-weight:500;">${esc(p.station||'—')}</td>
+                        <td style="color:var(--muted);">${esc(p.from||'—')}</td>
+                        <td style="color:var(--muted);">${esc(p.to||'—')}</td>
+                        <td>${esc(p.rank||'—')}</td>
+                      </tr>`).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>` : ''}
+
+              <!-- 5 Preferences -->
+              <div class="transfer-section">
+                <div class="transfer-section-head">🏢 Preferred Stations</div>
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+                  ${[1,2,3,4,5].map(n=>`
+                  <div style="background:var(--surf2);border:1px solid var(--bdr2);padding:10px;border-radius:var(--r-sm);text-align:center;">
+                    <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:3px;">Choice ${n}</div>
+                    <div style="font-size:12px;font-weight:500;">${esc(tr['preference'+n]||'—')}</div>
+                  </div>`).join('')}
+                </div>
+              </div>
+
+              <!-- Reason -->
+              <div class="transfer-section">
+                <div class="transfer-section-head">📄 Reason & Remarks</div>
+                <div style="display:grid;gap:10px;">
+                  <div><div class="tview-label">Reason</div><div class="tview-val" style="background:var(--surf);padding:8px 12px;border-radius:var(--r-sm);border:1px dashed var(--bdr2);">${esc(tr.reason||'—')}</div></div>
+                  ${tr.remarks ? `<div><div class="tview-label">Remarks</div><div class="tview-val" style="color:var(--muted);background:var(--surf);padding:8px 12px;border-radius:var(--r-sm);">${esc(tr.remarks)}</div></div>` : ''}
+                </div>
+              </div>
+
+              <div style="border-top:1px solid var(--bdr2);padding-top:15px;display:flex;justify-content:flex-end;gap:10px;">
+                <button class="btn btn-gold" onclick="isEditingOwnTransfer = true; renderApplyTransferTab();" style="padding:8px 16px;">✏️ Edit Application</button>
+                <button class="btn btn-red" onclick="withdrawTransferRequest('${esc(loggedKgid)}')" style="padding:8px 16px;">❌ Withdraw Application</button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        // Seed trDraftPostings from existing profile postings (past only)
+        trDraftPostings = (emp.postings || []).filter(p => p.to !== 'Present' && p.to !== '').map((p, idx) => ({
+          id: idx, from: p.from || '', to: p.to || '', station: p.station || '',
+          rank: p.rank || emp.rank || '', orderNumber: p.orderNumber || '', editing: false
+        }));
+
+        html += `
+          <div class="rpt-card" style="max-width:880px;margin:0 auto;">
+            <div class="rpt-head" style="background:linear-gradient(135deg,rgba(234,179,8,.12),rgba(234,179,8,.03));border-bottom:1px solid var(--bdr2);">
+              <div class="rpt-title">📝 Transfer Application Form</div>
+              <div class="rpt-cnt">Fill all sections carefully. Previous postings are mandatory for processing.</div>
+            </div>
+            <div class="rpt-body" style="padding:24px;">
+              <form id="userApplyForm" onsubmit="saveTransferRequestForm(event)">
+
+                <!-- ① Officer Identity -->
+                <div class="transfer-section">
+                  <div class="transfer-section-head">① Officer Identity</div>
+                  <div style="padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+                    <label class="flbl">Officer KGID
+                      <input type="text" id="trKgid" value="${esc(emp.kgid)}" readonly style="background:var(--surf2);color:var(--gold);font-weight:700;font-size:14px;letter-spacing:.5px;">
+                    </label>
+                    <label class="flbl">Officer Name
+                      <input type="text" id="trName" value="${esc(emp.name)}" readonly style="background:var(--surf2);color:var(--muted);">
+                    </label>
+                    <label class="flbl">Rank
+                      <input type="text" id="trRank" value="${esc(emp.rank)}" readonly style="background:var(--surf2);color:var(--muted);">
+                    </label>
+                    <label class="flbl">Date of Birth (DOB)
+                      <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:100%;">
+                        <input type="text" id="trDob" placeholder="DD-MM-YYYY" value="${emp.dob || ''}" style="padding-right:34px; width:100%;" oninput="onDateInputMask(this, event)">
+                        <input type="date" style="position:absolute; right:8px; width:24px; height:24px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));" value="${toIsoDate(emp.dob || '')}">
+                        <span style="position:absolute; right:10px; pointer-events:none; font-size:16px;">📅</span>
+                      </div>
+                    </label>
+                    <label class="flbl">Date of Appointment (DOA)
+                      <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:100%;">
+                        <input type="text" id="trDoa" placeholder="DD-MM-YYYY" value="${emp.doa || ''}" style="padding-right:34px; width:100%;" oninput="onDateInputMask(this, event)">
+                        <input type="date" style="position:absolute; right:8px; width:24px; height:24px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));" value="${toIsoDate(emp.doa || '')}">
+                        <span style="position:absolute; right:10px; pointer-events:none; font-size:16px;">📅</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- ② Current Working Details -->
+                <div class="transfer-section">
+                  <div class="transfer-section-head">② Current Working Details (Auto-filled)</div>
+                  <div style="padding:14px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:12px;align-items:end;">
+                    <label class="flbl">Current Station / Unit
+                      <select id="trCurrentStation" required style="font-size:12px;height:38px;">
+                        <option value="">— Select Station —</option>
+                        ${getStationsOptions(emp.currentUnit || '')}
+                      </select>
+                    </label>
+                    <label class="flbl">From
+                      <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:100%;">
+                        <input type="text" id="trCurrentFrom" placeholder="DD-MM-YYYY" value="${emp.currentSince || ''}" style="padding-right:34px; width:100%;" oninput="onDateInputMask(this, event); calcTrCurrentDuration(this)">
+                        <input type="date" style="position:absolute; right:8px; width:24px; height:24px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));" value="${toIsoDate(emp.currentSince || '')}">
+                        <span style="position:absolute; right:10px; pointer-events:none; font-size:16px;">📅</span>
+                      </div>
+                    </label>
+                    <label class="flbl">To
+                      <input type="text" value="Present" readonly style="background:var(--surf2);color:var(--grn);font-weight:600;text-align:center;">
+                    </label>
+                    <label class="flbl" style="text-align:center;">Duration (Yrs)
+                      <input type="text" id="trCurrentDuration" value="${emp.yearsAtCurrentUnit ? emp.yearsAtCurrentUnit.toFixed(1) : '—'}" readonly style="background:var(--surf2);color:var(--muted);text-align:center;font-weight:600;">
+                    </label>
+                    <label class="flbl">Type
+                      <select id="trTypeOfTransfer" style="font-size:12px;height:38px;">
+                        <option value="Regular" ${emp.typeOfTransfer === 'Regular' || !emp.typeOfTransfer ? 'selected' : ''}>Regular</option>
+                        <option value="OOD" ${emp.typeOfTransfer === 'OOD' ? 'selected' : ''}>OOD</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- ③ Previous Working Places -->
+                <div class="transfer-section">
+                  <div class="transfer-section-head" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>③ Previous Working Places <span style="color:var(--red);font-size:10px;font-weight:500;text-transform:none;">(List all previous postings from career start → most recent first)</span></span>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="addTrPosting()" style="font-size:12px;">＋ Add Row</button>
+                  </div>
+                  <div style="overflow-x:auto;">
+                    <table class="prev-post-table">
+                      <thead>
+                        <tr>
+                          <th style="width:28px;">#</th>
+                          <th>Previous Station / Place</th>
+                          <th style="width:128px;">From</th>
+                          <th style="width:128px;">To</th>
+                          <th style="width:64px;text-align:center;">Yrs (n)</th>
+                          <th style="width:110px;">Rank Held</th>
+                          <th style="width:110px;">Type</th>
+                          <th style="width:34px;"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="trPostingsTbody">
+                        <tr id="trPostingsEmpty">
+                          <td colspan="8" class="prev-post-empty">Click "＋ Add Row" to list each place you worked at before your current posting.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style="padding:7px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--bdr2);background:var(--surf2);">
+                    💡 Yrs (n) is auto-calculated when you enter From & To dates. &nbsp;|&nbsp; Type: <strong>Regular</strong> = Normal Posting &nbsp;|&nbsp; <strong>OOD</strong> = On Official Duty
+                  </div>
+                </div>
+
+                <!-- ④ Preferred Transfer Stations -->
+                <div class="transfer-section">
+                  <div class="transfer-section-head">④ Preferred Transfer Stations &nbsp;<span style="font-size:10px;font-weight:400;text-transform:none;color:var(--muted);">(Choices 1–3 required · 4 & 5 optional)</span></div>
+                  <div style="padding:14px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+                    ${[1,2,3,4,5].map(n=>`
+                    <label class="flbl">
+                      <span style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">
+                        <span style="background:var(--gold);color:#000;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">${n}</span>
+                        Preference ${n}${n<=3?' <span style=color:var(--red)>*</span>':''}
+                      </span>
+                      <select id="trPreference${n}" ${n<=3?'required':''}>
+                        <option value="">— Choice ${n} —</option>
+                        ${getStationsOptions(tr ? tr['preference' + n] || '' : '')}
+                      </select>
+                    </label>`).join('')}
+                  </div>
+                </div>
+
+                <!-- ⑤ Reason for Seeking Transfer -->
+                <div class="transfer-section">
+                  <div class="transfer-section-head">⑤ Reason for Seeking Transfer</div>
+                  <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <label class="flbl">Transfer Category *
+                      <select id="trTransferCategory" required>
+                        <option value="">— Select Category —</option>
+                        <option ${tr && tr.transferCategory === 'Medical / Health Grounds' ? 'selected' : ''}>Medical / Health Grounds</option>
+                        <option ${tr && tr.transferCategory === 'Family / Spouse Proximity' ? 'selected' : ''}>Family / Spouse Proximity</option>
+                        <option ${tr && tr.transferCategory === 'Children Education' ? 'selected' : ''}>Children Education</option>
+                        <option ${tr && tr.transferCategory === 'Mutual Transfer' ? 'selected' : ''}>Mutual Transfer</option>
+                        <option ${tr && tr.transferCategory === 'Own Request (General)' ? 'selected' : ''}>Own Request (General)</option>
+                        <option ${tr && tr.transferCategory === 'Hardship / Remote Area Tenure' ? 'selected' : ''}>Hardship / Remote Area Tenure</option>
+                        <option ${tr && tr.transferCategory === 'Administrative' ? 'selected' : ''}>Administrative</option>
+                        <option ${tr && tr.transferCategory === 'Other' ? 'selected' : ''}>Other</option>
+                      </select>
+                    </label>
+                    <label class="flbl">Transfer Type Sought
+                      <select id="trTransferType">
+                        <option value="Regular">Regular</option>
+                        <option value="OOD">OOD (On Official Duty)</option>
+                        <option value="Mutual">Mutual</option>
+                        <option value="Administrative">Administrative</option>
+                      </select>
+                    </label>
+                    <label class="flbl" style="grid-column:span 2;">Reason (Brief) *
+                      <input type="text" id="trReason" value="${esc(tr ? tr.reason || '' : '')}" placeholder="e.g. Mother's critical illness, spouse posted at Gowribidanur, children schooling…" required>
+                    </label>
+                    <label class="flbl" style="grid-column:span 2;">Supporting Remarks / Additional Details
+                      <textarea id="trRemarks" rows="3" placeholder="Certificate No., spouse KGID, medical report reference, distance from home, any other relevant details…">${esc(tr ? tr.remarks || '' : '')}</textarea>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Declaration -->
+                <div style="background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.2);border-radius:var(--r-sm);padding:12px 16px;margin-bottom:18px;">
+                  <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12.5px;color:var(--muted);">
+                    <input type="checkbox" id="trDeclaration" required style="margin-top:2px;width:15px;height:15px;flex-shrink:0;accent-color:var(--gold);">
+                    I declare that the above information is true and correct to the best of my knowledge. Providing false information may lead to rejection of this application.
+                  </label>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;gap:10px;">
+                  ${tr ? `<button type="button" class="btn btn-ghost" onclick="isEditingOwnTransfer = false; renderApplyTransferTab();" style="padding:11px 20px;">Cancel</button>` : ''}
+                  <button type="submit" class="btn btn-gold" style="padding:11px 30px;font-size:14px;font-weight:700;">📤 ${tr ? 'Update' : 'Submit'} Transfer Application</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        `;
+
+      }
+  }
+
+  container.innerHTML = html;
+
+  // Seed the Previous Working Places table with existing posting history
+  const tbody = $('trPostingsTbody');
+  if (tbody && trDraftPostings.length > 0) {
+    const empty = $('trPostingsEmpty');
+    if (empty) empty.remove();
+    trDraftPostings.forEach((p, idx) => {
+      const row = tbody.insertRow();
+      const yrsVal = (p.from && p.to && p.to !== 'Present' && p.to > p.from) ? ((new Date(p.to) - new Date(p.from)) / (365.25 * 24 * 3600 * 1000)).toFixed(1) : '';
+      row.innerHTML = `
+        <td style="color:var(--muted);font-size:11px;text-align:center;">${idx + 1}</td>
+        <td><select class="tr-pst-station" style="width:100%;min-width:150px;font-size:12px;"><option value="">— Select Station —</option>${getStationsOptions(p.station)}</select></td>
+        <td>
+          <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:120px;">
+            <input type="text" class="tr-pst-from" placeholder="DD-MM-YYYY" value="${toDisplayDate(p.from)}" style="font-size:12px; width:100%; padding-right:24px;" oninput="onDateInputMask(this, event); calcTrRowDuration(this)">
+            <input type="date" style="position:absolute; right:4px; width:18px; height:18px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));" value="${toIsoDate(p.from)}">
+            <span style="position:absolute; right:6px; pointer-events:none; font-size:12px;">📅</span>
+          </div>
+        </td>
+        <td>
+          <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:120px;">
+            <input type="text" class="tr-pst-to" placeholder="DD-MM-YYYY" value="${toDisplayDate(p.to)}" style="font-size:12px; width:100%; padding-right:24px;" oninput="onDateInputMask(this, event); calcTrRowDuration(this)">
+            <input type="date" style="position:absolute; right:4px; width:18px; height:18px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));" value="${toIsoDate(p.to)}">
+            <span style="position:absolute; right:6px; pointer-events:none; font-size:12px;">📅</span>
+          </div>
+        </td>
+        <td style="text-align:center;"><input type="text" class="tr-pst-yrs" readonly style="font-size:12px;width:48px;text-align:center;background:var(--surf2);color:var(--gold);font-weight:600;" value="${yrsVal}" placeholder="—"></td>
+        <td><input type="text" class="tr-pst-rank" placeholder="Rank held" style="font-size:12px;width:90px;" value="${esc(p.rank)}"></td>
+        <td><select class="tr-pst-type" style="font-size:12px;width:106px;">
+          <option value="Regular" ${p.type === 'Regular' || !p.type ? 'selected' : ''}>Regular</option>
+          <option value="OOD" ${p.type === 'OOD' ? 'selected' : ''}>OOD</option>
+          <option value="Mutual" ${p.type === 'Mutual' ? 'selected' : ''}>Mutual</option>
+          <option value="Administrative" ${p.type === 'Administrative' ? 'selected' : ''}>Administrative</option>
+        </select></td>
+        <td><button type="button" class="btn btn-red btn-sm" onclick="this.closest('tr').remove();reindexPostings('trPostingsTbody','trPostingsEmpty',8);" style="font-size:11px;padding:3px 7px;">✕</button></td>
+      `;
+    });
+  }
+}
+
+// ── Transfer Form Posting History Helpers ───────────────────────
+function renderTrDraftPostings() {
+  const container = $('trDraftPostingsContainer');
+  if (!container) return;
+  if (trDraftPostings.length === 0) {
+    container.innerHTML = `<div style="color:var(--muted); font-size:12.5px; padding:6px 0; text-align:center;">No previous postings added. Click "＋ Add Posting" to record your service history.</div>`;
+    return;
+  }
+  container.innerHTML = trDraftPostings.map((p, idx) => {
+    if (p.editing) {
+      return `
+        <div class="hist-card editing">
+          <div class="hist-edit-grid">
+            <label>From Date <input type="date" id="tr_h_from_${idx}" value="${toIsoDate(p.from)}" required /></label>
+            <label>To Date <input type="date" id="tr_h_to_${idx}" value="${toIsoDate(p.to)}" required /></label>
+            <label>Police Station / Unit <select id="tr_h_station_${idx}" required><option value="">— Select Station —</option>${getStationsOptions(p.station)}</select></label>
+            <label>Sub Division <select id="tr_h_subDivision_${idx}"><option value="">— Select —</option>${getSubdivisionsOptions(p.subDivision)}</select></label>
+            <label>District <input type="text" id="tr_h_district_${idx}" value="${esc(p.district || 'Chikkaballapura')}" /></label>
+            <label>Rank Held <input type="text" id="tr_h_rank_${idx}" value="${esc(p.rank)}" /></label>
+            <label style="grid-column: span 3">Order Number / Notes <input type="text" id="tr_h_order_${idx}" value="${esc(p.orderNumber)}" style="width:100%" /></label>
+          </div>
+          <div class="hist-card-actions">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="saveTrDraftPosting(${idx})">Done</button>
+            <button type="button" class="btn btn-red btn-sm" onclick="deleteTrDraftPosting(${idx})">Remove</button>
+          </div>
+        </div>`;
+    } else {
+      return `
+        <div class="hist-card">
+          <div class="hist-card-header">
+            <div>
+              <div class="hist-card-title">${esc(p.rank || '—')} at ${esc(p.station || '—')}</div>
+              <div class="hist-card-meta">
+                📅 ${text(p.from)} to ${text(p.to)}
+                ${p.subDivision ? ` · Sub Div: ${esc(p.subDivision)}` : ''}
+                ${p.district ? ` · District: ${esc(p.district)}` : ''}
+                ${p.orderNumber ? ` · Order: ${esc(p.orderNumber)}` : ''}
+              </div>
+            </div>
+            <div class="hist-card-actions" style="margin-top:0">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="editTrDraftPosting(${idx})">✏️ Edit</button>
+              <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteTrDraftPosting(${idx})">🗑</button>
+            </div>
+          </div>
+        </div>`;
+    }
+  }).join('');
+}
+
+function addTrDraftPosting() {
+  trDraftPostings.push({ id: trDraftPostings.length, from: '', to: '', station: '', subDivision: '', district: 'Chikkaballapura', rank: '', orderNumber: '', editing: true });
+  renderTrDraftPostings();
+}
+
+function editTrDraftPosting(idx) {
+  trDraftPostings[idx].editing = true;
+  renderTrDraftPostings();
+}
+
+function saveTrDraftPosting(idx) {
+  const from = ($(`tr_h_from_${idx}`) || {}).value || '';
+  const to = ($(`tr_h_to_${idx}`) || {}).value || '';
+  const station = ($(`tr_h_station_${idx}`) || {}).value || '';
+  const subDivision = ($(`tr_h_subDivision_${idx}`) || {}).value || '';
+  const district = ($(`tr_h_district_${idx}`) || {}).value || 'Chikkaballapura';
+  const rank = ($(`tr_h_rank_${idx}`) || {}).value || '';
+  const orderNumber = ($(`tr_h_order_${idx}`) || {}).value || '';
+  if (!from || !station) { alert('From Date and Police Station are required.'); return; }
+  trDraftPostings[idx] = { id: idx, from: toDisplayDate(from), to: toDisplayDate(to) || to, station, subDivision, district, rank, orderNumber, editing: false };
+  renderTrDraftPostings();
+}
+
+function deleteTrDraftPosting(idx) {
+  trDraftPostings.splice(idx, 1);
+  trDraftPostings.forEach((p, i) => p.id = i);
+  renderTrDraftPostings();
+}
+
+function getStatusStyle(status) {
+  if (status === 'Approved') return 'background: var(--grn-dim); color: var(--grn); border: 1px solid rgba(22,163,74,0.3);';
+  if (status === 'Rejected') return 'background: var(--red-dim); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.3);';
+  if (status === 'Review') return 'background: var(--pur-dim); color: var(--pur); border: 1px solid rgba(124, 58, 237, 0.3);';
+  return 'background: var(--amb-dim); color: var(--amb); border: 1px solid rgba(217, 119, 6, 0.3);';
+}
+
+function filterTransferRequestsTable() {
+  const input = $('trSearchInput');
+  if (input) {
+    trSearchQuery = input.value.trim().toLowerCase();
+  }
+  renderAdminTransferRequestsTable();
+}
+
+function filterTrStatus(status, btn) {
+  document.querySelectorAll('#trStatusFilterChips .chip').forEach(c => c.classList.remove('act'));
+  if (btn) btn.classList.add('act');
+  trStatusFilter = status;
+  renderAdminTransferRequestsTable();
+}
+
+function renderAdminTransferRequestsTable() {
+  const tbody = $('adminTransferRequestsBody');
+  if (!tbody) return;
+
+  const requests = DATA.transferRequests || [];
+  
+  const filtered = requests.filter(r => {
+    if (trStatusFilter !== 'All') {
+      if (r.status !== trStatusFilter) return false;
+    }
+    
+    if (trSearchQuery) {
+      const kgid = (r.kgid || '').toLowerCase();
+      const name = (r.name || '').toLowerCase();
+      const station = (r.currentStation || '').toLowerCase();
+      const pref1 = (r.preference1 || '').toLowerCase();
+      const pref2 = (r.preference2 || '').toLowerCase();
+      const pref3 = (r.preference3 || '').toLowerCase();
+      const reason = (r.reason || '').toLowerCase();
+      
+      if (!kgid.includes(trSearchQuery) &&
+          !name.includes(trSearchQuery) &&
+          !station.includes(trSearchQuery) &&
+          !pref1.includes(trSearchQuery) &&
+          !pref2.includes(trSearchQuery) &&
+          !pref3.includes(trSearchQuery) &&
+          !reason.includes(trSearchQuery)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const countEl = $('adminApplicationsCount');
+  if (countEl) {
+    countEl.textContent = `${filtered.length} application${filtered.length === 1 ? '' : 's'} shown (out of ${requests.length})`;
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 40px; color: var(--muted);">
+          <div style="font-size: 24px; margin-bottom: 8px;">🔍</div>
+          <div>No transfer applications found matching the criteria.</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r => {
+    return `
+      <tr>
+        <td style="white-space: nowrap; font-size: 12px; color: var(--muted); font-weight: 500;">
+          ${esc(r.applicationDate || '—')}
+        </td>
+        <td>
+          <div style="font-weight: bold; color: var(--txt);">${esc(r.name)}</div>
+          <div style="font-size: 11px; color: var(--muted);">KGID: ${esc(r.kgid)} | ${esc(r.rank || '—')}</div>
+        </td>
+        <td>
+          ${esc(r.currentStation || '—')}
+        </td>
+        <td>
+          <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px;">
+            <span style="font-weight: 500;"><span style="color: var(--muted); font-size: 10px; font-weight: bold;">1:</span> ${esc(r.preference1 || '—')}</span>
+            <span><span style="color: var(--muted); font-size: 10px; font-weight: bold;">2:</span> ${esc(r.preference2 || '—')}</span>
+            <span><span style="color: var(--muted); font-size: 10px; font-weight: bold;">3:</span> ${esc(r.preference3 || '—')}</span>
+          </div>
+        </td>
+        <td style="max-width: 250px;">
+          <div style="font-weight: 500; color: var(--txt2); font-size: 13px;">${esc(r.reason || '—')}</div>
+          ${r.remarks ? `<div style="font-size: 11px; color: var(--muted); margin-top: 4px; border-left: 2px solid var(--bdr2); padding-left: 6px; font-style: italic;">${esc(r.remarks)}</div>` : ''}
+        </td>
+        <td>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <select onchange="adminChangeRequestStatus('${esc(r.kgid)}', this.value)" style="min-height: 28px; font-size: 12px; padding: 2px 6px; width: auto; border-radius: var(--r-sm); font-weight: 600; cursor: pointer; ${getStatusStyle(r.status)}">
+              <option value="Pending" ${r.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Approved" ${r.status === 'Approved' ? 'selected' : ''}>Approved</option>
+              <option value="Rejected" ${r.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+              <option value="Review" ${r.status === 'Review' ? 'selected' : ''}>Under Review</option>
+            </select>
+            ${r.status === 'Approved' ? `
+              <select onchange="adminChangeApprovedStation('${esc(r.kgid)}', this.value)" style="min-height: 28px; font-size: 11px; padding: 2px 6px; width: 100%; border-radius: var(--r-sm); cursor: pointer; border: 1px solid var(--bdr2);">
+                <option value="">-- Select Approved PS --</option>
+                ${getStationsOptions(r.approvedStation)}
+              </select>
+            ` : ''}
+          </div>
+        </td>
+        <td style="text-align: right; white-space: nowrap;">
+          <button class="btn btn-red btn-sm" onclick="withdrawTransferRequest('${esc(r.kgid)}')" style="color: var(--red); padding: 3px 8px; font-weight: bold;">🗑 Delete</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function showOnBehalfForm() {
+  const el = $('onBehalfFormContainer');
+  if (el) {
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function hideOnBehalfForm() {
+  const el = $('onBehalfFormContainer');
+  if (el) el.style.display = 'none';
+  const form = $('onBehalfForm');
+  if (form) form.reset();
+}
+
+function autoFillOfficerDetails() {
+  const kgidVal = $('obKgid').value.trim();
+  const emp = DATA.employees.find(e => String(e.kgid).trim() === kgidVal);
+  if (emp) {
+    $('obName').value = emp.name || '';
+    $('obRank').value = emp.rank || '';
+    $('obCurrentStation').value = emp.currentUnit || '';
+    if ($('obDob')) $('obDob').value = emp.dob || '';
+    if ($('obDoa')) $('obDoa').value = emp.doa || '';
+  } else {
+    $('obName').value = '';
+    $('obRank').value = '';
+    $('obCurrentStation').value = '';
+    if ($('obDob')) $('obDob').value = '';
+    if ($('obDoa')) $('obDoa').value = '';
+  }
+}function verifyFormGenuinity(emp, formData) {
+  const errors = [];
+  const warnings = [];
+
+  function parseDMY(str) {
+    if (!str) return null;
+    const parts = str.trim().split('-');
+    if (parts.length !== 3) return null;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    const d = new Date(year, month, day);
+    if (d.getDate() === day && d.getMonth() === month && d.getFullYear() === year) {
+      return d;
+    }
+    return null;
+  }
+
+  const dobDate = parseDMY(formData.dob);
+  const doaDate = parseDMY(formData.doa);
+  const currentSinceDate = parseDMY(formData.currentSince);
+  const today = new Date();
+
+  // 1. DOB Checks
+  if (formData.dob) {
+    if (!dobDate) {
+      errors.push("Invalid Date of Birth format. Please use DD-MM-YYYY.");
+    } else if (dobDate > today) {
+      errors.push("Date of Birth cannot be in the future.");
+    } else {
+      const age = today.getFullYear() - dobDate.getFullYear();
+      if (age < 18) {
+        errors.push("Employee must be at least 18 years old.");
+      }
+    }
+  }
+
+  // 2. Appointment Checks
+  if (formData.doa) {
+    if (!doaDate) {
+      errors.push("Invalid Date of Appointment format. Please use DD-MM-YYYY.");
+    } else if (doaDate > today) {
+      errors.push("Date of Appointment cannot be in the future.");
+    }
+  }
+
+  if (dobDate && doaDate) {
+    if (doaDate < dobDate) {
+      errors.push("Date of Appointment cannot be before Date of Birth.");
+    } else {
+      const ageAtApp = doaDate.getFullYear() - dobDate.getFullYear();
+      if (ageAtApp < 18) {
+        errors.push("Appointment Date must be at least 18 years after Date of Birth.");
+      }
+    }
+  }
+
+  // 3. Current Station Joining Date Checks
+  if (formData.currentSince) {
+    if (!currentSinceDate) {
+      errors.push("Invalid Joining Date format. Please use DD-MM-YYYY.");
+    } else if (currentSinceDate > today) {
+      errors.push("Joining Date at current station cannot be in the future.");
+    }
+  }
+
+  if (doaDate && currentSinceDate && currentSinceDate < doaDate) {
+    errors.push("Joining Date at current station cannot be before Date of Appointment.");
+  }
+
+  // 4. Postings Checks (past postings)
+  if (formData.postings && formData.postings.length > 0) {
+    const parsedPostings = [];
+    formData.postings.forEach((p, idx) => {
+      const pf = parseDMY(p.from);
+      const pt = parseDMY(p.to);
+      const pst = p.station || `Row ${idx + 1}`;
+      if (p.from && !pf) {
+        errors.push(`Posting #${idx+1} (${pst}): Invalid From date format. Use DD-MM-YYYY.`);
+      }
+      if (p.to && p.to !== 'Present' && !pt) {
+        errors.push(`Posting #${idx+1} (${pst}): Invalid To date format. Use DD-MM-YYYY.`);
+      }
+      if (pf && pt && pt < pf) {
+        errors.push(`Posting #${idx+1} (${pst}): To date cannot be before From date.`);
+      }
+      if (doaDate && pf && pf < doaDate) {
+        errors.push(`Posting #${idx+1} (${pst}): From date cannot be before Appointment Date.`);
+      }
+      if (currentSinceDate && pt && pt > currentSinceDate) {
+        errors.push(`Posting #${idx+1} (${pst}): To date cannot be after Current Unit Joining Date.`);
+      }
+      if (pf && pt) {
+        parsedPostings.push({ idx: idx + 1, from: pf, to: pt, station: pst });
+      }
+    });
+
+    // Check overlap
+    parsedPostings.sort((a, b) => a.from - b.from);
+    for (let i = 0; i < parsedPostings.length - 1; i++) {
+      const curr = parsedPostings[i];
+      const next = parsedPostings[i+1];
+      if (curr.to && next.from && curr.to > next.from) {
+        errors.push(`Overlap detected between postings: "${curr.station}" (ends ${formData.postings[curr.idx-1].to}) and "${next.station}" (starts ${formData.postings[next.idx-1].from}).`);
+      }
+    }
+  }
+
+  // 5. Warnings (Mismatches with existing Profile Data)
+  if (emp) {
+    if (formData.dob && emp.dob && formData.dob !== emp.dob) {
+      warnings.push(`DOB: entered "${formData.dob}" does not match profile DOB "${emp.dob}"`);
+    }
+    if (formData.doa && emp.doa && formData.doa !== emp.doa) {
+      warnings.push(`DOA: entered "${formData.doa}" does not match profile DOA "${emp.doa}"`);
+    }
+    if (formData.currentStation && emp.currentUnit && formData.currentStation !== emp.currentUnit) {
+      warnings.push(`Current Station: selected "${formData.currentStation}" does not match profile unit "${emp.currentUnit}"`);
+    }
+    if (formData.currentSince && emp.currentSince && formData.currentSince !== emp.currentSince) {
+      warnings.push(`Joining Date: entered "${formData.currentSince}" does not match profile joining date "${emp.currentSince}"`);
+    }
+    if (formData.typeOfTransfer && emp.typeOfTransfer && formData.typeOfTransfer !== emp.typeOfTransfer) {
+      warnings.push(`Type of Transfer: selected "${formData.typeOfTransfer}" does not match profile type "${emp.typeOfTransfer}"`);
+    }
+
+    const profilePastPostings = (emp.postings || []).filter(p => p.to !== 'Present' && p.to !== '');
+    if (formData.postings && formData.postings.length !== profilePastPostings.length) {
+      warnings.push(`Posting History: you entered ${formData.postings.length} past postings, but profile has ${profilePastPostings.length}`);
+    } else if (formData.postings && profilePastPostings.length > 0) {
+      let hasDiff = false;
+      for (let i = 0; i < formData.postings.length; i++) {
+        const fp = formData.postings[i];
+        const pp = profilePastPostings[i];
+        if (fp.station !== pp.station || fp.from !== pp.from || fp.to !== pp.to || fp.rank !== pp.rank) {
+          hasDiff = true;
+          break;
+        }
+      }
+      if (hasDiff) {
+        warnings.push(`Posting History: entered postings differ from profile history.`);
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+
+async function saveOnBehalfRequest(e) {
+  if (e) e.preventDefault();
+
+  const kgid = ($('obKgid')||{}).value.trim();
+  const name = ($('obName')||{}).value.trim();
+  const rank = ($('obRank')||{}).value.trim();
+  const currentStation = ($('obCurrentStation')||{}).value.trim();
+  const preference1 = ($('obPreference1')||{}).value;
+  const preference2 = ($('obPreference2')||{}).value;
+  const preference3 = ($('obPreference3')||{}).value;
+  const preference4 = ($('obPreference4')||{}).value||'';
+  const preference5 = ($('obPreference5')||{}).value||'';
+  const transferCategory = ($('obTransferCategory')||{}).value||'';
+  const reason = ($('obReason')||{}).value.trim();
+  const remarks = ($('obRemarks')||{}).value.trim();
+  const postings = getObPostingsFromTable();
+
+  if (!kgid || !name) { alert('Please enter a valid officer KGID.'); return; }
+  if (!preference1 || !preference2 || !preference3) { alert('Please select at least 3 station preferences.'); return; }
+
+  const emp = DATA.employees.find(x => x.kgid === kgid);
+  const dob = ($('obDob')||{}).value || (emp ? emp.dob || '' : '');
+  const doa = ($('obDoa')||{}).value || (emp ? emp.doa || '' : '');
+  const currentSince = emp ? emp.currentSince || '' : '';
+  const typeOfTransfer = emp ? emp.typeOfTransfer || 'Regular' : 'Regular';
+
+  const currentSubDivision = FRONTEND_STATION_SUBDIVISION_MAP[currentStation] || (emp ? emp.currentSubDivision || '' : '');
+  const activePosting = emp ? {
+    from: currentSince, to: 'Present', station: currentStation,
+    subDivision: currentSubDivision, district: emp.currentDistrict || 'Chikkaballapura',
+    rank: rank, orderNumber: ''
+  } : null;
+  const allPostings = [...(activePosting ? [activePosting] : []), ...postings];
+
+  const verify = verifyFormGenuinity(emp, {
+    dob, doa, currentStation, currentSince, typeOfTransfer, postings
+  });
+
+  if (!verify.valid) {
+    alert("❌ Genuinity Verification failed:\n\n" + verify.errors.map(e => "• " + e).join("\n"));
+    return;
+  }
+
+  if (verify.warnings.length > 0) {
+    const proceed = confirm("⚠️ WARNING: The entered details do not match the official profile:\n\n" + verify.warnings.map(w => "• " + w).join("\n") + "\n\nDo you want to proceed and update the official profile?");
+    if (!proceed) return;
+  }
+
+  const payload = {
+    kgid, name, rank, currentStation,
+    preference1, preference2, preference3, preference4, preference5,
+    transferCategory, reason, remarks,
+    status: 'Pending',
+    applicationDate: new Date().toLocaleDateString('en-GB').replace(/\//g, '-'),
+    approvedStation: '',
+    dob, doa, currentSince, typeOfTransfer, postings: allPostings
+  };
+
+  try {
+    const res = await apiFetch('save-transfer-request', {}, { method: 'POST', body: { transferRequest: payload } });
+    if (!res.ok) { alert(res.error || 'Failed to submit request.'); return; }
+    alert('Transfer request submitted on behalf of ' + name + '! Profile data and posting history updated.');
+    hideOnBehalfForm();
+    await loadData();
+    renderApplyTransferTab();
+  } catch (err) { alert('Error: ' + err.message); }
+}
+
+async function saveTransferRequestForm(e) {
+  if (e) e.preventDefault();
+
+  const postings = getTrPostingsFromTable();
+
+  const preference1 = ($('trPreference1')||{}).value||'';
+  const preference2 = ($('trPreference2')||{}).value||'';
+  const preference3 = ($('trPreference3')||{}).value||'';
+  const preference4 = ($('trPreference4')||{}).value||'';
+  const preference5 = ($('trPreference5')||{}).value||'';
+  const transferCategory = ($('trTransferCategory')||{}).value||'';
+  const reason = ($('trReason')||{}).value.trim();
+  const remarks = ($('trRemarks')||{}).value.trim();
+
+  if (!preference1 || !preference2 || !preference3) {
+    alert('Please select at least 3 station preferences (1–3 are required).');
+    return;
+  }
+
+  const kgid = $('trKgid').value;
+  const name = $('trName').value;
+  const rank = $('trRank').value;
+  const currentStation = $('trCurrentStation').value;
+  const applicationDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+
+  const formCurrentFrom = ($('trCurrentFrom') || {}).value || '';
+  const formDob = ($('trDob') || {}).value || '';
+  const formDoa = ($('trDoa') || {}).value || '';
+  const typeOfTransfer = ($('trTypeOfTransfer') || {}).value || 'Regular';
+  const emp = DATA.employees.find(x => x.kgid === kgid);
+  const formCurrentSince = formCurrentFrom ? toDisplayDate(formCurrentFrom) : (emp ? emp.currentSince || '' : '');
+  const dobDisplay = formDob ? toDisplayDate(formDob) : (emp ? emp.dob || '' : '');
+  const doaDisplay = formDoa ? toDisplayDate(formDoa) : (emp ? emp.doa || '' : '');
+
+  const currentSubDivision = FRONTEND_STATION_SUBDIVISION_MAP[currentStation] || (emp ? emp.currentSubDivision || '' : '');
+  const activePosting = emp ? {
+    from: formCurrentSince, to: 'Present', station: currentStation,
+    subDivision: currentSubDivision, district: emp.currentDistrict || 'Chikkaballapura',
+    rank: rank, orderNumber: ''
+  } : null;
+  const allPostings = [...(activePosting ? [activePosting] : []), ...postings];
+
+  const verify = verifyFormGenuinity(emp, {
+    dob: dobDisplay,
+    doa: doaDisplay,
+    currentStation,
+    currentSince: formCurrentSince,
+    typeOfTransfer,
+    postings
+  });
+
+  if (!verify.valid) {
+    alert("❌ Genuinity Verification failed:\n\n" + verify.errors.map(e => "• " + e).join("\n"));
+    return;
+  }
+
+  if (verify.warnings.length > 0) {
+    const proceed = confirm("⚠️ WARNING: The entered details do not match your official profile:\n\n" + verify.warnings.map(w => "• " + w).join("\n") + "\n\nDo you want to proceed and update your official profile?");
+    if (!proceed) return;
+  }
+
+  const transferPayload = {
+    kgid, name, rank, currentStation,
+    preference1, preference2, preference3, preference4, preference5,
+    transferCategory, reason, remarks,
+    status: 'Pending', applicationDate, approvedStation: '',
+    postingHistoryCount: postings.length,
+    dob: dobDisplay, doa: doaDisplay, currentSince: formCurrentSince, typeOfTransfer, postings: allPostings
+  };
+
+  try {
+    const res = await apiFetch('save-transfer-request', {}, { method: 'POST', body: { transferRequest: transferPayload } });
+    if (!res.ok) { alert(res.error || 'Failed to submit application.'); return; }
+
+    alert('Transfer application submitted! Profile details and posting history updated.');
+    trDraftPostings = [];
+    isEditingOwnTransfer = false;
+    await loadData();
+    renderApplyTransferTab();
+  } catch (err) { alert('Error: ' + err.message); }
+}
+// ── Previous Working Places table helpers ────────────────────────
+// Each table (obPostingsTable / trPostingsTable) stores rows inline in the DOM.
+
+function addObPosting() {
+  const tbody = $('obPostingsTbody');
+  if (!tbody) return;
+  const empty = $('obPostingsEmpty');
+  if (empty) empty.remove();
+  const idx = tbody.rows.length;
+  const row = tbody.insertRow();
+  row.innerHTML = `
+    <td style="color:var(--muted);font-size:11px;">${idx + 1}</td>
+    <td><select class="ob-pst-station" style="width:100%;min-width:140px;font-size:12px;"><option value="">— Select Station —</option>${getStationsOptions('')}</select></td>
+    <td><input type="date" class="ob-pst-from" style="font-size:12px;width:130px;"></td>
+    <td><input type="date" class="ob-pst-to" style="font-size:12px;width:130px;"></td>
+    <td><input type="text" class="ob-pst-rank" placeholder="Rank held" style="font-size:12px;width:90px;"></td>
+    <td><button type="button" class="btn btn-red btn-sm" onclick="this.closest('tr').remove();reindexPostings('obPostingsTbody','obPostingsEmpty',6);" style="font-size:11px;padding:3px 8px;">✕</button></td>
+  `;
+}
+
+function addTrPosting() {
+  const tbody = $('trPostingsTbody');
+  if (!tbody) return;
+  const empty = $('trPostingsEmpty');
+  if (empty) empty.remove();
+  const idx = tbody.rows.length;
+  const uid = Date.now();
+  const row = tbody.insertRow();
+  row.innerHTML = `
+    <td style="color:var(--muted);font-size:11px;text-align:center;">${idx + 1}</td>
+    <td><select class="tr-pst-station" style="width:100%;min-width:150px;font-size:12px;"><option value="">— Select Station —</option>${getStationsOptions('')}</select></td>
+    <td>
+      <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:120px;">
+        <input type="text" class="tr-pst-from" placeholder="DD-MM-YYYY" style="font-size:12px; width:100%; padding-right:24px;" oninput="onDateInputMask(this, event); calcTrRowDuration(this)">
+        <input type="date" style="position:absolute; right:4px; width:18px; height:18px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));">
+        <span style="position:absolute; right:6px; pointer-events:none; font-size:12px;">📅</span>
+      </div>
+    </td>
+    <td>
+      <div class="date-wrapper" style="position:relative; display:flex; align-items:center; width:120px;">
+        <input type="text" class="tr-pst-to" placeholder="DD-MM-YYYY" style="font-size:12px; width:100%; padding-right:24px;" oninput="onDateInputMask(this, event); calcTrRowDuration(this)">
+        <input type="date" style="position:absolute; right:4px; width:18px; height:18px; opacity:0; cursor:pointer;" onchange="this.previousElementSibling.value = toDisplayDate(this.value); this.previousElementSibling.dispatchEvent(new Event('input'));">
+        <span style="position:absolute; right:6px; pointer-events:none; font-size:12px;">📅</span>
+      </div>
+    </td>
+    <td style="text-align:center;"><input type="text" class="tr-pst-yrs" readonly style="font-size:12px;width:48px;text-align:center;background:var(--surf2);color:var(--gold);font-weight:600;" placeholder="—"></td>
+    <td><input type="text" class="tr-pst-rank" placeholder="Rank held" style="font-size:12px;width:90px;"></td>
+    <td><select class="tr-pst-type" style="font-size:12px;width:106px;">
+      <option value="Regular">Regular</option>
+      <option value="OOD">OOD</option>
+      <option value="Mutual">Mutual</option>
+      <option value="Administrative">Administrative</option>
+    </select></td>
+    <td><button type="button" class="btn btn-red btn-sm" onclick="this.closest('tr').remove();reindexPostings('trPostingsTbody','trPostingsEmpty',8);" style="font-size:11px;padding:3px 7px;">✕</button></td>
+  `;
+}
+
+function reindexPostings(tbodyId, emptyId, colspan) {
+  const tbody = $(tbodyId);
+  if (!tbody) return;
+  const rows = Array.from(tbody.rows);
+  if (rows.length === 0) {
+    const tr = document.createElement('tr');
+    tr.id = emptyId;
+    tr.innerHTML = `<td colspan="${colspan}" class="prev-post-empty">No previous places added. Click "+ Add Place" to begin.</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+  rows.forEach((r, i) => { if (r.cells[0]) r.cells[0].textContent = i + 1; });
+}
+
+function getObPostingsFromTable() {
+  const tbody = $('obPostingsTbody'); if (!tbody) return [];
+  return Array.from(tbody.rows).filter(r => !r.id).map(r => ({
+    station: (r.querySelector('.ob-pst-station') || {}).value || '',
+    from: toDisplayDate((r.querySelector('.ob-pst-from') || {}).value || '') || '',
+    to: toDisplayDate((r.querySelector('.ob-pst-to') || {}).value || '') || '',
+    rank: (r.querySelector('.ob-pst-rank') || {}).value || '',
+    subDivision: '', district: 'Chikkaballapura', orderNumber: ''
+  })).filter(p => p.station);
+}
+
+function getTrPostingsFromTable() {
+  const tbody = $('trPostingsTbody'); if (!tbody) return [];
+  return Array.from(tbody.rows).filter(r => !r.id).map(r => ({
+    station: (r.querySelector('.tr-pst-station') || {}).value || '',
+    from: toDisplayDate((r.querySelector('.tr-pst-from') || {}).value || '') || '',
+    to: toDisplayDate((r.querySelector('.tr-pst-to') || {}).value || '') || '',
+    rank: (r.querySelector('.tr-pst-rank') || {}).value || '',
+    type: (r.querySelector('.tr-pst-type') || {}).value || 'Regular',
+    subDivision: '', district: 'Chikkaballapura', orderNumber: ''
+  })).filter(p => p.station);
+}
+
+function onDateInputMask(input, e) {
+  let val = input.value;
+  if (e && e.inputType === 'deleteContentBackward' && val.endsWith('-')) {
+    val = val.slice(0, -1);
+  }
+  let digits = val.replace(/\D/g, '');
+  if (digits.length > 8) digits = digits.substring(0, 8);
+  
+  let formatted = '';
+  if (digits.length > 0) {
+    formatted += digits.substring(0, 2);
+  }
+  if (digits.length > 2) {
+    formatted += '-' + digits.substring(2, 4);
+  }
+  if (digits.length > 4) {
+    formatted += '-' + digits.substring(4, 8);
+  }
+  input.value = formatted;
+}
+
+function calcTrCurrentDuration(fromEl) {
+  const durEl = $('trCurrentDuration');
+  if (!durEl) return;
+  const from = toIsoDate(fromEl.value);
+  if (from && !isNaN(new Date(from).getTime())) {
+    const diff = (new Date() - new Date(from)) / (365.25 * 24 * 3600 * 1000);
+    durEl.value = diff >= 0 ? diff.toFixed(1) : '0.0';
+  } else {
+    durEl.value = '—';
+  }
+}
+
+function calcTrRowDuration(inputEl) {
+  const row = inputEl.closest('tr');
+  if (!row) return;
+  const fromEl = row.querySelector('.tr-pst-from');
+  const toEl = row.querySelector('.tr-pst-to');
+  const yrsEl = row.querySelector('.tr-pst-yrs');
+  if (!fromEl || !toEl || !yrsEl) return;
+  const from = toIsoDate(fromEl.value), to = toIsoDate(toEl.value);
+  if (from && to && to > from && !isNaN(new Date(from).getTime()) && !isNaN(new Date(to).getTime())) {
+    const diff = (new Date(to) - new Date(from)) / (365.25 * 24 * 3600 * 1000);
+    yrsEl.value = diff.toFixed(1);
+  } else {
+    yrsEl.value = '';
+  }
+}
+
+
+async function withdrawTransferRequest(kgid) {
+  const bypass = new URLSearchParams(window.location.search).has('bypass_confirm');
+  if (!bypass && !confirm("Are you sure you want to withdraw/delete this transfer application?")) {
+    return;
+  }
+  
+  try {
+    const res = await apiFetch('delete-transfer-request', { kgid: kgid }, {
+      method: 'DELETE',
+      body: { kgid: kgid }
+    });
+    
+    if (!res.ok) {
+      alert(res.error || "Failed to withdraw application.");
+      return;
+    }
+    
+    alert("Application successfully withdrawn/deleted.");
+    await loadData();
+    renderApplyTransferTab();
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+}
+
+async function adminChangeRequestStatus(kgid, newStatus) {
+  const requests = DATA.transferRequests || [];
+  const tr = requests.find(r => r.kgid === kgid);
+  if (!tr) {
+    alert("Application not found.");
+    return;
+  }
+  
+  const updatedRequest = { 
+    ...tr, 
+    status: newStatus,
+    approvedStation: newStatus === 'Approved' ? (tr.approvedStation || '') : ''
+  };
+  
+  try {
+    const res = await apiFetch('save-transfer-request', {}, {
+      method: 'POST',
+      body: { transferRequest: updatedRequest }
+    });
+    
+    if (!res.ok) {
+      alert(res.error || "Failed to update status.");
+      return;
+    }
+    
+    tr.status = newStatus;
+    tr.approvedStation = updatedRequest.approvedStation;
+    renderApplyTransferTab();
+  } catch (err) {
+    alert("Error updating status: " + err.message);
+  }
+}
+
+async function adminChangeApprovedStation(kgid, approvedStation) {
+  const requests = DATA.transferRequests || [];
+  const tr = requests.find(r => r.kgid === kgid);
+  if (!tr) {
+    alert("Application not found.");
+    return;
+  }
+  
+  const updatedRequest = { ...tr, approvedStation: approvedStation };
+  
+  try {
+    const res = await apiFetch('save-transfer-request', {}, {
+      method: 'POST',
+      body: { transferRequest: updatedRequest }
+    });
+    
+    if (!res.ok) {
+      alert(res.error || "Failed to save approved station.");
+      return;
+    }
+    
+    tr.approvedStation = approvedStation;
+    renderApplyTransferTab();
+  } catch (err) {
+    alert("Error saving approved station: " + err.message);
+  }
+}
+
 document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{ customKpiFilter = null; switchTab(b.dataset.tab); }));
 document.querySelectorAll('.rpt-btn').forEach(b=>b.addEventListener('click',()=>renderRpt(b.dataset.rpt)));
 ['fQuick','fRank','fStation','fEligible'].forEach(id=>{const el=$(id);el.addEventListener('input',()=>{customKpiFilter=null;renderSearch();});el.addEventListener('change',()=>{customKpiFilter=null;renderSearch();});});
 $('refreshBtn').addEventListener('click',()=>loadData().catch(e=>$('dataBadge').textContent='⚠ '+e.message));
 $('addBtn').addEventListener('click',()=>{
   editing=true;
-  draft={kgid:'',name:'',rank:'',designation:'',dob:'',doa:'',mobile:'',homeDistrict:'Chikkaballapura',category:'',currentDistrict:'Chikkaballapura',currentSubDivision:'',currentUnit:'',currentSince:'',sourceProfile:{}};
+  draft={kgid:'',name:'',rank:'',designation:'',dob:'',doa:'',mobile:'',homeDistrict:'Chikkaballapura',category:'',currentDistrict:'Chikkaballapura',currentSubDivision:'',currentUnit:'',currentSince:'',typeOfTransfer:'Regular',sourceProfile:{}};
   draftPostings = [];
-  switchTab('search');
-  renderEditor(draft, 'profileModalContent');
-  $('profileModal').classList.add('open');
+  draftFamily = [];
+  if (activeTab !== 'profile-view') {
+    previousTab = activeTab;
+  }
+  switchTab('profile-view');
+  renderEditor(draft, 'profileFullPageContent');
 });
 
 // ── Modals & Controls Listeners ─────────────────────────────────
