@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -4026,7 +4026,9 @@ function renderProfile(e, targetId = 'profileModalContent'){
           </table>
         </div>
       ` : `<div style="color:var(--muted); font-size:12.5px; padding:10px 0; text-align:center;">No family details recorded.</div>`;
-    })())}`;\r\n  $(targetId).querySelectorAll('.cs-trigger').forEach(b=>b.addEventListener('click',()=>{b.classList.toggle('open');b.nextElementSibling.classList.toggle('open');}));\r\n}
+    })())}`;
+  $(targetId).querySelectorAll('.cs-trigger').forEach(b=>b.addEventListener('click',()=>{b.classList.toggle('open');b.nextElementSibling.classList.toggle('open');}));
+}
 
 function cs(icon,label,content,open=false){return `<button class="cs-trigger${open?' open':''}" onclick=""><span class="cs-ico">${icon}</span><span class="cs-lbl">${label}</span><span class="cs-chev">▼</span></button><div class="cs-body${open?' open':''}"><div class="cs-inner">${content}</div></div>`;}
 function f(label,value){const v=(value===undefined||value===null||value==='')?null:value;return `<div class="fcard"><div class="fc-lbl">${esc(label)}</div><div class="fc-val">${v!==null?value:'<span class="fc-nil">—</span>'}</div></div>`;}
