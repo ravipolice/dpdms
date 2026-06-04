@@ -1611,3 +1611,152 @@ function handleDeleteTransferRequest(payload, session) {
   
   return jsonResponse({ ok: false, error: "Transfer request not found." });
 }
+
+// ── CUSTOM MENU FOR IMPORTING DATA ────────────────────────────
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu("DPDMS Admin")
+    .addItem("Import Data from External Sheet", "importExternalEmployeeData")
+    .addToUi();
+}
+
+function importExternalEmployeeData() {
+  var ui = SpreadsheetApp.getUi();
+  var externalUrl = "https://docs.google.com/spreadsheets/d/199WoCqPzhSB-zS2qkM_TdmjYJ8oNFtHASLLyXf0VMBk/edit";
+  
+  try {
+    var masterSs = SpreadsheetApp.getActiveSpreadsheet();
+    var masterSheet = masterSs.getSheetByName("Employee Master");
+    if (!masterSheet) {
+      ui.alert("Error: 'Employee Master' sheet not found in the active spreadsheet.");
+      return;
+    }
+    
+    // Open source sheet
+    var srcSs = SpreadsheetApp.openByUrl(externalUrl);
+    var srcSheet = srcSs.getSheets()[0]; // get first sheet
+    var srcData = srcSheet.getDataRange().getValues();
+    if (srcData.length <= 1) {
+      ui.alert("Error: The source spreadsheet is empty or has no data rows.");
+      return;
+    }
+    
+    var srcHeaders = srcData[0].map(function(h) { return String(h).trim(); });
+    var srcKgidIdx = -1;
+    for (var i = 0; i < srcHeaders.length; i++) {
+      var hLower = srcHeaders[i].toLowerCase();
+      if (hLower === "kgid" || hLower === "k.g.i.d" || hLower === "employee kgid") {
+        srcKgidIdx = i;
+        break;
+      }
+    }
+    
+    if (srcKgidIdx === -1) {
+      ui.alert("Error: Could not find a 'KGID' column in the source sheet. Headers found: " + srcHeaders.join(", "));
+      return;
+    }
+    
+    // Get master sheet headers and map them
+    var masterData = masterSheet.getDataRange().getValues();
+    var masterHeaders = masterData[0].map(function(h) { return String(h).trim(); });
+    var masterKgidIdx = masterHeaders.indexOf("KGID");
+    if (masterKgidIdx === -1) {
+      ui.alert("Error: 'KGID' column not found in 'Employee Master' sheet.");
+      return;
+    }
+    
+    // Create a column index map for matching headers
+    var headerMap = {}; // srcColIndex -> masterColIndex (1-indexed for getRange)
+    srcHeaders.forEach(function(srcHeader, srcIdx) {
+      if (srcIdx === srcKgidIdx) return; // skip KGID as it is target key
+      
+      // Try to find matching master header (case-insensitive)
+      var matchedMasterIdx = -1;
+      for (var mIdx = 0; mIdx < masterHeaders.length; mIdx++) {
+        var mHeader = masterHeaders[mIdx];
+        if (mHeader.toLowerCase() === srcHeader.toLowerCase() ||
+            (srcHeader.toLowerCase() === "employee name" && mHeader.toLowerCase() === "employee name") ||
+            (srcHeader.toLowerCase() === "name" && mHeader.toLowerCase() === "employee name") ||
+            (srcHeader.toLowerCase() === "appointment date" && mHeader.toLowerCase() === "appointment date") ||
+            (srcHeader.toLowerCase() === "date of appointment" && mHeader.toLowerCase() === "appointment date") ||
+            (srcHeader.toLowerCase() === "date of birth" && mHeader.toLowerCase() === "dob") ||
+            (srcHeader.toLowerCase() === "unit" && mHeader.toLowerCase() === "current unit") ||
+            (srcHeader.toLowerCase() === "subdivision" && mHeader.toLowerCase() === "current sub-division") ||
+            (srcHeader.toLowerCase() === "sub-division" && mHeader.toLowerCase() === "current sub-division") ||
+            (srcHeader.toLowerCase() === "sub division" && mHeader.toLowerCase() === "current sub-division")) {
+          matchedMasterIdx = mIdx;
+          break;
+        }
+      }
+      if (matchedMasterIdx !== -1) {
+        headerMap[srcIdx] = matchedMasterIdx + 1; // 1-indexed for sheet column
+      }
+    });
+    
+    // Index existing master rows by KGID
+    var masterKgidRowMap = {};
+    for (var r = 1; r < masterData.length; r++) {
+      var k = String(masterData[r][masterKgidIdx]).trim();
+      if (k) {
+        masterKgidRowMap[k] = r + 1; // 1-indexed row number
+      }
+    }
+    
+    var updatedCount = 0;
+    var addedCount = 0;
+    
+    // Columns mapping
+    var mCols = {};
+    masterHeaders.forEach(function(h, idx) { mCols[h] = idx + 1; });
+    
+    for (var r = 1; r < srcData.length; r++) {
+      var row = srcData[r];
+      var kgid = String(row[srcKgidIdx] || "").trim();
+      if (!kgid) continue;
+      
+      var targetRow = masterKgidRowMap[kgid];
+      var isNew = !targetRow;
+      
+      if (isNew) {
+        targetRow = masterSheet.getLastRow() + 1;
+        masterSheet.getRange(targetRow, masterKgidIdx + 1).setValue(kgid);
+        masterKgidRowMap[kgid] = targetRow;
+        addedCount++;
+      } else {
+        updatedCount++;
+      }
+      
+      // Update mapped columns
+      for (var srcIdxStr in headerMap) {
+        var srcIdx = parseInt(srcIdxStr);
+        var destCol = headerMap[srcIdx];
+        var val = row[srcIdx];
+        if (val !== null && val !== "") {
+          var destHeader = masterHeaders[destCol - 1];
+          if (destHeader === "DOB" || destHeader === "Appointment Date" || destHeader === "Present Posting Date") {
+            if (typeof val === "string") {
+              val = parseDateStr(val);
+            }
+          }
+          masterSheet.getRange(targetRow, destCol).setValue(val);
+        }
+      }
+      
+      // Set default formulas for new rows
+      if (isNew) {
+        if (mCols["Retirement Date"]) masterSheet.getRange(targetRow, mCols["Retirement Date"]).setFormula('=IF(E' + targetRow + '="","",EOMONTH(EDATE(E' + targetRow + ',60*12),0))');
+        if (mCols["Total Service Years"]) masterSheet.getRange(targetRow, mCols["Total Service Years"]).setFormula('=IF(F' + targetRow + '="","",ROUND(YEARFRAC(F' + targetRow + ',TODAY()),1))');
+        if (mCols["Current Station Years"]) masterSheet.getRange(targetRow, mCols["Current Station Years"]).setFormula('=IF(M' + targetRow + '="","",ROUND(YEARFRAC(M' + targetRow + ',TODAY()),1))');
+        if (mCols["Current Sub-Division Years"]) masterSheet.getRange(targetRow, mCols["Current Sub-Division Years"]).setFormula('=IF(A' + targetRow + '="","",ROUND(SUMPRODUCT((\'Posting History\'!$A$2:$A$1000=A' + targetRow + ')*(\'Posting History\'!$E$2:$E$1000=K' + targetRow + ')*(\'Posting History\'!$B$2:$B$1000<>"")*(IF(\'Posting History\'!$C$2:$C$1000="",TODAY(),\'Posting History\'!$C$2:$C$1000)-\'Posting History\'!$B$2:$B$1000))/365.25,1))');
+        if (mCols["District Service Years"]) masterSheet.getRange(targetRow, mCols["District Service Years"]).setFormula('=IF(A' + targetRow + '="","",ROUND(SUMPRODUCT((\'Posting History\'!$A$2:$A$1000=A' + targetRow + ')*(\'Posting History\'!$F$2:$F$1000=J' + targetRow + ')*(\'Posting History\'!$B$2:$B$1000<>"")*(IF(\'Posting History\'!$C$2:$C$1000="",TODAY(),\'Posting History\'!$C$2:$C$1000)-\'Posting History\'!$B$2:$B$1000))/365.25,1))');
+        if (mCols["Transfer Eligible"]) masterSheet.getRange(targetRow, mCols["Transfer Eligible"]).setFormula('=IF(O' + targetRow + '="","",IF(O' + targetRow + '>=3,"Yes","No"))');
+        if (mCols["Priority"]) masterSheet.getRange(targetRow, mCols["Priority"]).setFormula('=IF(O' + targetRow + '="","",IF(O' + targetRow + '>=5,"High",IF(O' + targetRow + '>=3,"Medium","Low")))');
+      }
+    }
+    
+    ui.alert("Import Complete!\n\nAdded: " + addedCount + " new employees\nUpdated: " + updatedCount + " existing records");
+  } catch (e) {
+    ui.alert("Error during import: " + e.toString());
+  }
+}
+
