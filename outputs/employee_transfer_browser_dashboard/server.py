@@ -18,6 +18,28 @@ IMPORTED_WORKBOOK_PATH = APP_DIR.parent / "District_Employee_Transfer_Database_I
 FIXED_WORKBOOK_PATH = APP_DIR.parent / "District_Employee_Transfer_Database_Template_FIXED.xlsx"
 WORKBOOK_PATH = IMPORTED_WORKBOOK_PATH if IMPORTED_WORKBOOK_PATH.exists() else FIXED_WORKBOOK_PATH
 BACKUP_DIR = APP_DIR.parent / "backups"
+MAX_BACKUPS = 30  # Keep only the last 30 rolling backups
+
+
+def backup_workbook(label: str = "") -> Path | None:
+    """Create a timestamped backup of the workbook and prune old backups.
+    Returns the path of the new backup file, or None if workbook not found.
+    """
+    if not WORKBOOK_PATH.exists():
+        return None
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    suffix = f"_{label}" if label else ""
+    dest = BACKUP_DIR / f"{WORKBOOK_PATH.stem}{suffix}_{stamp}.xlsx"
+    shutil.copy2(WORKBOOK_PATH, dest)
+    # Prune: keep only the most recent MAX_BACKUPS files
+    backups = sorted(BACKUP_DIR.glob("*.xlsx"), key=lambda p: p.stat().st_mtime, reverse=True)
+    for old in backups[MAX_BACKUPS:]:
+        try:
+            old.unlink()
+        except OSError:
+            pass
+    return dest
 
 
 MASTER_HEADERS = [
@@ -417,9 +439,7 @@ def save_employee(payload):
     if not name:
         raise ValueError("Employee name is required.")
 
-    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    shutil.copy2(WORKBOOK_PATH, BACKUP_DIR / f"{WORKBOOK_PATH.stem}_{stamp}.xlsx")
+    backup_workbook()
 
     wb = load_workbook(WORKBOOK_PATH)
     master = wb["Employee Master"]
@@ -602,9 +622,7 @@ def delete_employee(kgid):
     if not kgid:
         raise ValueError("KGID is required.")
 
-    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    shutil.copy2(WORKBOOK_PATH, BACKUP_DIR / f"{WORKBOOK_PATH.stem}_{stamp}.xlsx")
+    backup_workbook()
 
     wb = load_workbook(WORKBOOK_PATH)
     master = wb["Employee Master"]
@@ -746,9 +764,7 @@ def save_transfer_request(payload):
     apply_date = as_text(payload.get("applicationDate") or datetime.now().strftime("%d-%m-%Y")).strip()
     approved_station = as_text(payload.get("approvedStation") or "").strip()
 
-    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    shutil.copy2(WORKBOOK_PATH, BACKUP_DIR / f"{WORKBOOK_PATH.stem}_{stamp}.xlsx")
+    backup_workbook()
 
     wb = load_workbook(WORKBOOK_PATH)
     
@@ -892,9 +908,7 @@ def delete_transfer_request(kgid):
     if not kgid:
         raise ValueError("KGID is required.")
         
-    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    shutil.copy2(WORKBOOK_PATH, BACKUP_DIR / f"{WORKBOOK_PATH.stem}_{stamp}.xlsx")
+    backup_workbook()
 
     wb = load_workbook(WORKBOOK_PATH)
     if "Transfer Requests" in wb.sheetnames:
@@ -1115,6 +1129,13 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    # ── Startup backup ───────────────────────────────────────────────
+    startup_bk = backup_workbook("startup")
+    if startup_bk:
+        print(f"[DPDMS] Startup backup created: {startup_bk.name}")
+    else:
+        print("[DPDMS] WARNING: Data workbook not found – no startup backup created.")
+    # ── Launch server ────────────────────────────────────────────────
     server = ThreadingHTTPServer(("127.0.0.1", 8765), Handler)
-    print("Dashboard running at http://127.0.0.1:8765")
+    print("[DPDMS] Dashboard running at http://127.0.0.1:8765")
     server.serve_forever()
