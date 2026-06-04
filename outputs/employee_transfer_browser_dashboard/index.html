@@ -1738,6 +1738,11 @@
       <div class="chart-card"><div class="cc-head"><span class="cc-title">🏢 Station-wise Strength</span><span class="cc-sub" id="stLbl"></span></div><div class="cc-body" id="stChart"></div></div>
       <div class="chart-card"><div class="cc-head"><span class="cc-title">🗺️ Sub-Division Strength</span></div><div class="cc-body" id="sdChart"></div></div>
     </div>
+    <!-- District Snapshot: Station Strength / Rank Distribution / Sub-Division tables -->
+    <div class="chart-card" style="margin-top:20px;" id="districtSnapshot">
+      <div class="cc-head"><span class="cc-title">📊 District Snapshot</span><span class="cc-sub">Station Strength · Rank Distribution · Sub-Division</span></div>
+      <div class="cc-body" id="districtSnapshotBody" style="padding:16px;"></div>
+    </div>
   </section>
 
   <!-- ═══ TAB 2 · TRANSFER DASHBOARD ═════════════════ -->
@@ -3425,6 +3430,16 @@ function renderEmpDash(){
 
   const sdData=sdDataMap(sds, emps);const mxSd=sdData[0]?.c||1;
   $('sdChart').innerHTML=sdData.length?sdData.map(s=>`<div class="bar-row"><div class="bar-lbl" title="${esc(s.n)}">${esc(s.n)}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${Math.round(s.c/mxSd*100)}%"></div></div><div class="bar-n">${s.c}</div></div>`).join(''):'<div class="empty"><div class="empty-txt">No Sub-Division data</div></div>';
+
+  // ── District Snapshot tables ──────────────────────────────────────
+  const snap = $('districtSnapshotBody');
+  if (snap) {
+    snap.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      ${miniTbl('Station Strength', DATA.summary ? DATA.summary.stations : [])}
+      ${miniTbl('Rank Distribution', DATA.summary ? DATA.summary.ranks : [])}
+      ${miniTbl('Sub-Division', DATA.summary ? DATA.summary.subdivisions : [])}
+    </div>`;
+  }
 }
 function sdDataMap(sds, emps) {
   return sds.map(s=>({n:s,c:emps.filter(e=>e.currentSubDivision===s).length})).sort((a,b)=>b.c-a.c);
@@ -4011,10 +4026,7 @@ function renderProfile(e, targetId = 'profileModalContent'){
           </table>
         </div>
       ` : `<div style="color:var(--muted); font-size:12.5px; padding:10px 0; text-align:center;">No family details recorded.</div>`;
-    })())}</div>
-    <div class="cs">${cs('📊','District Snapshot',`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${miniTbl('Station Strength',DATA.summary.stations)}${miniTbl('Rank Distribution',DATA.summary.ranks)}${miniTbl('Sub-Division',DATA.summary.subdivisions)}</div>`)}</div>`;
-  $(targetId).querySelectorAll('.cs-trigger').forEach(b=>b.addEventListener('click',()=>{b.classList.toggle('open');b.nextElementSibling.classList.toggle('open');}));
-}
+    })())}`;\r\n  $(targetId).querySelectorAll('.cs-trigger').forEach(b=>b.addEventListener('click',()=>{b.classList.toggle('open');b.nextElementSibling.classList.toggle('open');}));\r\n}
 
 function cs(icon,label,content,open=false){return `<button class="cs-trigger${open?' open':''}" onclick=""><span class="cs-ico">${icon}</span><span class="cs-lbl">${label}</span><span class="cs-chev">▼</span></button><div class="cs-body${open?' open':''}"><div class="cs-inner">${content}</div></div>`;}
 function f(label,value){const v=(value===undefined||value===null||value==='')?null:value;return `<div class="fcard"><div class="fc-lbl">${esc(label)}</div><div class="fc-val">${v!==null?value:'<span class="fc-nil">—</span>'}</div></div>`;}
