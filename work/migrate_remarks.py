@@ -118,16 +118,11 @@ def run_migration():
                         imported_sheet.cell(dest_row, imp_cols[k], value=v)
             
             migrated_count += 1
-            
-            # Clean up Employee Master Remarks column (removing the profile data block)
-            if clean_remarks != str(remarks_val).strip():
-                master_sheet.cell(r, remarks_col, value=clean_remarks if clean_remarks else None)
-                cleaned_count += 1
 
     wb.save(db_path)
     print(f"\nMigration Completed!")
     print(f"Migrated profile tokens for {migrated_count} employees.")
-    print(f"Cleaned up Remarks column in Employee Master for {cleaned_count} rows.")
+    print("Original 'Remarks' column in 'Employee Master' was left untouched.")
 
 if __name__ == "__main__":
     run_migration()

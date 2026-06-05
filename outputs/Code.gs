@@ -1992,22 +1992,13 @@ function migrateRemarksToSeparateColumns() {
         }
         
         migratedCount++;
-        
-        // Update Remarks array in memory with cleaned string
-        if (cleanRemarks !== remarksVal) {
-          masterValues[r][remarksColIdx] = cleanRemarks;
-          cleanedCount++;
-        }
       }
     }
-    
-    // Write back Employee Master in batch
-    masterRange.setValues(masterValues);
     
     // Write back Imported Emp Profiles in batch
     importedSheet.getRange(1, 1, importedValues.length, width).setValues(importedValues);
     
-    ui.alert("Migration Completed Successfully!\n\nParsed and migrated profiles for: " + migratedCount + " employees\nCleaned up Remarks column for: " + cleanedCount + " rows");
+    ui.alert("Migration Completed Successfully!\n\nParsed and migrated profiles for: " + migratedCount + " employees. The original 'Remarks' column in 'Employee Master' was left untouched.");
   } catch (e) {
     ui.alert("Error during migration: " + e.toString());
   }
