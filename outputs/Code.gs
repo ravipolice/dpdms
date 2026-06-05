@@ -1617,6 +1617,7 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu("DPDMS Admin")
     .addItem("Import Data from External Sheet", "importExternalEmployeeData")
+    .addItem("Split Remarks to Separate Columns", "migrateRemarksToSeparateColumns")
     .addToUi();
 }
 
@@ -1878,6 +1879,165 @@ function importExternalEmployeeData() {
   } catch (e) {
     ui.alert("Error during import: " + e.toString());
   }
+}
+
+// ── SPLIT REMARKS INTO SEPARATE COLUMNS ───────────────────────
+function migrateRemarksToSeparateColumns() {
+  var ui = SpreadsheetApp.getUi();
+  var confirm = ui.alert(
+    "Migrate Profile Details",
+    "This will parse the profile details (Blood, Metal, Email, Approved, Admin, Created, Updated) from the 'Remarks' column in 'Employee Master', move them to their respective separate columns in 'Imported Emp Profiles', and clean up the 'Remarks' column.\n\nDo you want to proceed?",
+    ui.ButtonSet.YES_NO
+  );
+  
+  if (confirm !== ui.Button.YES) {
+    return;
+  }
+  
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var masterSheet = ss.getSheetByName("Employee Master");
+    var importedSheet = ss.getSheetByName("Imported Emp Profiles");
+    
+    if (!masterSheet) {
+      ui.alert("Error: 'Employee Master' sheet not found.");
+      return;
+    }
+    
+    if (!importedSheet) {
+      importedSheet = ss.insertSheet("Imported Emp Profiles");
+      importedSheet.appendRow([
+        "kgid", "name", "mobile1", "mobile2", "rank", "station", "district",
+        "metalNumber", "bloodGroup", "email", "isAdmin", "isApproved",
+        "createdAt", "updatedAt", "isDeleted", "photoUrl", "lockedFields",
+        "caste", "subCaste", "height", "weight", "familyDetails"
+      ]);
+    }
+    
+    var masterData = masterSheet.getDataRange().getValues();
+    var masterHeaders = masterData[0].map(function(h) { return String(h).trim(); });
+    var kgidCol = masterHeaders.indexOf("KGID") + 1;
+    var nameCol = masterHeaders.indexOf("Employee Name") + 1;
+    var remarksCol = masterHeaders.indexOf("Remarks") + 1;
+    
+    if (kgidCol === 0 || remarksCol === 0) {
+      ui.alert("Error: KGID or Remarks column not found in 'Employee Master'.");
+      return;
+    }
+    
+    var importedData = importedSheet.getDataRange().getValues();
+    var importedHeaders = importedData[0].map(function(h) { return String(h).trim(); });
+    var impKgidCol = importedHeaders.indexOf("kgid") + 1;
+    var impNameCol = importedHeaders.indexOf("name") + 1;
+    
+    if (impKgidCol === 0) {
+      ui.alert("Error: 'kgid' column not found in 'Imported Emp Profiles'.");
+      return;
+    }
+    
+    // Map imported headers to column index
+    var impCols = {};
+    importedHeaders.forEach(function(h, idx) { impCols[h] = idx + 1; });
+    
+    // Index existing imported rows by KGID
+    var impKgidRowMap = {};
+    for (var r = 1; r < importedData.length; r++) {
+      var k = String(importedData[r][impKgidCol - 1]).trim();
+      if (k) {
+        impKgidRowMap[k] = r + 1;
+      }
+    }
+    
+    var migratedCount = 0;
+    var cleanedCount = 0;
+    
+    for (var r = 1; r < masterData.length; r++) {
+      var kgid = String(masterData[r][kgidCol - 1]).trim();
+      var name = String(masterData[r][nameCol - 1]).trim();
+      var remarksVal = String(masterData[r][remarksCol - 1]).trim();
+      
+      if (!kgid || !remarksVal || remarksVal === "-" || remarksVal === "") continue;
+      
+      var parseResult = parseRemarksString(remarksVal);
+      var profileData = parseResult.profileData;
+      var cleanRemarks = parseResult.cleanRemarks;
+      
+      if (Object.keys(profileData).length > 0) {
+        var destRow = impKgidRowMap[kgid];
+        if (!destRow) {
+          destRow = importedSheet.getLastRow() + 1;
+          importedSheet.cell = importedSheet.getRange(destRow, impKgidCol).setValue(kgid);
+          importedSheet.getRange(destRow, impNameCol).setValue(name);
+          impKgidRowMap[kgid] = destRow;
+        }
+        
+        // Write profile details to Imported Emp Profiles
+        for (var k in profileData) {
+          if (impCols[k]) {
+            var cell = importedSheet.getRange(impKgidRowMap[kgid], impCols[k]);
+            var currentVal = String(cell.getValue()).trim();
+            if (!currentVal || currentVal === "" || currentVal === "??" || currentVal === "None") {
+              cell.setValue(profileData[k]);
+            }
+          }
+        }
+        
+        migratedCount++;
+        
+        // Update Remarks column in Employee Master with cleaned string
+        if (cleanRemarks !== remarksVal) {
+          masterSheet.getRange(r + 1, remarksCol).setValue(cleanRemarks ? cleanRemarks : "");
+          cleanedCount++;
+        }
+      }
+    }
+    
+    ui.alert("Migration Completed Successfully!\n\nParsed and migrated profiles for: " + migratedCount + " employees\nCleaned up Remarks column for: " + cleanedCount + " rows");
+  } catch (e) {
+    ui.alert("Error during migration: " + e.toString());
+  }
+}
+
+function parseRemarksString(remarksStr) {
+  if (!remarksStr) return { profileData: {}, cleanRemarks: "" };
+  
+  var parts = remarksStr.split(";");
+  var profileData = {};
+  var remainingParts = [];
+  
+  for (var i = 0; i < parts.length; i++) {
+    var part = parts[i].trim();
+    if (!part) continue;
+    
+    if (part.indexOf(":") !== -1) {
+      var splitIdx = part.indexOf(":");
+      var k = part.substring(0, splitIdx).trim().toLowerCase();
+      var v = part.substring(splitIdx + 1).trim();
+      
+      if (k === "metal" || k === "metal number" || k === "metalno") {
+        profileData["metalNumber"] = v;
+      } else if (k === "blood" || k === "blood group" || k === "bloodgroup") {
+        profileData["bloodGroup"] = v;
+      } else if (k === "email") {
+        profileData["email"] = v;
+      } else if (k === "approved") {
+        profileData["isApproved"] = v;
+      } else if (k === "admin") {
+        profileData["isAdmin"] = v;
+      } else if (k === "created") {
+        profileData["createdAt"] = v;
+      } else if (k === "updated") {
+        profileData["updatedAt"] = v;
+      } else {
+        remainingParts.push(part);
+      }
+    } else {
+      remainingParts.push(part);
+    }
+  }
+  
+  var cleanRemarks = remainingParts.join("; ").trim();
+  return { profileData: profileData, cleanRemarks: cleanRemarks };
 }
 
 
