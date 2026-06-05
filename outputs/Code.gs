@@ -1914,47 +1914,52 @@ function migrateRemarksToSeparateColumns() {
       ]);
     }
     
-    var masterData = masterSheet.getDataRange().getValues();
-    var masterHeaders = masterData[0].map(function(h) { return String(h).trim(); });
-    var kgidCol = masterHeaders.indexOf("KGID") + 1;
-    var nameCol = masterHeaders.indexOf("Employee Name") + 1;
-    var remarksCol = masterHeaders.indexOf("Remarks") + 1;
+    // Load Employee Master data in batch
+    var masterRange = masterSheet.getDataRange();
+    var masterValues = masterRange.getValues();
+    var masterHeaders = masterValues[0].map(function(h) { return String(h).trim(); });
+    var kgidColIdx = masterHeaders.indexOf("KGID");
+    var nameColIdx = masterHeaders.indexOf("Employee Name");
+    var remarksColIdx = masterHeaders.indexOf("Remarks");
     
-    if (kgidCol === 0 || remarksCol === 0) {
+    if (kgidColIdx === -1 || remarksColIdx === -1) {
       ui.alert("Error: KGID or Remarks column not found in 'Employee Master'.");
       return;
     }
     
-    var importedData = importedSheet.getDataRange().getValues();
-    var importedHeaders = importedData[0].map(function(h) { return String(h).trim(); });
-    var impKgidCol = importedHeaders.indexOf("kgid") + 1;
-    var impNameCol = importedHeaders.indexOf("name") + 1;
+    // Load Imported Emp Profiles data in batch
+    var importedRange = importedSheet.getDataRange();
+    var importedValues = importedRange.getValues();
+    var importedHeaders = importedValues[0].map(function(h) { return String(h).trim(); });
+    var impKgidColIdx = importedHeaders.indexOf("kgid");
+    var impNameColIdx = importedHeaders.indexOf("name");
     
-    if (impKgidCol === 0) {
+    if (impKgidColIdx === -1) {
       ui.alert("Error: 'kgid' column not found in 'Imported Emp Profiles'.");
       return;
     }
     
-    // Map imported headers to column index
-    var impCols = {};
-    importedHeaders.forEach(function(h, idx) { impCols[h] = idx + 1; });
+    // Map imported header names to 0-based index
+    var impColsIdx = {};
+    importedHeaders.forEach(function(h, idx) { impColsIdx[h] = idx; });
     
-    // Index existing imported rows by KGID
-    var impKgidRowMap = {};
-    for (var r = 1; r < importedData.length; r++) {
-      var k = String(importedData[r][impKgidCol - 1]).trim();
+    // Index existing imported rows by KGID (map: kgid -> 0-based row index in importedValues)
+    var impKgidRowIdxMap = {};
+    for (var r = 1; r < importedValues.length; r++) {
+      var k = String(importedValues[r][impKgidColIdx]).trim();
       if (k) {
-        impKgidRowMap[k] = r + 1;
+        impKgidRowIdxMap[k] = r;
       }
     }
     
     var migratedCount = 0;
     var cleanedCount = 0;
+    var width = importedHeaders.length;
     
-    for (var r = 1; r < masterData.length; r++) {
-      var kgid = String(masterData[r][kgidCol - 1]).trim();
-      var name = String(masterData[r][nameCol - 1]).trim();
-      var remarksVal = String(masterData[r][remarksCol - 1]).trim();
+    for (var r = 1; r < masterValues.length; r++) {
+      var kgid = String(masterValues[r][kgidColIdx]).trim();
+      var name = String(masterValues[r][nameColIdx]).trim();
+      var remarksVal = String(masterValues[r][remarksColIdx]).trim();
       
       if (!kgid || !remarksVal || remarksVal === "-" || remarksVal === "") continue;
       
@@ -1963,34 +1968,44 @@ function migrateRemarksToSeparateColumns() {
       var cleanRemarks = parseResult.cleanRemarks;
       
       if (Object.keys(profileData).length > 0) {
-        var destRow = impKgidRowMap[kgid];
-        if (!destRow) {
-          destRow = importedSheet.getLastRow() + 1;
-          importedSheet.cell = importedSheet.getRange(destRow, impKgidCol).setValue(kgid);
-          importedSheet.getRange(destRow, impNameCol).setValue(name);
-          impKgidRowMap[kgid] = destRow;
+        var rowIdx = impKgidRowIdxMap[kgid];
+        
+        // If not found in imported sheet, create a new row array
+        if (rowIdx === undefined) {
+          var newRow = new Array(width).fill("");
+          newRow[impKgidColIdx] = kgid;
+          if (impNameColIdx !== -1) newRow[impNameColIdx] = name;
+          
+          importedValues.push(newRow);
+          rowIdx = importedValues.length - 1;
+          impKgidRowIdxMap[kgid] = rowIdx;
         }
         
-        // Write profile details to Imported Emp Profiles
+        // Write profile details to the array in memory
         for (var k in profileData) {
-          if (impCols[k]) {
-            var cell = importedSheet.getRange(impKgidRowMap[kgid], impCols[k]);
-            var currentVal = String(cell.getValue()).trim();
-            if (!currentVal || currentVal === "" || currentVal === "??" || currentVal === "None") {
-              cell.setValue(profileData[k]);
+          if (impColsIdx[k] !== undefined) {
+            var currentVal = String(importedValues[rowIdx][impColsIdx[k]]).trim();
+            if (!currentVal || currentVal === "" || currentVal === "??" || currentVal === "None" || currentVal === "null") {
+              importedValues[rowIdx][impColsIdx[k]] = profileData[k];
             }
           }
         }
         
         migratedCount++;
         
-        // Update Remarks column in Employee Master with cleaned string
+        // Update Remarks array in memory with cleaned string
         if (cleanRemarks !== remarksVal) {
-          masterSheet.getRange(r + 1, remarksCol).setValue(cleanRemarks ? cleanRemarks : "");
+          masterValues[r][remarksColIdx] = cleanRemarks;
           cleanedCount++;
         }
       }
     }
+    
+    // Write back Employee Master in batch
+    masterRange.setValues(masterValues);
+    
+    // Write back Imported Emp Profiles in batch
+    importedSheet.getRange(1, 1, importedValues.length, width).setValues(importedValues);
     
     ui.alert("Migration Completed Successfully!\n\nParsed and migrated profiles for: " + migratedCount + " employees\nCleaned up Remarks column for: " + cleanedCount + " rows");
   } catch (e) {
