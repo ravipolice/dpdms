@@ -78,6 +78,7 @@ STATION_SUBDIVISION_MAP = {
     "DSB": "Chikkaballapura",
     "Cen PS": "Chikkaballapura",
     "DAR Chikkaballapura": "Chikkaballapura",
+    "DAR": "Chikkaballapura",
     "Smmc": "Chikkaballapura",
     "DCRB": "Chikkaballapura",
 
@@ -105,6 +106,165 @@ STATION_SUBDIVISION_MAP = {
     "CPI Off Sidlaghatta": "Chintamani",
 }
 
+STATION_CIRCLE_MAP = {
+    # Chikkaballapura Circle
+    "Chikkaballapura Town PS"     : "Chikkaballapura",
+    "Chikkaballapura Rural PS"    : "Chikkaballapura",
+    "Chikkaballapura Traffic PS"  : "Chikkaballapura",
+    "Nandigiridhama PS"           : "Chikkaballapura",
+    "Nandi Hills PS"              : "Chikkaballapura",
+    "Nandhi Hills PS"             : "Chikkaballapura",
+    "Cen PS"                      : "Chikkaballapura",
+    "CPI Office Cbpura"           : "Chikkaballapura",
+
+    # Gouribidanur Circle
+    "Gowribidanur Town PS"        : "Gouribidanur",
+    "Gowribidanur Rural PS"       : "Gouribidanur",
+    "Manchenahalli PS"            : "Gouribidanur",
+    "CPI Off Gowribidanur"        : "Gouribidanur",
+
+    # Gudibande (belongs to Bagepalli Circle in Option 1)
+    "Gudibanda PS"                : "Bagepalli",
+    "Gudibande PS"                : "Bagepalli",
+    "Peresandra PS"               : "Bagepalli",
+    "CPI Off Gudibande"           : "Bagepalli",
+
+    # Kencharlahalli Circle
+    "Kencharlahalli PS"           : "Kencharlahalli",
+    "Batlahalli PS"               : "Kencharlahalli",
+    "Bhatlahalli PS"              : "Kencharlahalli",
+    "CPI Off Kencharlahalli"      : "Kencharlahalli",
+
+    # Chintamani Circle (Town & Rural are grouped under Chintamani)
+    "Chintamani Town PS"          : "Chintamani",
+    "Chintamani Rural PS"         : "Chintamani",
+
+    # Sidlaghatta Circle
+    "Sidlaghatta Town PS"         : "Sidlaghatta",
+    "Sidlagatta Town PS"          : "Sidlaghatta",
+    "Shidlaghatta Town PS"        : "Sidlaghatta",
+    "Shidlagatta Town PS"         : "Sidlaghatta",
+    "Sidlaghatta Rural PS"        : "Sidlaghatta",
+    "Sidlagatta Rural PS"         : "Sidlaghatta",
+    "Shidlaghatta Rural PS"       : "Sidlaghatta",
+    "Shidlagatta Rural PS"        : "Sidlaghatta",
+    "Dibburhalli PS"              : "Sidlaghatta",
+    "Dibburahalli PS"             : "Sidlaghatta",
+    "CPI Off Shidlaghatta"        : "Sidlaghatta",
+    "CPI Off Sidlaghatta"         : "Sidlaghatta",
+
+    # Chelur (belongs to Bagepalli Circle in Option 1)
+    "Chelur PS"                   : "Bagepalli",
+    "Pathapalya PS"               : "Bagepalli",
+    "CPI Office Cheluru"          : "Bagepalli",
+
+    # Bagepalli Circle
+    "Bagepalli PS"                : "Bagepalli",
+
+    # District & Sub-Division Headquarters (Non-Circle)
+    "Chikkaballapura Women PS"    : "District HQ & Sub-Division HQ",
+    "Cyber Crime PS"              : "District HQ & Sub-Division HQ",
+    "Sdpo Cbpura"                 : "District HQ & Sub-Division HQ",
+    "Dysp Office Cbp"             : "District HQ & Sub-Division HQ",
+    "DPO"                         : "District HQ & Sub-Division HQ",
+    "Control Room"                : "District HQ & Sub-Division HQ",
+    "DSB"                         : "District HQ & Sub-Division HQ",
+    "DAR Chikkaballapura"         : "District HQ & Sub-Division HQ",
+    "DAR"                         : "District HQ & Sub-Division HQ",
+    "Smmc"                        : "District HQ & Sub-Division HQ",
+    "DCRB"                        : "District HQ & Sub-Division HQ",
+    "Dysp Off Cmi"                : "District HQ & Sub-Division HQ",
+}
+
+CIRCLE_SUBDIVISION_MAP = {
+    "Chikkaballapura"               : "Chikkaballapura",
+    "Gouribidanur"                  : "Chikkaballapura",
+    "Bagepalli"                     : "Chintamani",
+    "Chintamani"                    : "Chintamani",
+    "Sidlaghatta"                   : "Chintamani",
+    "Kencharlahalli"                : "Chintamani",
+    "District HQ & Sub-Division HQ" : "Chikkaballapura"
+}
+
+
+def load_station_maps(wb):
+    global STATION_SUBDIVISION_MAP, STATION_CIRCLE_MAP, CIRCLE_SUBDIVISION_MAP
+    sheet_name = None
+    for s in ["PS data", "PS Data", "PS", "PS_Data"]:
+        if s in wb.sheetnames:
+            sheet_name = s
+            break
+    if not sheet_name:
+        return
+        
+    sheet = wb[sheet_name]
+    headers = [str(cell.value).strip().lower() if cell.value is not None else "" for cell in sheet[1]]
+    
+    ps_idx = -1
+    subdiv_idx = -1
+    circle_idx = -1
+    
+    for i, h in enumerate(headers):
+        if "station" in h or "unit" in h or h == "ps":
+            ps_idx = i
+        elif "sub-division" in h or "subdivision" in h or "sub division" in h:
+            subdiv_idx = i
+        elif "circle" in h:
+            circle_idx = i
+            
+    if ps_idx == -1:
+        return
+        
+    new_subdiv_map = {}
+    new_circle_map = {}
+    new_circle_subdiv_map = {}
+    
+    for r in range(2, 5000):
+        ps_val = sheet.cell(r, ps_idx + 1).value
+        if ps_val is None:
+            # Check if we hit the end (e.g. 5 consecutive empty rows)
+            empty_streak = True
+            for check in range(r, min(r + 5, 5000)):
+                if sheet.cell(check, ps_idx + 1).value is not None:
+                    empty_streak = False
+                    break
+            if empty_streak:
+                break
+            continue
+        
+        ps_name = str(ps_val).strip()
+        sub_val = sheet.cell(r, subdiv_idx + 1).value if subdiv_idx != -1 else ""
+        circle_val = sheet.cell(r, circle_idx + 1).value if circle_idx != -1 else ""
+        
+        sub_name = str(sub_val).strip() if sub_val is not None else ""
+        circle_name = str(circle_val).strip() if circle_val is not None else ""
+        
+        new_subdiv_map[ps_name] = sub_name
+        new_circle_map[ps_name] = circle_name
+        if circle_name and sub_name:
+            new_circle_subdiv_map[circle_name] = sub_name
+            
+    if new_subdiv_map:
+        STATION_SUBDIVISION_MAP = new_subdiv_map
+    if new_circle_map:
+        STATION_CIRCLE_MAP = new_circle_map
+    if new_circle_subdiv_map:
+        CIRCLE_SUBDIVISION_MAP = new_circle_subdiv_map
+
+
+def get_circle_for_station(station_name):
+    if not station_name:
+        return ""
+    s = str(station_name).strip()
+    if s in STATION_CIRCLE_MAP:
+        return STATION_CIRCLE_MAP[s]
+    # Case-insensitive fallback
+    s_low = s.lower()
+    for k, v in STATION_CIRCLE_MAP.items():
+        if k.lower() == s_low:
+            return v
+    return ""
+
 
 def as_text(value):
     if value is None:
@@ -125,6 +285,8 @@ def normalize_station(value):
         return "DCRB"
     if nu == "DPO":
         return "DPO"
+    if nu in ("DAR", "DAR CHIKKABALLAPURA"):
+        return "DAR"
     return n
 
 
@@ -204,6 +366,7 @@ def load_data():
         raise FileNotFoundError(f"Workbook not found: {WORKBOOK_PATH}")
 
     wb = load_workbook(WORKBOOK_PATH, data_only=False, read_only=True)
+    load_station_maps(wb)
     master = sheet_rows(wb["Employee Master"])
     history = sheet_rows(wb["Posting History"])
     imported_rows = sheet_rows(wb["Imported Emp Profiles"]) if "Imported Emp Profiles" in wb.sheetnames else []
@@ -266,6 +429,7 @@ def load_data():
         unit = normalize_station(employee.get("Current Unit"))
         if not current_subdiv_raw:
             current_subdiv_raw = STATION_SUBDIVISION_MAP.get(unit, "")
+        circle_raw = as_text(employee.get("Circle") or employee.get("circle") or get_circle_for_station(unit)).strip()
         current_district_raw = as_text(employee.get("Current District")).strip()
         subdiv_years = round(sum(
             (p.get("_durationYears") or 0) for p in postings
@@ -296,6 +460,7 @@ def load_data():
             "retirementDate": display_date(retirement_value) or retirement_display(dob),
             "currentDistrict": as_text(employee.get("Current District")),
             "currentSubDivision": current_subdiv_raw,
+            "circle": circle_raw,
             "currentUnit": unit,
             "currentSince": display_date(current_since),
             "totalServiceYears": total_service,
@@ -332,6 +497,7 @@ def load_data():
                 "familyDetails": as_text(source.get("familyDetails")),
                 "photoUrl": as_text(source.get("photoUrl") or source.get("photo") or ""),
                 "lockedFields": as_text(source.get("lockedFields") or ""),
+                "darWing": as_text(source.get("darWing") or ""),
             },
             "category": category,
             "typeOfTransfer": type_of_transfer,
@@ -366,6 +532,7 @@ def load_data():
         "employees": employees,
         "summary": summary,
         "transferRequests": transfer_requests,
+        "stationSubdivisionMap": STATION_SUBDIVISION_MAP,
     }
 
 
@@ -442,6 +609,7 @@ def save_employee(payload):
     backup_workbook()
 
     wb = load_workbook(WORKBOOK_PATH)
+    load_station_maps(wb)
     master = wb["Employee Master"]
     history = wb["Posting History"]
     imported = wb["Imported Emp Profiles"] if "Imported Emp Profiles" in wb.sheetnames else None
@@ -602,9 +770,10 @@ def save_employee(payload):
             "familyDetails": as_text(source.get("familyDetails")).strip(),
             "photoUrl": as_text(source.get("photoUrl")).strip(),
             "lockedFields": as_text(source.get("lockedFields") or "").strip(),
+            "darWing": as_text(source.get("darWing")).strip(),
         }
         imported_headers = headers_for(imported)
-        for col_name in ["email", "photoUrl", "lockedFields", "caste", "subCaste", "height", "weight", "familyDetails"]:
+        for col_name in ["email", "photoUrl", "lockedFields", "caste", "subCaste", "height", "weight", "familyDetails", "darWing"]:
             if col_name not in imported_headers:
                 new_col = len(imported_headers) + 1
                 imported.cell(1, new_col).value = col_name
@@ -625,6 +794,7 @@ def delete_employee(kgid):
     backup_workbook()
 
     wb = load_workbook(WORKBOOK_PATH)
+    load_station_maps(wb)
     master = wb["Employee Master"]
     history = wb["Posting History"]
     imported = wb["Imported Emp Profiles"] if "Imported Emp Profiles" in wb.sheetnames else None
@@ -767,6 +937,7 @@ def save_transfer_request(payload):
     backup_workbook()
 
     wb = load_workbook(WORKBOOK_PATH)
+    load_station_maps(wb)
     
     # 2. Crosscheck and sync with Employee Master
     warnings = []
@@ -911,6 +1082,7 @@ def delete_transfer_request(kgid):
     backup_workbook()
 
     wb = load_workbook(WORKBOOK_PATH)
+    load_station_maps(wb)
     if "Transfer Requests" in wb.sheetnames:
         ws = wb["Transfer Requests"]
         row_idx = find_row_by_value(ws, "KGID", kgid)
