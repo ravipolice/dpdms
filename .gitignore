@@ -16,3 +16,8 @@ postings_test_backups/
 *.jobid
 .DS_Store
 Thumbs.db
+
+# Project-specific scratch and temporary files
+scratch/
+check_js.py
+*.bak
