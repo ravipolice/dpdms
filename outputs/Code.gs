@@ -1518,7 +1518,7 @@ function handleSaveTransferRequest(payload, session) {
   var sheet = ss.getSheetByName("Transfer Requests");
   if (!sheet) {
     sheet = ss.insertSheet("Transfer Requests");
-    sheet.appendRow(["KGID", "Employee Name", "Rank", "Current Station", "Preference 1", "Preference 2", "Preference 3", "Reason", "Remarks", "Application Date", "Status", "Approved Station"]);
+    sheet.appendRow(["KGID", "Employee Name", "Rank", "Current Station", "Preference 1", "Preference 2", "Preference 3", "Preference 4", "Preference 5", "Reason", "Remarks", "Application Date", "Status", "Approved Station"]);
   }
   
   var data = sheet.getDataRange().getValues();
@@ -1540,6 +1540,16 @@ function handleSaveTransferRequest(payload, session) {
   
   var cols = {};
   headers.forEach(function(h, idx) { cols[h] = idx + 1; });
+
+  // Auto-create Preference 4 and Preference 5 if missing
+  ["Preference 4", "Preference 5"].forEach(function(prefCol) {
+    if (!cols[prefCol]) {
+      var nextCol = headers.length + 1;
+      sheet.getRange(1, nextCol).setValue(prefCol);
+      cols[prefCol] = nextCol;
+      headers.push(prefCol);
+    }
+  });
   
   // Set values
   if (cols["KGID"]) sheet.getRange(targetRow, cols["KGID"]).setValue(kgid);

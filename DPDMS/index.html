@@ -5939,6 +5939,8 @@ function renderAdminTransferRequestsTable() {
       const pref1 = (r.preference1 || '').toLowerCase();
       const pref2 = (r.preference2 || '').toLowerCase();
       const pref3 = (r.preference3 || '').toLowerCase();
+      const pref4 = (r.preference4 || '').toLowerCase();
+      const pref5 = (r.preference5 || '').toLowerCase();
       const reason = (r.reason || '').toLowerCase();
       
       if (!kgid.includes(trSearchQuery) &&
@@ -5947,6 +5949,8 @@ function renderAdminTransferRequestsTable() {
           !pref1.includes(trSearchQuery) &&
           !pref2.includes(trSearchQuery) &&
           !pref3.includes(trSearchQuery) &&
+          !pref4.includes(trSearchQuery) &&
+          !pref5.includes(trSearchQuery) &&
           !reason.includes(trSearchQuery)) {
         return false;
       }
@@ -5989,6 +5993,8 @@ function renderAdminTransferRequestsTable() {
             <span style="font-weight: 500;"><span style="color: var(--muted); font-size: 10px; font-weight: bold;">1:</span> ${esc(r.preference1 || '—')}</span>
             <span><span style="color: var(--muted); font-size: 10px; font-weight: bold;">2:</span> ${esc(r.preference2 || '—')}</span>
             <span><span style="color: var(--muted); font-size: 10px; font-weight: bold;">3:</span> ${esc(r.preference3 || '—')}</span>
+            ${r.preference4 ? `<span><span style="color: var(--muted); font-size: 10px; font-weight: bold;">4:</span> ${esc(r.preference4)}</span>` : ''}
+            ${r.preference5 ? `<span><span style="color: var(--muted); font-size: 10px; font-weight: bold;">5:</span> ${esc(r.preference5)}</span>` : ''}
           </div>
         </td>
         <td style="max-width: 250px;">
