@@ -2765,7 +2765,8 @@ function checkSubCasteOther() {
 
 // ── API Configurations ─────────────────────────────────────────
 const getApiUrl = () => {
-  return 'https://script.google.com/macros/s/AKfycbzTbIFC6kfiQSMY-NzQ0vr19oveT-Qyz2xICG2h1KY6nmP10-8B_AKeQJU30uPK0w3f/exec';
+  const url = localStorage.getItem('dpdms_api_url');
+  return url !== null ? url : 'https://script.google.com/macros/s/AKfycbzTbIFC6kfiQSMY-NzQ0vr19oveT-Qyz2xICG2h1KY6nmP10-8B_AKeQJU30uPK0w3f/exec';
 };
 const getToken = () => localStorage.getItem('dpdms_token') || '';
 const getRole = () => localStorage.getItem('dpdms_role') || '';
