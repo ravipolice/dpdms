@@ -1699,6 +1699,7 @@
     }
   </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </head>
 <body>
 
@@ -1758,6 +1759,7 @@
       <button class="tab-btn" data-tab="search"><span class="ti">👥</span>Employees</button>
       <button class="tab-btn" data-tab="reports"><span class="ti">📋</span>Reports</button>
       <button class="tab-btn" data-tab="apply-transfer"><span class="ti">📝</span>Apply Transfer</button>
+      <button class="tab-btn" data-tab="excel-processing"><span class="ti">🗂️</span>UI Cases Report</button>
       <button class="tab-btn" data-tab="settings" id="tabBtnSettings" style="display:none"><span class="ti">⚙️</span>Users & Roles</button>
     </nav>
   </div>
@@ -1877,6 +1879,362 @@
   <!-- ═══ TAB · APPLY FOR TRANSFER ════════════════════ -->
   <section class="tab-sec" id="tab-apply-transfer">
     <div id="applyTransferTabContainer"></div>
+  </section>
+
+  <!-- ═══ TAB · EXCEL REPORT PROCESSING ═══════════════ -->
+  <section class="tab-sec" id="tab-excel-processing" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <style>
+      .excel-proc-container {
+        background: var(--surf);
+        border-radius: var(--r);
+        border: 1px solid var(--bdr);
+        box-shadow: var(--sh);
+        padding: 30px;
+        margin-top: 10px;
+      }
+      .excel-proc-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--txt);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .excel-proc-subtitle {
+        color: var(--muted);
+        font-size: 13.5px;
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+      .dropzone {
+        border: 2px dashed var(--bdr2);
+        border-radius: 8px;
+        padding: 40px 20px;
+        text-align: center;
+        background: var(--surf2);
+        cursor: pointer;
+        transition: all var(--trans);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+      .dropzone:hover, .dropzone.dragover {
+        border-color: var(--gold);
+        background: var(--gold-dim);
+      }
+      .dropzone-icon {
+        font-size: 40px;
+      }
+      .dropzone-text {
+        font-weight: 600;
+        color: var(--txt2);
+      }
+      .dropzone-subtext {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .file-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--surf3);
+        border-radius: 6px;
+        border: 1px solid var(--bdr);
+        margin-top: 20px;
+        display: none;
+      }
+      .file-name {
+        font-weight: 600;
+        color: var(--txt);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-process {
+        background: var(--gold);
+        color: #ffffff;
+        border: none;
+        padding: 10px 24px;
+        font-weight: 700;
+        font-size: 13.5px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background var(--trans);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-process:hover {
+        background: var(--gold-lt);
+      }
+      .btn-process:disabled {
+        background: var(--muted2);
+        cursor: not-allowed;
+      }
+      .progress-container {
+        margin-top: 24px;
+        display: none;
+      }
+      .progress-bar-bg {
+        background: var(--surf3);
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 12px;
+      }
+      .progress-bar-fill {
+        background: var(--gold);
+        width: 0%;
+        height: 100%;
+        transition: width 0.3s ease;
+      }
+      .status-step {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .status-step.active {
+        color: var(--txt);
+        font-weight: 600;
+      }
+      .status-step.completed {
+        color: var(--grn);
+        font-weight: 600;
+      }
+      .status-step.completed .step-icon::before {
+        content: '✅';
+      }
+      .status-step.active .step-icon::before {
+        content: '⚡';
+      }
+      .status-step.pending .step-icon::before {
+        content: '⚪';
+      }
+      .result-container {
+        margin-top: 24px;
+        padding: 20px;
+        background: var(--grn-dim);
+        border: 1px solid var(--grn-lt);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        text-align: center;
+        display: none;
+      }
+      .result-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--grn);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .result-text {
+        font-size: 13px;
+        color: var(--txt2);
+      }
+      .btn-download {
+        background: var(--grn);
+        color: #ffffff;
+        border: none;
+        padding: 12px 28px;
+        font-weight: 700;
+        font-size: 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background var(--trans);
+        text-decoration: none;
+      }
+      .btn-download:hover {
+        background: var(--grn-lt);
+      }
+      .info-card {
+        margin-top: 30px;
+        padding: 20px;
+        background: var(--surf2);
+        border: 1px solid var(--bdr);
+        border-radius: 8px;
+        font-size: 13px;
+      }
+      .info-card-title {
+        font-weight: 700;
+        color: var(--navy);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .info-card ul {
+        padding-left: 20px;
+        line-height: 1.6;
+        color: var(--txt2);
+      }
+      .excel-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        text-align: center;
+      }
+      .excel-table th {
+        background: var(--navy-surf);
+        color: var(--navy-btn-txt);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        padding: 8px 6px;
+        border: 1px solid var(--bdr);
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      .excel-table td {
+        padding: 8px 6px;
+        border: 1px solid var(--bdr);
+        vertical-align: middle;
+        color: var(--txt2);
+      }
+      .excel-table tr:nth-child(even) td {
+        background: var(--surf2);
+      }
+      .excel-table tr.total-row td {
+        background: var(--surf3) !important;
+        font-weight: 700;
+        color: var(--txt);
+        border-top: 2px solid var(--bdr2);
+        border-bottom: 3px double var(--bdr2);
+      }
+      .excel-table tr:hover td {
+        background: var(--gold-dim) !important;
+      }
+    </style>
+    
+    <div class="excel-proc-container">
+      <div class="excel-proc-title">
+        <span>🗂️</span> Non-Heinous UI Cases Report Generator
+      </div>
+      <div class="excel-proc-subtitle">
+        Upload the raw Excel case file to split sheets by Police Station, Circle, and Sub-Division, and generate context-aware navigation dashboards automatically in your browser.
+      </div>
+      
+      <!-- Drag & Drop Zone -->
+      <div id="excelDropzone" class="dropzone">
+        <div class="dropzone-icon">📥</div>
+        <div class="dropzone-text">Drag and drop your Excel file here or click to browse</div>
+        <div class="dropzone-subtext">Supports .xlsx spreadsheets</div>
+        <input type="file" id="excelFileInput" accept=".xlsx" style="display: none;" />
+      </div>
+      
+      <!-- File Info Area -->
+      <div id="excelFileInfo" class="file-info">
+        <div class="file-name">
+          <span>📄</span> <span id="excelSelectedFileName">filename.xlsx</span>
+        </div>
+        <button id="excelBtnProcess" class="btn-process">⚡ Process & Split Workbook</button>
+      </div>
+      
+      <!-- Progress Indicator -->
+      <div id="excelProgressContainer" class="progress-container">
+        <div class="progress-bar-bg">
+          <div id="excelProgressBarFill" class="progress-bar-fill"></div>
+        </div>
+        <div id="excelStep1" class="status-step pending"><span class="step-icon"></span> Reading spreadsheet file...</div>
+        <div id="excelStep2" class="status-step pending"><span class="step-icon"></span> Splitting cases by Police Station...</div>
+        <div id="excelStep3" class="status-step pending"><span class="step-icon"></span> Splitting cases by Circle & Sub-Division...</div>
+        <div id="excelStep4" class="status-step pending"><span class="step-icon"></span> Generating summary dashboards (DB CBP SD, DB CMI SD)...</div>
+        <div id="excelStep5" class="status-step pending"><span class="step-icon"></span> Reordering sheets and applying hyperlinks...</div>
+      </div>
+      
+      <!-- Results / Download -->
+      <div id="excelResultContainer" class="result-container">
+        <div class="result-title">🎉 Processing Complete!</div>
+        <div class="result-text">Your Excel file has been successfully split and dashboards have been generated.</div>
+        <button id="excelBtnDownload" class="btn-download">⬇️ Download Processed Excel File</button>
+      </div>
+
+      <!-- Dynamic Web Dashboard -->
+      <div id="excelDashboardContainer" style="display: none; margin-top: 40px; border-top: 1px solid var(--bdr); padding-top: 30px;">
+        <!-- Dashboard Sub-Division Tabs -->
+        <div class="tab-row" style="border-top: none; border-bottom: 1px solid var(--bdr); padding-bottom: 8px; margin-bottom: 20px; display: flex; gap: 8px;">
+          <button class="tab-btn act" id="btnShowCbpDash" style="font-weight:700;"><span class="ti">🔵</span>Chikkaballapura Sub-Division</button>
+          <button class="tab-btn" id="btnShowCmiDash" style="font-weight:700;"><span class="ti">🟠</span>Chintamani Sub-Division</button>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="kpi-grid" id="excelKpiGrid" style="margin-bottom: 24px;"></div>
+
+        <!-- Tables Grid (Circle Stats and Detailed Stats) -->
+        <div style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 24px;">
+          <!-- Overall Stats CPI Table -->
+          <div class="rpt-card">
+            <div class="rpt-head">
+              <div>
+                <div class="rpt-title" id="excelTitleCPI">Circle Overall UI Statistics</div>
+                <div class="rpt-sub" style="font-size:12px; color:var(--muted); margin-top:4px;">Includes Heinious & Non-Henious UI cases</div>
+              </div>
+            </div>
+            <div class="rpt-body" style="overflow-x: auto; padding: 0;">
+              <table class="excel-table" id="excelTableCPI"></table>
+            </div>
+          </div>
+
+          <!-- Detailed Stations Table -->
+          <div class="rpt-card">
+            <div class="rpt-head">
+              <div>
+                <div class="rpt-title" id="excelTitlePS">Police Station Detailed Non-Heinous UI Statistics</div>
+                <div class="rpt-sub" style="font-size:12px; color:var(--muted); margin-top:4px;">Dynamically calculated from uploaded RAW DATA</div>
+              </div>
+            </div>
+            <div class="rpt-body" style="overflow-x: auto; padding: 0;">
+              <table class="excel-table" id="excelTablePS"></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Area -->
+        <div class="grid2" style="margin-bottom: 24px;">
+          <!-- Station wise UI Strength -->
+          <div class="chart-card">
+            <div class="cc-head">
+              <span class="cc-title">👮 Police Station UI strength</span>
+            </div>
+            <div class="cc-body" id="excelPsChart"></div>
+          </div>
+
+          <!-- Year wise UI distribution -->
+          <div class="chart-card">
+            <div class="cc-head">
+              <span class="cc-title">📅 Year-wise Cases Distribution</span>
+            </div>
+            <div class="cc-body" id="excelYearChart"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Requirements Info Card -->
+      <div class="info-card">
+        <div class="info-card-title">
+          <span>⚠️</span> Requirements for Input File
+        </div>
+        <ul>
+          <li>Must contain a sheet named exactly <strong>"RAW DATA "</strong> (with the trailing space).</li>
+          <li>Rows 1, 2, and 3 must contain the headers (Row 1: Title, Rows 2-3: Column names).</li>
+          <li>Case data rows must start from <strong>Row 4</strong> onwards.</li>
+          <li>Columns must match the standard report schema (e.g., Column A: PS Name, Column AA: FIR Status/Stage).</li>
+        </ul>
+      </div>
+    </div>
   </section>
 
   <!-- ═══ TAB 5 · SUPER ADMIN SETTINGS ═════════════════ -->
@@ -5277,6 +5635,11 @@ function switchTab(t){
     renderSettings();
     loadSaUsers();
   }
+  if(t==='excel-processing') {
+    if(window.activeCasesData) {
+      renderWebDashboard();
+    }
+  }
 }
 
 // ── Super Admin Settings Handlers ───────────────────────────────
@@ -6648,6 +7011,1475 @@ document.addEventListener('click', (ev) => {
   if (card && card.classList.contains('open') && !card.contains(ev.target)) {
     card.classList.remove('open');
   }
+});
+
+// ── Excel UI Cases processing logic ───────────────────────
+const excelDropzone = $('excelDropzone');
+const excelFileInput = $('excelFileInput');
+const excelFileInfo = $('excelFileInfo');
+const excelSelectedFileName = $('excelSelectedFileName');
+const excelBtnProcess = $('excelBtnProcess');
+const excelProgressContainer = $('excelProgressContainer');
+const excelProgressBarFill = $('excelProgressBarFill');
+const excelResultContainer = $('excelResultContainer');
+const excelBtnDownload = $('excelBtnDownload');
+
+let uploadedExcelFile = null;
+let processedExcelBlobUrl = null;
+let processedExcelName = "";
+
+window.activeCasesData = {
+  "Chickballapura Town PS": {
+    "total": 45,
+    "cc": 0,
+    "b": 0,
+    "c": 0,
+    "draft": 8,
+    "years": {
+      "2018": 0,
+      "2019": 1,
+      "2020": 0,
+      "2021": 3,
+      "2022": 7,
+      "2023": 6,
+      "2024": 1,
+      "2025": 21,
+      "2026": 6
+    }
+  },
+  "Bagepalli PS": {
+    "total": 78,
+    "cc": 0,
+    "b": 0,
+    "c": 0,
+    "draft": 23,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 3,
+      "2023": 2,
+      "2024": 13,
+      "2025": 52,
+      "2026": 8
+    }
+  },
+  "Chickballapura Rural PS": {
+    "total": 67,
+    "cc": 0,
+    "b": 0,
+    "c": 0,
+    "draft": 17,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 2,
+      "2023": 3,
+      "2024": 7,
+      "2025": 50,
+      "2026": 5
+    }
+  },
+  "Chikkaballapura Women PS": {
+    "total": 14,
+    "cc": 0,
+    "b": 0,
+    "c": 0,
+    "draft": 2,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 2,
+      "2024": 0,
+      "2025": 12,
+      "2026": 0
+    }
+  },
+  "Nandi Giridhama PS": {
+    "total": 50,
+    "cc": 1,
+    "b": 0,
+    "c": 1,
+    "draft": 14,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 1,
+      "2024": 0,
+      "2025": 46,
+      "2026": 3
+    }
+  },
+  "Gowribidanur Rural PS": {
+    "total": 57,
+    "cc": 0,
+    "b": 0,
+    "c": 0,
+    "draft": 17,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 1,
+      "2024": 5,
+      "2025": 42,
+      "2026": 9
+    }
+  },
+  "Gudibande PS": {
+    "total": 32,
+    "cc": 0,
+    "b": 2,
+    "c": 2,
+    "draft": 7,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 0,
+      "2024": 2,
+      "2025": 27,
+      "2026": 3
+    }
+  },
+  "Chelur PS": {
+    "total": 18,
+    "cc": 0,
+    "b": 0,
+    "c": 0,
+    "draft": 9,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 0,
+      "2024": 1,
+      "2025": 9,
+      "2026": 8
+    }
+  },
+  "Manchenalli PS": {
+    "total": 42,
+    "cc": 1,
+    "b": 0,
+    "c": 0,
+    "draft": 7,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 0,
+      "2024": 2,
+      "2025": 34,
+      "2026": 6
+    }
+  },
+  "Chickballapura Traffic PS": {
+    "total": 11,
+    "cc": 0,
+    "b": 0,
+    "c": 0,
+    "draft": 7,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 0,
+      "2024": 0,
+      "2025": 11,
+      "2026": 0
+    }
+  },
+  "Patapalya PS": {
+    "total": 15,
+    "cc": 0,
+    "b": 0,
+    "c": 0,
+    "draft": 1,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 0,
+      "2024": 0,
+      "2025": 11,
+      "2026": 4
+    }
+  },
+  "Peresandra PS": {
+    "total": 36,
+    "cc": 1,
+    "b": 0,
+    "c": 0,
+    "draft": 12,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 0,
+      "2024": 0,
+      "2025": 27,
+      "2026": 9
+    }
+  },
+  "Gowribidanur Town PS": {
+    "total": 15,
+    "cc": 0,
+    "b": 0,
+    "c": 0,
+    "draft": 2,
+    "years": {
+      "2018": 0,
+      "2019": 0,
+      "2020": 0,
+      "2021": 0,
+      "2022": 0,
+      "2023": 0,
+      "2024": 0,
+      "2025": 12,
+      "2026": 3
+    }
+  }
+};
+
+excelDropzone.addEventListener('click', () => excelFileInput.click());
+excelFileInput.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) {
+    handleExcelFileSelected(e.target.files[0]);
+  }
+});
+excelDropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  excelDropzone.classList.add('dragover');
+});
+excelDropzone.addEventListener('dragleave', () => {
+  excelDropzone.classList.remove('dragover');
+});
+excelDropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  excelDropzone.classList.remove('dragover');
+  if (e.dataTransfer.files.length > 0) {
+    handleExcelFileSelected(e.dataTransfer.files[0]);
+  }
+});
+
+function handleExcelFileSelected(file) {
+  uploadedExcelFile = file;
+  excelSelectedFileName.textContent = file.name;
+  excelDropzone.style.display = 'none';
+  excelFileInfo.style.display = 'flex';
+  excelProgressContainer.style.display = 'none';
+  excelResultContainer.style.display = 'none';
+  if (processedExcelBlobUrl) {
+    URL.revokeObjectURL(processedExcelBlobUrl);
+    processedExcelBlobUrl = null;
+  }
+}
+
+function updateExcelStep(stepNum) {
+  const fillPercent = stepNum * 20;
+  excelProgressBarFill.style.width = `${Math.min(fillPercent, 100)}%`;
+  
+  for (let s = 1; s <= 5; s++) {
+    const el = $('excelStep' + s);
+    if (s < stepNum) {
+      el.className = 'status-step completed';
+    } else if (s === stepNum) {
+      el.className = 'status-step active';
+    } else {
+      el.className = 'status-step pending';
+    }
+  }
+}
+
+excelBtnProcess.addEventListener('click', async () => {
+  if (!uploadedExcelFile) return;
+  
+  excelBtnProcess.disabled = true;
+  excelProgressContainer.style.display = 'block';
+  excelResultContainer.style.display = 'none';
+  
+  try {
+    // Step 1: Read File
+    updateExcelStep(1);
+    const arrayBuffer = await uploadedExcelFile.arrayBuffer();
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
+    
+    // Find RAW DATA sheet
+    const rawSheet = workbook.worksheets.find(w => w.name.trim() === 'RAW DATA');
+    if (!rawSheet) {
+      throw new Error('A sheet named "RAW DATA " (with trailing space) is required in the workbook!');
+    }
+    
+    // Step 2: Split by PS
+    updateExcelStep(2);
+    const psGroups = {};
+    for (let r = 4; r <= rawSheet.rowCount; r++) {
+      const row = rawSheet.getRow(r);
+      const psValue = row.getCell(1).value;
+      if (psValue) {
+        const psName = String(psValue).trim();
+        if (!psGroups[psName]) psGroups[psName] = [];
+        psGroups[psName].push(row);
+      }
+    }
+    
+    const headerMerges = [
+      'F2:F3', 'A2:A3', 'B2:B3', 'C2:C3', 'D2:D3', 'E2:E3',
+      'AF2:AF3', 'AK2:AK3', 'AL2:AL3', 'T2:T3', 'X2:X3',
+      'AA2:AA3', 'AB2:AB3', 'AD2:AD3', 'AE2:AE3'
+    ];
+    
+    const copyRowData = (srcRow, destRow) => {
+      destRow.height = srcRow.height;
+      srcRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        const destCell = destRow.getCell(colNumber);
+        destCell.value = cell.value;
+        destCell.style = cell.style; 
+      });
+    };
+    
+    const createAndPopulateSheet = (name, rows) => {
+      let sheetName = name;
+      if (sheetName.length > 31) {
+        sheetName = sheetName.substring(0, 31);
+      }
+      const existing = workbook.getWorksheet(sheetName);
+      if (existing) {
+        workbook.removeWorksheet(existing.id);
+      }
+      const newSheet = workbook.addWorksheet(sheetName);
+      
+      newSheet.columns = rawSheet.columns.map(col => ({
+        header: col.header,
+        key: col.key,
+        width: col.width,
+        style: col.style,
+        hidden: col.hidden
+      }));
+      
+      const row1 = rawSheet.getRow(1);
+      const row2 = rawSheet.getRow(2);
+      const row3 = rawSheet.getRow(3);
+      
+      const newRow1 = newSheet.getRow(1);
+      const newRow2 = newSheet.getRow(2);
+      const newRow3 = newSheet.getRow(3);
+      
+      copyRowData(row1, newRow1);
+      copyRowData(row2, newRow2);
+      copyRowData(row3, newRow3);
+      
+      headerMerges.forEach(mergeRange => {
+        newSheet.mergeCells(mergeRange);
+      });
+      
+      let destRowNum = 4;
+      for (const srcRow of rows) {
+        const destRow = newSheet.getRow(destRowNum);
+        copyRowData(srcRow, destRow);
+        destRowNum++;
+      }
+      
+      newRow1.commit();
+      newRow2.commit();
+      newRow3.commit();
+      for (let r = 4; r < destRowNum; r++) {
+        newSheet.getRow(r).commit();
+      }
+    };
+    
+    for (const [psName, rows] of Object.entries(psGroups)) {
+      createAndPopulateSheet(psName, rows);
+    }
+    
+    // Step 3: Split by Circle & Sub-Division
+    updateExcelStep(3);
+    const circleMapping = {
+      'Chickballapura Town PS': 'Chikkaballapura Circle',
+      'Chickballapura Rural PS': 'Chikkaballapura Circle',
+      'Nandi Giridhama PS': 'Chikkaballapura Circle',
+      'Chickballapura Traffic PS': 'Chikkaballapura Circle',
+      
+      'Gowribidanur Town PS': 'Gowribidanur Circle',
+      'Gowribidanur Rural PS': 'Gowribidanur Circle',
+      'Manchenalli PS': 'Gowribidanur Circle',
+      
+      'Gudibande PS': 'Gudibande Circle',
+      'Peresandra PS': 'Gudibande Circle',
+      
+      'Bagepalli PS': 'Bagepalli Circle',
+      'Chelur PS': 'Chelur Circle',
+      'Patapalya PS': 'Chelur Circle',
+      'Chikkaballapura Women PS': 'Chikkaballapura Sub-division'
+    };
+
+    const subdivisionMapping = {
+      'Chikkaballapura Circle': 'Chikkaballapura Sub-Division',
+      'Gowribidanur Circle': 'Chikkaballapura Sub-Division',
+      'Gudibande Circle': 'Chikkaballapura Sub-Division',
+      'Bagepalli Circle': 'Chintamani Sub-Division',
+      'Chelur Circle': 'Chintamani Sub-Division'
+    };
+    
+    const circleGroups = {};
+    const subdivisionGroups = {};
+    
+    for (let r = 4; r <= rawSheet.rowCount; r++) {
+      const row = rawSheet.getRow(r);
+      const psValue = row.getCell(1).value;
+      if (psValue) {
+        const psName = String(psValue).trim();
+        const circle = circleMapping[psName];
+        if (circle) {
+          if (!circleGroups[circle]) circleGroups[circle] = [];
+          circleGroups[circle].push(row);
+          
+          const subDiv = subdivisionMapping[circle];
+          if (subDiv) {
+            if (!subdivisionGroups[subDiv]) subdivisionGroups[subDiv] = [];
+            subdivisionGroups[subDiv].push(row);
+          }
+        }
+      }
+    }
+    
+    for (const [circle, rows] of Object.entries(circleGroups)) {
+      createAndPopulateSheet(circle, rows);
+    }
+    for (const [subDiv, rows] of Object.entries(subdivisionGroups)) {
+      createAndPopulateSheet(subDiv, rows);
+    }
+    
+    // Step 4: Generating summary dashboards
+    updateExcelStep(4);
+    const activeCases = {};
+    for (let r = 4; r <= rawSheet.rowCount; r++) {
+      const row = rawSheet.getRow(r);
+      const stage = row.getCell(27).value;
+      if (stage === 'Under Investigation') {
+        const ps = String(row.getCell(1).value).trim();
+        const firDateStr = String(row.getCell(3).value);
+        const match = firDateStr.match(/\b(20\d{2})\b/);
+        const year = match ? match[1] : 'Unknown';
+        
+        const c17 = row.getCell(17).value;
+        const c18 = row.getCell(18).value;
+        const c19 = row.getCell(19).value;
+        
+        let isCc = false, isB = false, isC = false, isDraft = false;
+        if (c17) {
+          const str = String(c17).trim();
+          if (str.startsWith("Draft")) isDraft = true;
+          else if (str !== "X") isCc = true;
+        }
+        if (c18 && String(c18).trim() !== "X") isB = true;
+        if (c19 && String(c19).trim() !== "X") isC = true;
+        
+        if (!activeCases[ps]) {
+          activeCases[ps] = {
+            total: 0, cc: 0, b: 0, c: 0, draft: 0,
+            years: { '2018': 0, '2019': 0, '2020': 0, '2021': 0, '2022': 0, '2023': 0, '2024': 0, '2025': 0, '2026': 0 }
+          };
+        }
+        const counts = activeCases[ps];
+        counts.total++;
+        if (isCc) counts.cc++;
+        if (isB) counts.b++;
+        if (isC) counts.c++;
+        if (isDraft) counts.draft++;
+        if (counts.years[year] !== undefined) counts.years[year]++;
+      }
+    }
+    
+    // Remove old worksheets if any
+    const oldSheets = ['Dash Board', 'DB CBP SD', 'DB CMI SD'];
+    oldSheets.forEach(name => {
+      const sheet = workbook.worksheets.find(w => w.name === name);
+      if (sheet) workbook.removeWorksheet(sheet.id);
+    });
+    
+    const fontTitle = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFF' } };
+    const fontHeader = { name: 'Arial', size: 9, bold: true, color: { argb: 'FFFFFF' } };
+    const fontLink = { name: 'Arial', size: 10, color: { argb: '0563C1' }, underline: 'single' };
+    const fontLinkBold = { name: 'Arial', size: 10, bold: true, color: { argb: '0563C1' }, underline: 'single' };
+    const fontBackLink = { name: 'Arial', size: 10, bold: true, color: { argb: '0563C1' }, underline: 'single' };
+    const alignBackLink = { vertical: 'middle', horizontal: 'center' };
+    
+    const borderHeader = {
+      top: { style: 'thin', color: { argb: '4A5568' } },
+      left: { style: 'thin', color: { argb: '4A5568' } },
+      bottom: { style: 'thin', color: { argb: '4A5568' } },
+      right: { style: 'thin', color: { argb: '4A5568' } }
+    };
+    const borderData = {
+      top: { style: 'thin', color: { argb: 'E2E8F0' } },
+      left: { style: 'thin', color: { argb: 'E2E8F0' } },
+      bottom: { style: 'thin', color: { argb: 'E2E8F0' } },
+      right: { style: 'thin', color: { argb: 'E2E8F0' } }
+    };
+    const borderTotal = {
+      top: { style: 'thin', color: { argb: '4A5568' } },
+      bottom: { style: 'double', color: { argb: '000000' } },
+      left: { style: 'thin', color: { argb: 'E2E8F0' } },
+      right: { style: 'thin', color: { argb: 'E2E8F0' } }
+    };
+    const borderButton = {
+      top: { style: 'thin', color: { argb: '000000' } },
+      left: { style: 'thin', color: { argb: '000000' } },
+      bottom: { style: 'thin', color: { argb: '000000' } },
+      right: { style: 'thin', color: { argb: '000000' } }
+    };
+    
+    const fillTitle = { type: 'pattern', pattern: 'solid', fgColor: { argb: '1B365D' } };
+    const fillHeader = { type: 'pattern', pattern: 'solid', fgColor: { argb: '2C5282' } };
+    const fillZebra = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F7FAFC' } };
+    const fillTotal = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'EDF2F7' } };
+    const fillYellow = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF00' } };
+    
+    const alignHeader = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    const alignPSName = { vertical: 'middle', horizontal: 'left' };
+    const alignCount = { vertical: 'middle', horizontal: 'center' };
+    
+    const setupColumns = (ws) => {
+      ws.views = [{ showGridLines: true }];
+      ws.columns = [
+        { width: 5 }, { width: 32 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+        { width: 3 }, { width: 3 }, { width: 3 }, { width: 3 },
+        { width: 8 }, { width: 8 }, { width: 8 }, { width: 8 }, { width: 8 }, { width: 8 }, { width: 8 }, { width: 8 }, { width: 8 }, { width: 8 }
+      ];
+      ws.getColumn('I').hidden = true;
+      ws.getColumn('J').hidden = true;
+      ws.getColumn('K').hidden = true;
+      ws.getColumn('L').hidden = true;
+    };
+    
+    function getTable1SheetName(name) {
+      if (name === "Chikkaballapura Sub-division") return "Chikkaballapura Women PS";
+      if (name === "Bagepalli PS") return "Bagepalli Circle";
+      return name;
+    }
+    function getTable3SheetName(name) {
+      if (name === "Bagepalli Circle") return "Bagepalli Circle";
+      if (name === "Chelur Circle") return "Chelur Circle";
+      return "Chintamani Sub-Division";
+    }
+    function getTable4SheetName(name) {
+      if (name === "Bagepalli PS") return "Bagepalli PS";
+      if (name === "Chelur PS") return "Chelur PS";
+      if (name === "Pathapalya PS") return "Patapalya PS";
+      return "Chintamani Sub-Division";
+    }
+    function getActiveCaseKey(name) {
+      if (name === "Manchenahalli PS") return "Manchenalli PS";
+      if (name === "Nandigiridhama PS") return "Nandi Giridhama PS";
+      if (name === "Pathapalya PS") return "Patapalya PS";
+      return name;
+    }
+    
+    // CBP Dashboard
+    const wsCbp = workbook.addWorksheet('DB CBP SD');
+    wsCbp.properties.tabColor = { argb: 'FF2C5282' };
+    setupColumns(wsCbp);
+    
+    let cbpRow = 1;
+    function writeTableHeader(ws, titleText, rowRef) {
+      ws.mergeCells(rowRef, 1, rowRef, 22);
+      const titleCell = ws.getCell(rowRef, 1);
+      titleCell.value = titleText;
+      titleCell.font = fontTitle;
+      titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+      titleCell.fill = fillTitle;
+      ws.getRow(rowRef).height = 26;
+      rowRef++;
+      
+      ws.mergeCells(rowRef, 1, rowRef + 1, 1);
+      ws.getCell(rowRef, 1).value = "Sl.\nNo.";
+      ws.mergeCells(rowRef, 2, rowRef + 1, 2);
+      ws.getCell(rowRef, 2).value = "Name of the ps";
+      ws.mergeCells(rowRef, 3, rowRef, 8);
+      ws.getCell(rowRef, 3).value = "2011 to 2025 as on   15-01-2026";
+      ws.mergeCells(rowRef, 13, rowRef, 22);
+      ws.getCell(rowRef, 13).value = "Year wise split details";
+      ws.getRow(rowRef).height = 18;
+      rowRef++;
+      
+      ws.getCell(rowRef, 3).value = "Total\nUI";
+      ws.getCell(rowRef, 4).value = "CC No.\npending";
+      ws.getCell(rowRef, 5).value = "B-report\npending";
+      ws.getCell(rowRef, 6).value = "C-report\npending";
+      ws.getCell(rowRef, 7).value = "CS in\nDraft";
+      ws.getCell(rowRef, 8).value = "Acutal UI";
+      
+      ws.getCell(rowRef, 13).value = "2018";
+      ws.getCell(rowRef, 14).value = "2019";
+      ws.getCell(rowRef, 15).value = "2020";
+      ws.getCell(rowRef, 16).value = "2021";
+      ws.getCell(rowRef, 17).value = "2022";
+      ws.getCell(rowRef, 18).value = "2023";
+      ws.getCell(rowRef, 19).value = "2024";
+      ws.getCell(rowRef, 20).value = "2025";
+      ws.getCell(rowRef, 21).value = "2026";
+      ws.getCell(rowRef, 22).value = "Total";
+      ws.getRow(rowRef).height = 22;
+      
+      for (let r = rowRef - 1; r <= rowRef; r++) {
+        const row = ws.getRow(r);
+        for (let c = 1; c <= 22; c++) {
+          const cell = row.getCell(c);
+          cell.font = fontHeader;
+          cell.alignment = alignHeader;
+          cell.border = borderHeader;
+          cell.fill = fillHeader;
+        }
+      }
+      rowRef++;
+      return rowRef;
+    }
+    
+    cbpRow = writeTableHeader(wsCbp, "Cbpura Sub-Division UI Statistics as per Police IT (Henious & Non-Henious)", cbpRow);
+    const t1Start = cbpRow;
+    const t1Data = [
+      ["Chikkaballapura Sub-division", 4, 1, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 3, 0, 4],
+      ["Chikkaballapura Circle", 55, 0, 2, 2, 16, 35, 0, 0, 0, 0, 0, 2, 3, 48, 2, 55],
+      ["Gowribidanur Circle", 39, 2, 0, 0, 10, 27, 0, 0, 0, 0, 0, 1, 2, 33, 3, 39],
+      ["Chelur Circle", 16, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 0, 0, 14, 2, 16],
+      ["Gudibande Circle", 33, 0, 0, 0, 8, 25, 0, 0, 0, 0, 0, 0, 1, 26, 6, 33],
+      ["Bagepalli PS", 22, 0, 0, 0, 5, 17, 0, 0, 0, 0, 0, 0, 0, 20, 2, 22]
+    ];
+    
+    t1Data.forEach((rowVals, idx) => {
+      const row = wsCbp.getRow(cbpRow);
+      row.height = 20;
+      const sheetName = getTable1SheetName(rowVals[0]);
+      const isEven = (idx % 2 === 1);
+      const rowFill = isEven ? fillZebra : null;
+      
+      row.getCell(1).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${idx + 1})`, result: idx + 1 };
+      row.getCell(1).font = fontLink;
+      row.getCell(1).alignment = alignCount;
+      row.getCell(1).border = borderData;
+      if (rowFill) row.getCell(1).fill = rowFill;
+      
+      row.getCell(2).value = { formula: `HYPERLINK("#'${sheetName}'!A1", "${rowVals[0]}")`, result: rowVals[0] };
+      row.getCell(2).font = fontLinkBold;
+      row.getCell(2).alignment = alignPSName;
+      row.getCell(2).border = borderData;
+      if (rowFill) row.getCell(2).fill = rowFill;
+      
+      row.getCell(3).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${rowVals[1]})`, result: rowVals[1] };
+      row.getCell(3).font = fontLinkBold;
+      row.getCell(3).alignment = alignCount;
+      row.getCell(3).border = borderData;
+      if (rowFill) row.getCell(3).fill = rowFill;
+      
+      for (let col = 4; col <= 7; col++) {
+        row.getCell(col).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${rowVals[col - 2]})`, result: rowVals[col - 2] };
+        row.getCell(col).font = fontLink;
+        row.getCell(col).alignment = alignCount;
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      
+      row.getCell(8).value = { formula: `HYPERLINK("#'${sheetName}'!A1", C${cbpRow}-(D${cbpRow}+E${cbpRow}+F${cbpRow}+G${cbpRow}))` };
+      row.getCell(8).font = fontLinkBold;
+      row.getCell(8).alignment = alignCount;
+      row.getCell(8).border = borderData;
+      if (rowFill) row.getCell(8).fill = rowFill;
+      
+      for (let col = 9; col <= 12; col++) {
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      for (let col = 13; col <= 21; col++) {
+        row.getCell(col).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${rowVals[col - 6]})`, result: rowVals[col - 6] };
+        row.getCell(col).font = fontLink;
+        row.getCell(col).alignment = alignCount;
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      row.getCell(22).value = { formula: `HYPERLINK("#'${sheetName}'!A1", SUM(M${cbpRow}:U${cbpRow}))` };
+      row.getCell(22).font = fontLinkBold;
+      row.getCell(22).alignment = alignCount;
+      row.getCell(22).border = borderData;
+      if (rowFill) row.getCell(22).fill = rowFill;
+      
+      cbpRow++;
+    });
+    
+    const t1End = cbpRow - 1;
+    const t1TotalRow = wsCbp.getRow(cbpRow);
+    t1TotalRow.height = 22;
+    t1TotalRow.getCell(2).value = { formula: `HYPERLINK("#'RAW DATA'!A1", "Total")`, result: "Total" };
+    t1TotalRow.getCell(2).font = fontLinkBold;
+    t1TotalRow.getCell(2).alignment = alignPSName;
+    for (let c = 1; c <= 22; c++) {
+      const cell = t1TotalRow.getCell(c);
+      cell.border = borderTotal;
+      cell.fill = fillTotal;
+    }
+    for (let c = 3; c <= 8; c++) {
+      const colLetter = String.fromCharCode(64 + c);
+      t1TotalRow.getCell(c).value = { formula: `HYPERLINK("#'RAW DATA'!A1", SUM(${colLetter}${t1Start}:${colLetter}${t1End}))` };
+      t1TotalRow.getCell(c).font = fontLinkBold;
+      t1TotalRow.getCell(c).alignment = alignCount;
+    }
+    for (let c = 13; c <= 22; c++) {
+      const colLetter = c <= 26 ? String.fromCharCode(64 + c) : 'V';
+      t1TotalRow.getCell(c).value = { formula: `HYPERLINK("#'RAW DATA'!A1", SUM(${colLetter}${t1Start}:${colLetter}${t1End}))` };
+      t1TotalRow.getCell(c).font = fontLinkBold;
+      t1TotalRow.getCell(c).alignment = alignCount;
+    }
+    
+    cbpRow += 5;
+    
+    // Table 2 CBP Non-Heinous
+    cbpRow = writeTableHeader(wsCbp, "Cbpura Sub-Division UI Statistics as per Police IT (Non-Henious)", cbpRow);
+    const t2Start = cbpRow;
+    const t2Stations = [
+      [1, "Bagepalli PS"], [2, "Chelur PS"], [4, "Chickballapura Rural PS"], [5, "Chickballapura Town PS"],
+      [6, "Chickballapura Traffic PS"], [8, "Gowribidanur Rural PS"], [9, "Gowribidanur Town PS"],
+      [10, "Gudibande PS"], [11, "Manchenahalli PS"], [12, "Nandigiridhama PS"], [13, "Pathapalya PS"], [14, "Peresandra PS"]
+    ];
+    
+    t2Stations.forEach((st, idx) => {
+      const slNo = st[0];
+      const psName = st[1];
+      const key = getActiveCaseKey(psName);
+      const data = activeCases[key] || {
+        total: 0, cc: 0, b: 0, c: 0, draft: 0,
+        years: { '2018': 0, '2019': 0, '2020': 0, '2021': 0, '2022': 0, '2023': 0, '2024': 0, '2025': 0, '2026': 0 }
+      };
+      const row = wsCbp.getRow(cbpRow);
+      row.height = 20;
+      const sheetName = getActiveCaseKey(psName);
+      const isEven = (idx % 2 === 1);
+      const rowFill = isEven ? fillZebra : null;
+      
+      row.getCell(1).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${slNo})`, result: slNo };
+      row.getCell(1).font = fontLink;
+      row.getCell(1).alignment = alignCount;
+      row.getCell(1).border = borderData;
+      if (rowFill) row.getCell(1).fill = rowFill;
+      
+      row.getCell(2).value = { formula: `HYPERLINK("#'${sheetName}'!A1", "${psName}")`, result: psName };
+      row.getCell(2).font = fontLinkBold;
+      row.getCell(2).alignment = alignPSName;
+      row.getCell(2).border = borderData;
+      if (rowFill) row.getCell(2).fill = rowFill;
+      
+      row.getCell(3).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.total})`, result: data.total };
+      row.getCell(3).font = fontLinkBold;
+      row.getCell(3).alignment = alignCount;
+      row.getCell(3).border = borderData;
+      if (rowFill) row.getCell(3).fill = rowFill;
+      
+      row.getCell(4).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.cc})`, result: data.cc };
+      row.getCell(5).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.b})`, result: data.b };
+      row.getCell(6).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.c})`, result: data.c };
+      row.getCell(7).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.draft})`, result: data.draft };
+      for (let col = 4; col <= 7; col++) {
+        row.getCell(col).font = fontLink;
+        row.getCell(col).alignment = alignCount;
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      
+      row.getCell(8).value = { formula: `HYPERLINK("#'${sheetName}'!A1", C${cbpRow}-(D${cbpRow}+E${cbpRow}+F${cbpRow}+G${cbpRow}))` };
+      row.getCell(8).font = fontLinkBold;
+      row.getCell(8).alignment = alignCount;
+      row.getCell(8).border = borderData;
+      if (rowFill) row.getCell(8).fill = rowFill;
+      
+      for (let col = 9; col <= 12; col++) {
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      
+      let yrIdx = 0;
+      const years = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+      for (let col = 13; col <= 21; col++) {
+        const yr = years[yrIdx];
+        const yrVal = data.years[yr] || 0;
+        row.getCell(col).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${yrVal})`, result: yrVal };
+        row.getCell(col).font = fontLink;
+        row.getCell(col).alignment = alignCount;
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+        yrIdx++;
+      }
+      row.getCell(22).value = { formula: `HYPERLINK("#'${sheetName}'!A1", SUM(M${cbpRow}:U${cbpRow}))` };
+      row.getCell(22).font = fontLinkBold;
+      row.getCell(22).alignment = alignCount;
+      row.getCell(22).border = borderData;
+      if (rowFill) row.getCell(22).fill = rowFill;
+      
+      cbpRow++;
+    });
+    
+    const t2End = cbpRow - 1;
+    const t2TotalRow = wsCbp.getRow(cbpRow);
+    t2TotalRow.height = 22;
+    t2TotalRow.getCell(2).value = { formula: `HYPERLINK("#'RAW DATA'!A1", "Total")`, result: "Total" };
+    t2TotalRow.getCell(2).font = fontLinkBold;
+    t2TotalRow.getCell(2).alignment = alignPSName;
+    for (let c = 1; c <= 22; c++) {
+      const cell = t2TotalRow.getCell(c);
+      cell.border = borderTotal;
+      cell.fill = fillTotal;
+    }
+    for (let c = 3; c <= 8; c++) {
+      const colLetter = String.fromCharCode(64 + c);
+      t2TotalRow.getCell(c).value = { formula: `HYPERLINK("#'RAW DATA'!A1", SUM(${colLetter}${t2Start}:${colLetter}${t2End}))` };
+      t2TotalRow.getCell(c).font = fontLinkBold;
+      t2TotalRow.getCell(c).alignment = alignCount;
+    }
+    for (let c = 13; c <= 22; c++) {
+      const colLetter = c <= 26 ? String.fromCharCode(64 + c) : 'V';
+      t2TotalRow.getCell(c).value = { formula: `HYPERLINK("#'RAW DATA'!A1", SUM(${colLetter}${t2Start}:${colLetter}${t2End}))` };
+      t2TotalRow.getCell(c).font = fontLinkBold;
+      t2TotalRow.getCell(c).alignment = alignCount;
+    }
+    
+    // CMI Dashboard
+    const wsCmi = workbook.addWorksheet('DB CMI SD');
+    wsCmi.properties.tabColor = { argb: 'FFC05621' };
+    setupColumns(wsCmi);
+    
+    let cmiRow = 1;
+    cmiRow = writeTableHeader(wsCmi, "Chintamani Sub-Division UI Statistics as per Police IT (Henious & Non-Henious)", cmiRow);
+    const t3Start = cmiRow;
+    const t3Data = [
+      ["Bagepalli Circle", 22, 0, 0, 0, 5, 17, 0, 0, 0, 0, 0, 0, 0, 20, 2, 22],
+      ["Chelur Circle", 16, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 0, 0, 14, 2, 16],
+      ["Chintamani Town PS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ["Chintamani Rural PS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ["Shidlagatta Circle", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ["Kencharlahalli Circle", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+    
+    t3Data.forEach((rowVals, idx) => {
+      const row = wsCmi.getRow(cmiRow);
+      row.height = 20;
+      const sheetName = getTable3SheetName(rowVals[0]);
+      const isEven = (idx % 2 === 1);
+      const rowFill = isEven ? fillZebra : null;
+      
+      row.getCell(1).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${idx + 1})`, result: idx + 1 };
+      row.getCell(1).font = fontLink;
+      row.getCell(1).alignment = alignCount;
+      row.getCell(1).border = borderData;
+      if (rowFill) row.getCell(1).fill = rowFill;
+      
+      row.getCell(2).value = { formula: `HYPERLINK("#'${sheetName}'!A1", "${rowVals[0]}")`, result: rowVals[0] };
+      row.getCell(2).font = fontLinkBold;
+      row.getCell(2).alignment = alignPSName;
+      row.getCell(2).border = borderData;
+      if (rowFill) row.getCell(2).fill = rowFill;
+      
+      row.getCell(3).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${rowVals[1]})`, result: rowVals[1] };
+      row.getCell(3).font = fontLinkBold;
+      row.getCell(3).alignment = alignCount;
+      row.getCell(3).border = borderData;
+      if (rowFill) row.getCell(3).fill = rowFill;
+      
+      for (let col = 4; col <= 7; col++) {
+        row.getCell(col).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${rowVals[col - 2]})`, result: rowVals[col - 2] };
+        row.getCell(col).font = fontLink;
+        row.getCell(col).alignment = alignCount;
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      row.getCell(8).value = { formula: `HYPERLINK("#'${sheetName}'!A1", C${cmiRow}-(D${cmiRow}+E${cmiRow}+F${cmiRow}+G${cmiRow}))` };
+      row.getCell(8).font = fontLinkBold;
+      row.getCell(8).alignment = alignCount;
+      row.getCell(8).border = borderData;
+      if (rowFill) row.getCell(8).fill = rowFill;
+      
+      for (let col = 9; col <= 12; col++) {
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      for (let col = 13; col <= 21; col++) {
+        row.getCell(col).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${rowVals[col - 6]})`, result: rowVals[col - 6] };
+        row.getCell(col).font = fontLink;
+        row.getCell(col).alignment = alignCount;
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      row.getCell(22).value = { formula: `HYPERLINK("#'${sheetName}'!A1", SUM(M${cmiRow}:U${cmiRow}))` };
+      row.getCell(22).font = fontLinkBold;
+      row.getCell(22).alignment = alignCount;
+      row.getCell(22).border = borderData;
+      if (rowFill) row.getCell(22).fill = rowFill;
+      
+      cmiRow++;
+    });
+    
+    const t3End = cmiRow - 1;
+    const t3TotalRow = wsCmi.getRow(cmiRow);
+    t3TotalRow.height = 22;
+    t3TotalRow.getCell(2).value = { formula: `HYPERLINK("#'RAW DATA'!A1", "Total")`, result: "Total" };
+    t3TotalRow.getCell(2).font = fontLinkBold;
+    t3TotalRow.getCell(2).alignment = alignPSName;
+    for (let c = 1; c <= 22; c++) {
+      const cell = t3TotalRow.getCell(c);
+      cell.border = borderTotal;
+      cell.fill = fillTotal;
+    }
+    for (let c = 3; c <= 8; c++) {
+      const colLetter = String.fromCharCode(64 + c);
+      t3TotalRow.getCell(c).value = { formula: `HYPERLINK("#'RAW DATA'!A1", SUM(${colLetter}${t3Start}:${colLetter}${t3End}))` };
+      t3TotalRow.getCell(c).font = fontLinkBold;
+      t3TotalRow.getCell(c).alignment = alignCount;
+    }
+    for (let c = 13; c <= 22; c++) {
+      const colLetter = c <= 26 ? String.fromCharCode(64 + c) : 'V';
+      t3TotalRow.getCell(c).value = { formula: `HYPERLINK("#'RAW DATA'!A1", SUM(${colLetter}${t3Start}:${colLetter}${t3End}))` };
+      t3TotalRow.getCell(c).font = fontLinkBold;
+      t3TotalRow.getCell(c).alignment = alignCount;
+    }
+    
+    cmiRow += 5;
+    
+    // Table 4 CMI Non-Heinous
+    cmiRow = writeTableHeader(wsCmi, "Chintamani Sub-Division UI Statistics as per Police IT (Non-Henious)", cmiRow);
+    const t4Start = cmiRow;
+    const t4Stations = [
+      [1, "Bagepalli PS"], [2, "Chelur PS"], [3, "Pathapalya PS"], [4, "Chintamani Town PS"],
+      [5, "Chintamani Rural PS"], [6, "Shidlagatta Town PS"], [7, "Shidlagatta Rural PS"],
+      [8, "Dibburahalli PS"], [9, "Kencharlahalli PS"], [10, "Batlahalli PS"]
+    ];
+    
+    t4Stations.forEach((st, idx) => {
+      const slNo = st[0];
+      const psName = st[1];
+      const key = getActiveCaseKey(psName);
+      const data = activeCases[key] || {
+        total: 0, cc: 0, b: 0, c: 0, draft: 0,
+        years: { '2018': 0, '2019': 0, '2020': 0, '2021': 0, '2022': 0, '2023': 0, '2024': 0, '2025': 0, '2026': 0 }
+      };
+      const row = wsCmi.getRow(cmiRow);
+      row.height = 20;
+      const sheetName = getTable4SheetName(psName);
+      const isEven = (idx % 2 === 1);
+      const rowFill = isEven ? fillZebra : null;
+      
+      row.getCell(1).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${slNo})`, result: slNo };
+      row.getCell(1).font = fontLink;
+      row.getCell(1).alignment = alignCount;
+      row.getCell(1).border = borderData;
+      if (rowFill) row.getCell(1).fill = rowFill;
+      
+      row.getCell(2).value = { formula: `HYPERLINK("#'${sheetName}'!A1", "${psName}")`, result: psName };
+      row.getCell(2).font = fontLinkBold;
+      row.getCell(2).alignment = alignPSName;
+      row.getCell(2).border = borderData;
+      if (rowFill) row.getCell(2).fill = rowFill;
+      
+      row.getCell(3).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.total})`, result: data.total };
+      row.getCell(3).font = fontLinkBold;
+      row.getCell(3).alignment = alignCount;
+      row.getCell(3).border = borderData;
+      if (rowFill) row.getCell(3).fill = rowFill;
+      
+      row.getCell(4).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.cc})`, result: data.cc };
+      row.getCell(5).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.b})`, result: data.b };
+      row.getCell(6).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.c})`, result: data.c };
+      row.getCell(7).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${data.draft})`, result: data.draft };
+      for (let col = 4; col <= 7; col++) {
+        row.getCell(col).font = fontLink;
+        row.getCell(col).alignment = alignCount;
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      row.getCell(8).value = { formula: `HYPERLINK("#'${sheetName}'!A1", C${cmiRow}-(D${cmiRow}+E${cmiRow}+F${cmiRow}+G${cmiRow}))` };
+      row.getCell(8).font = fontLinkBold;
+      row.getCell(8).alignment = alignCount;
+      row.getCell(8).border = borderData;
+      if (rowFill) row.getCell(8).fill = rowFill;
+      
+      for (let col = 9; col <= 12; col++) {
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+      }
+      
+      let yrIdx = 0;
+      const years = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+      for (let col = 13; col <= 21; col++) {
+        const yr = years[yrIdx];
+        const yrVal = data.years[yr] || 0;
+        row.getCell(col).value = { formula: `HYPERLINK("#'${sheetName}'!A1", ${yrVal})`, result: yrVal };
+        row.getCell(col).font = fontLink;
+        row.getCell(col).alignment = alignCount;
+        row.getCell(col).border = borderData;
+        if (rowFill) row.getCell(col).fill = rowFill;
+        yrIdx++;
+      }
+      row.getCell(22).value = { formula: `HYPERLINK("#'${sheetName}'!A1", SUM(M${cmiRow}:U${cmiRow}))` };
+      row.getCell(22).font = fontLinkBold;
+      row.getCell(22).alignment = alignCount;
+      row.getCell(22).border = borderData;
+      if (rowFill) row.getCell(22).fill = rowFill;
+      
+      cmiRow++;
+    });
+    
+    const t4End = cmiRow - 1;
+    const t4TotalRow = wsCmi.getRow(cmiRow);
+    t4TotalRow.height = 22;
+    t4TotalRow.getCell(2).value = { formula: `HYPERLINK("#'RAW DATA'!A1", "Total")`, result: "Total" };
+    t4TotalRow.getCell(2).font = fontLinkBold;
+    t4TotalRow.getCell(2).alignment = alignPSName;
+    for (let c = 1; c <= 22; c++) {
+      const cell = t4TotalRow.getCell(c);
+      cell.border = borderTotal;
+      cell.fill = fillTotal;
+    }
+    for (let c = 3; c <= 8; c++) {
+      const colLetter = String.fromCharCode(64 + c);
+      t4TotalRow.getCell(c).value = { formula: `HYPERLINK("#'RAW DATA'!A1", SUM(${colLetter}${t4Start}:${colLetter}${t4End}))` };
+      t4TotalRow.getCell(c).font = fontLinkBold;
+      t4TotalRow.getCell(c).alignment = alignCount;
+    }
+    for (let c = 13; c <= 22; c++) {
+      const colLetter = c <= 26 ? String.fromCharCode(64 + c) : 'V';
+      t4TotalRow.getCell(c).value = { formula: `HYPERLINK("#'RAW DATA'!A1", SUM(${colLetter}${t4Start}:${colLetter}${t4End}))` };
+      t4TotalRow.getCell(c).font = fontLinkBold;
+      t4TotalRow.getCell(c).alignment = alignCount;
+    }
+    
+    // Step 5: Clean Row 1, Apply return links and Order worksheets
+    updateExcelStep(5);
+    
+    const chintamaniSheets = [
+      'Chintamani Sub-Division', 'Bagepalli Circle', 'Chelur Circle', 'Bagepalli PS', 'Chelur PS', 'Patapalya PS',
+      'Chintamani Town PS', 'Chintamani Rural PS', 'Shidlagatta Town PS', 'Shidlagatta Rural PS', 'Dibburahalli PS',
+      'Kencharlahalli PS', 'Batlahalli PS'
+    ];
+    function getBackLinkSheet(sheetName) {
+      if (chintamaniSheets.includes(sheetName)) return 'DB CMI SD';
+      return 'DB CBP SD';
+    }
+    
+    function prepareRow1ForBackLinks(ws) {
+      if (ws._merges) {
+        for (const key of Object.keys(ws._merges)) {
+          const range = ws._merges[key];
+          if (range.model && range.model.top === 1 && range.model.bottom === 1 && range.model.left >= 8) {
+            const leftLetter = String.fromCharCode(64 + range.model.left);
+            const rightLetter = String.fromCharCode(64 + range.model.right);
+            const address = `${leftLetter}1:${rightLetter}1`;
+            try { ws.unMergeCells(address); } catch (e) {}
+          }
+        }
+      }
+      const row1 = ws.getRow(1);
+      for (let col = 8; col <= 26; col++) {
+        const cell = row1.getCell(col);
+        cell.value = null;
+        cell.style = {};
+      }
+    }
+    
+    workbook.worksheets.forEach(ws => {
+      if (ws.name === 'DB CBP SD' || ws.name === 'DB CMI SD') return;
+      
+      prepareRow1ForBackLinks(ws);
+      const row1 = ws.getRow(1);
+      if (!row1.height || row1.height < 25) {
+        row1.height = 25;
+      }
+      
+      try { ws.mergeCells('A1:G1'); } catch (e) {}
+      try { ws.getCell('A1').alignment = { vertical: 'middle', horizontal: 'left' }; } catch (e) {}
+      
+      if (ws.name.trim() === 'RAW DATA') {
+        try { ws.mergeCells('H1:K1'); } catch (e) {}
+        const cellCbp = ws.getCell('H1');
+        cellCbp.value = { formula: 'HYPERLINK("#\'DB CBP SD\'!A1", "<- Back to CBP DB")', result: '<- Back to CBP DB' };
+        cellCbp.font = fontBackLink;
+        cellCbp.alignment = alignBackLink;
+        for (let col = 8; col <= 11; col++) {
+          ws.getRow(1).getCell(col).fill = fillYellow;
+          ws.getRow(1).getCell(col).border = borderButton;
+        }
+        
+        try { ws.mergeCells('M1:P1'); } catch (e) {}
+        const cellCmi = ws.getCell('M1');
+        cellCmi.value = { formula: 'HYPERLINK("#\'DB CMI SD\'!A1", "<- Back to CMI DB")', result: '<- Back to CMI DB' };
+        cellCmi.font = fontBackLink;
+        cellCmi.alignment = alignBackLink;
+        for (let col = 13; col <= 16; col++) {
+          ws.getRow(1).getCell(col).fill = fillYellow;
+          ws.getRow(1).getCell(col).border = borderButton;
+        }
+      } else {
+        const targetDB = getBackLinkSheet(ws.name);
+        const labelText = targetDB === 'DB CBP SD' ? '<- Back to CBP DB' : '<- Back to CMI DB';
+        try { ws.mergeCells('H1:K1'); } catch (e) {}
+        const backCell = ws.getCell('H1');
+        backCell.value = { formula: `HYPERLINK("#'${targetDB}'!A1", "${labelText}")`, result: labelText };
+        backCell.font = fontBackLink;
+        backCell.alignment = alignBackLink;
+        for (let col = 8; col <= 11; col++) {
+          ws.getRow(1).getCell(col).fill = fillYellow;
+          ws.getRow(1).getCell(col).border = borderButton;
+        }
+      }
+    });
+    
+    // Reorder worksheets to front
+    const s1 = workbook.worksheets.find(w => w.name === 'DB CBP SD');
+    const s2 = workbook.worksheets.find(w => w.name === 'DB CMI SD');
+    if (s1) {
+      const idx = workbook._worksheets.indexOf(s1);
+      if (idx > -1) workbook._worksheets.splice(idx, 1);
+    }
+    if (s2) {
+      const idx = workbook._worksheets.indexOf(s2);
+      if (idx > -1) workbook._worksheets.splice(idx, 1);
+    }
+    if (s2) workbook._worksheets.splice(1, 0, s2);
+    if (s1) workbook._worksheets.splice(1, 0, s1);
+    
+    workbook._worksheets.forEach((sheet, idx) => {
+      if (sheet) sheet.orderNo = idx;
+    });
+    
+    // Write buffer and download
+    const outputBuffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([outputBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    processedExcelBlobUrl = URL.createObjectURL(blob);
+    processedExcelName = `Processed_${uploadedExcelFile.name}`;
+    
+    excelBtnDownload.onclick = () => {
+      const a = document.createElement('a');
+      a.href = processedExcelBlobUrl;
+      a.download = processedExcelName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+    
+    updateExcelStep(6); // Complete all
+    excelProgressContainer.style.display = 'none';
+    excelResultContainer.style.display = 'flex';
+    
+    // Save data and render web dashboard
+    window.activeCasesData = activeCases;
+    renderWebDashboard();
+    
+  } catch (err) {
+    console.error(err);
+    alert('Error processing file: ' + err.message);
+    excelProgressContainer.style.display = 'none';
+  } finally {
+    excelBtnProcess.disabled = false;
+  }
+});
+
+let currentDashboardSubDiv = 'CBP'; // Default to Chikkaballapura
+
+// Dynamic Web Dashboard Rendering
+function renderWebDashboard() {
+  const container = $('excelDashboardContainer');
+  if (!container) return;
+  container.style.display = 'block';
+
+  // Toggle buttons active class
+  $('btnShowCbpDash').classList.toggle('act', currentDashboardSubDiv === 'CBP');
+  $('btnShowCmiDash').classList.toggle('act', currentDashboardSubDiv === 'CMI');
+
+  const activeCasesMap = window.activeCasesData || {};
+
+  // Mappings
+  const getActiveCaseKey = (name) => {
+    if (name === "Manchenahalli PS") return "Manchenalli PS";
+    if (name === "Nandigiridhama PS") return "Nandi Giridhama PS";
+    if (name === "Pathapalya PS") return "Patapalya PS";
+    return name;
+  };
+
+  // 1. Gather stats based on selection
+  let titleCPI = "";
+  let titlePS = "";
+  let circleData = [];
+  let stationList = [];
+  let primaryColor = "k-blu";
+  let chartColor = "bar-navy";
+
+  if (currentDashboardSubDiv === 'CBP') {
+    titleCPI = "Chikkaballapura Sub-Division Circle Overall UI Statistics";
+    titlePS = "Chikkaballapura Station Detailed Non-Heinous UI Statistics";
+    circleData = [
+      ["Chikkaballapura Sub-division", 4, 1, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 3, 0, 4],
+      ["Chikkaballapura Circle", 55, 0, 2, 2, 16, 35, 0, 0, 0, 0, 0, 2, 3, 48, 2, 55],
+      ["Gowribidanur Circle", 39, 2, 0, 0, 10, 27, 0, 0, 0, 0, 0, 1, 2, 33, 3, 39],
+      ["Chelur Circle", 16, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 0, 0, 14, 2, 16],
+      ["Gudibande Circle", 33, 0, 0, 0, 8, 25, 0, 0, 0, 0, 0, 0, 1, 26, 6, 33],
+      ["Bagepalli PS", 22, 0, 0, 0, 5, 17, 0, 0, 0, 0, 0, 0, 0, 20, 2, 22]
+    ];
+    stationList = [
+      "Bagepalli PS", "Chelur PS", "Chickballapura Rural PS", "Chickballapura Town PS",
+      "Chickballapura Traffic PS", "Gowribidanur Rural PS", "Gowribidanur Town PS",
+      "Gudibande PS", "Manchenahalli PS", "Nandigiridhama PS", "Pathapalya PS", "Peresandra PS"
+    ];
+    primaryColor = "k-blu";
+    chartColor = "bar-navy";
+  } else {
+    titleCPI = "Chintamani Sub-Division Circle Overall UI Statistics";
+    titlePS = "Chintamani Station Detailed Non-Heinous UI Statistics";
+    circleData = [
+      ["Bagepalli Circle", 22, 0, 0, 0, 5, 17, 0, 0, 0, 0, 0, 0, 0, 20, 2, 22],
+      ["Chelur Circle", 16, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 0, 0, 14, 2, 16],
+      ["Chintamani Town PS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ["Chintamani Rural PS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ["Shidlagatta Circle", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ["Kencharlahalli Circle", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+    stationList = [
+      "Bagepalli PS", "Chelur PS", "Pathapalya PS", "Chintamani Town PS", "Chintamani Rural PS",
+      "Shidlagatta Town PS", "Shidlagatta Rural PS", "Dibburahalli PS", "Kencharlahalli PS", "Batlahalli PS"
+    ];
+    primaryColor = "k-red";
+    chartColor = "bar-amber";
+  }
+
+  $('excelTitleCPI').textContent = titleCPI;
+  $('excelTitlePS').textContent = titlePS;
+
+  // 2. Render KPI cards
+  let sumTotal = 0, sumCc = 0, sumB = 0, sumC = 0, sumDraft = 0, sumActual = 0;
+  const yearSums = { '2018': 0, '2019': 0, '2020': 0, '2021': 0, '2022': 0, '2023': 0, '2024': 0, '2025': 0, '2026': 0 };
+
+  stationList.forEach(ps => {
+    const key = getActiveCaseKey(ps);
+    const data = activeCasesMap[key] || {
+      total: 0, cc: 0, b: 0, c: 0, draft: 0,
+      years: { '2018': 0, '2019': 0, '2020': 0, '2021': 0, '2022': 0, '2023': 0, '2024': 0, '2025': 0, '2026': 0 }
+    };
+    sumTotal += data.total;
+    sumCc += data.cc;
+    sumB += data.b;
+    sumC += data.c;
+    sumDraft += data.draft;
+    sumActual += (data.total - (data.cc + data.b + data.c + data.draft));
+    
+    for (const yr of Object.keys(yearSums)) {
+      yearSums[yr] += (data.years[yr] || 0);
+    }
+  });
+
+  const kpiCard = (lbl, val, sub, cls) => {
+    return `<div class="kpi ${cls}"><div class="kpi-glow"></div><div class="kpi-lbl">${lbl}</div><div class="kpi-val">${val}</div><div class="kpi-sub">${sub}</div></div>`;
+  };
+
+  $('excelKpiGrid').innerHTML = `
+    ${kpiCard('Total UI Cases', sumTotal, 'Pending active cases', primaryColor)}
+    ${kpiCard('CC Pending', sumCc, 'Charge sheet submitted', 'k-pur')}
+    ${kpiCard('B-Report', sumB, 'Non-cognizable/False', 'k-red')}
+    ${kpiCard('C-Report', sumC, 'Undetected cases', 'k-cyn')}
+    ${kpiCard('CS in Draft', sumDraft, 'Draft charge sheets', 'k-amb')}
+    ${kpiCard('Actual UI', sumActual, 'Active investigation', 'k-grn')}
+  `;
+
+  // 3. Render Table 1/3 (Circle Stats)
+  const headerHtml = `
+    <thead>
+      <tr>
+        <th rowspan="2">Sl No</th>
+        <th rowspan="2">Circle / Unit</th>
+        <th colspan="6">UI Details</th>
+        <th colspan="10">Year-wise Split</th>
+      </tr>
+      <tr>
+        <th>Total</th>
+        <th>CC Pend</th>
+        <th>B-Rep</th>
+        <th>C-Rep</th>
+        <th>Draft</th>
+        <th>Act UI</th>
+        <th>18</th>
+        <th>19</th>
+        <th>20</th>
+        <th>21</th>
+        <th>22</th>
+        <th>23</th>
+        <th>24</th>
+        <th>25</th>
+        <th>26</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+  `;
+
+  let tCPIBody = "";
+  let cTotals = Array(15).fill(0);
+  circleData.forEach((row, i) => {
+    const actUI = row[1] - (row[2]+row[3]+row[4]+row[5]);
+    tCPIBody += `
+      <tr>
+        <td>${i+1}</td>
+        <td style="text-align:left; font-weight:600;">${row[0]}</td>
+        <td style="font-weight:700;">${row[1]}</td>
+        <td>${row[2]}</td>
+        <td>${row[3]}</td>
+        <td>${row[4]}</td>
+        <td>${row[5]}</td>
+        <td style="font-weight:700;">${actUI}</td>
+        <td>${row[6]}</td>
+        <td>${row[7]}</td>
+        <td>${row[8]}</td>
+        <td>${row[9]}</td>
+        <td>${row[10]}</td>
+        <td>${row[11]}</td>
+        <td>${row[12]}</td>
+        <td>${row[13]}</td>
+        <td>${row[14]}</td>
+        <td style="font-weight:700;">${row[1]}</td>
+      </tr>
+    `;
+    cTotals[0] += row[1];
+    cTotals[1] += row[2];
+    cTotals[2] += row[3];
+    cTotals[3] += row[4];
+    cTotals[4] += row[5];
+    cTotals[5] += actUI;
+    for (let y = 0; y < 9; y++) cTotals[6+y] += row[6+y];
+  });
+
+  tCPIBody += `
+    <tr class="total-row">
+      <td></td>
+      <td style="text-align:left;">Total</td>
+      <td>${cTotals[0]}</td>
+      <td>${cTotals[1]}</td>
+      <td>${cTotals[2]}</td>
+      <td>${cTotals[3]}</td>
+      <td>${cTotals[4]}</td>
+      <td>${cTotals[5]}</td>
+      ${cTotals.slice(6).map(v => `<td>${v}</td>`).join('')}
+      <td>${cTotals[0]}</td>
+    </tr>
+  `;
+  $('excelTableCPI').innerHTML = headerHtml + '<tbody>' + tCPIBody + '</tbody>';
+
+  // 4. Render Table 2/4 (Station Detailed Stats)
+  let tPSBody = "";
+  let stTotals = Array(15).fill(0);
+  stationList.forEach((psName, idx) => {
+    const key = getActiveCaseKey(psName);
+    const data = activeCasesMap[key] || {
+      total: 0, cc: 0, b: 0, c: 0, draft: 0,
+      years: { '2018': 0, '2019': 0, '2020': 0, '2021': 0, '2022': 0, '2023': 0, '2024': 0, '2025': 0, '2026': 0 }
+    };
+    const actUI = data.total - (data.cc + data.b + data.c + data.draft);
+    const years = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+    tPSBody += `
+      <tr>
+        <td>${idx+1}</td>
+        <td style="text-align:left; font-weight:600;">${psName}</td>
+        <td style="font-weight:700;">${data.total}</td>
+        <td>${data.cc}</td>
+        <td>${data.b}</td>
+        <td>${data.c}</td>
+        <td>${data.draft}</td>
+        <td style="font-weight:700;">${actUI}</td>
+        ${years.map(yr => `<td>${data.years[yr] || 0}</td>`).join('')}
+        <td style="font-weight:700;">${data.total}</td>
+      </tr>
+    `;
+    stTotals[0] += data.total;
+    stTotals[1] += data.cc;
+    stTotals[2] += data.b;
+    stTotals[3] += data.c;
+    stTotals[4] += data.draft;
+    stTotals[5] += actUI;
+    years.forEach((yr, yIdx) => {
+      stTotals[6+yIdx] += (data.years[yr] || 0);
+    });
+  });
+
+  tPSBody += `
+    <tr class="total-row">
+      <td></td>
+      <td style="text-align:left;">Total</td>
+      <td>${stTotals[0]}</td>
+      <td>${stTotals[1]}</td>
+      <td>${stTotals[2]}</td>
+      <td>${stTotals[3]}</td>
+      <td>${stTotals[4]}</td>
+      <td>${stTotals[5]}</td>
+      ${stTotals.slice(6).map(v => `<td>${v}</td>`).join('')}
+      <td>${stTotals[0]}</td>
+    </tr>
+  `;
+  $('excelTablePS').innerHTML = headerHtml + '<tbody>' + tPSBody + '</tbody>';
+
+  // 5. Render Station Bar Chart
+  const barChartData = stationList.map(ps => {
+    const key = getActiveCaseKey(ps);
+    const d = activeCasesMap[key] || { total: 0 };
+    return { n: ps.replace(" PS", ""), c: d.total };
+  }).sort((a,b)=>b.c-a.c);
+  const mxPs = Math.max(...barChartData.map(d=>d.c), 1);
+  $('excelPsChart').innerHTML = barChartData.map(item => `
+    <div class="bar-row">
+      <div class="bar-lbl" title="${item.n}">${item.n}</div>
+      <div class="bar-track">
+        <div class="bar-fill ${chartColor}" style="width: ${Math.round(item.c / mxPs * 100)}%"></div>
+      </div>
+      <div class="bar-n">${item.c}</div>
+    </div>
+  `).join('');
+
+  // 6. Render Year Bar Chart
+  const yearChartData = Object.keys(yearSums).map(yr => ({ n: yr, c: yearSums[yr] }));
+  const mxYr = Math.max(...yearChartData.map(d=>d.c), 1);
+  $('excelYearChart').innerHTML = yearChartData.map(item => `
+    <div class="bar-row">
+      <div class="bar-lbl" title="${item.n}">${item.n}</div>
+      <div class="bar-track">
+        <div class="bar-fill bar-purple" style="width: ${Math.round(item.c / mxYr * 100)}%"></div>
+      </div>
+      <div class="bar-n">${item.c}</div>
+    </div>
+  `).join('');
+}
+
+// Bind sub-division dashboard toggle clicks
+$('btnShowCbpDash').addEventListener('click', () => {
+  currentDashboardSubDiv = 'CBP';
+  renderWebDashboard();
+});
+$('btnShowCmiDash').addEventListener('click', () => {
+  currentDashboardSubDiv = 'CMI';
+  renderWebDashboard();
 });
 
 // Boot System
