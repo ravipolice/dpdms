@@ -2172,6 +2172,19 @@
         border-color: #C05621;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
+      #excelKpiGrid {
+        grid-template-columns: repeat(6, 1fr) !important;
+      }
+      @media (max-width: 1024px) {
+        #excelKpiGrid {
+          grid-template-columns: repeat(3, 1fr) !important;
+        }
+      }
+      @media (max-width: 600px) {
+        #excelKpiGrid {
+          grid-template-columns: repeat(2, 1fr) !important;
+        }
+      }
     </style>
     
     <div class="excel-proc-container">
