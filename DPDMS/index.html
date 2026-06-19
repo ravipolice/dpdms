@@ -7629,7 +7629,7 @@ excelBtnProcess.addEventListener('click', async () => {
       if (sheetName.length > 31) {
         sheetName = sheetName.substring(0, 31);
       }
-      const existing = workbook.getWorksheet(sheetName);
+      const existing = workbook.worksheets.find(w => w.name.toLowerCase() === sheetName.toLowerCase());
       if (existing) {
         workbook.removeWorksheet(existing.id);
       }
@@ -7680,32 +7680,6 @@ excelBtnProcess.addEventListener('click', async () => {
     
     // Step 3: Split by Circle & Sub-Division
     updateExcelStep(3);
-    const circleMapping = {
-      'Chickballapura Town PS': 'Chikkaballapura Circle',
-      'Chickballapura Rural PS': 'Chikkaballapura Circle',
-      'Nandi Giridhama PS': 'Chikkaballapura Circle',
-      'Chickballapura Traffic PS': 'Chikkaballapura Circle',
-      
-      'Gowribidanur Town PS': 'Gowribidanur Circle',
-      'Gowribidanur Rural PS': 'Gowribidanur Circle',
-      'Manchenalli PS': 'Gowribidanur Circle',
-      
-      'Gudibande PS': 'Gudibande Circle',
-      'Peresandra PS': 'Gudibande Circle',
-      
-      'Bagepalli PS': 'Bagepalli Circle',
-      'Chelur PS': 'Chelur Circle',
-      'Patapalya PS': 'Chelur Circle',
-      'Chikkaballapura Women PS': 'Chikkaballapura Sub-division'
-    };
-
-    const subdivisionMapping = {
-      'Chikkaballapura Circle': 'Chikkaballapura Sub-Division',
-      'Gowribidanur Circle': 'Chikkaballapura Sub-Division',
-      'Gudibande Circle': 'Chikkaballapura Sub-Division',
-      'Bagepalli Circle': 'Chintamani Sub-Division',
-      'Chelur Circle': 'Chintamani Sub-Division'
-    };
     
     const circleGroups = {};
     const subdivisionGroups = {};
@@ -7715,16 +7689,26 @@ excelBtnProcess.addEventListener('click', async () => {
       const psValue = row.getCell(1).value;
       if (psValue) {
         const psName = String(psValue).trim();
-        const circle = circleMapping[psName];
+        
+        // Group by Circle
+        const circle = getCircleOfPS(psName);
         if (circle) {
           if (!circleGroups[circle]) circleGroups[circle] = [];
           circleGroups[circle].push(row);
-          
-          const subDiv = subdivisionMapping[circle];
-          if (subDiv) {
-            if (!subdivisionGroups[subDiv]) subdivisionGroups[subDiv] = [];
-            subdivisionGroups[subDiv].push(row);
-          }
+        }
+        
+        // Group by Sub-Division
+        const subDiv = getSubDivOfPS(psName);
+        let subDivSheetName = "";
+        if (subDiv === 'CBP') {
+          subDivSheetName = 'Chikkaballapura Sub-Division';
+        } else if (subDiv === 'CMI') {
+          subDivSheetName = 'Chintamani Sub-Division';
+        }
+        
+        if (subDivSheetName) {
+          if (!subdivisionGroups[subDivSheetName]) subdivisionGroups[subDivSheetName] = [];
+          subdivisionGroups[subDivSheetName].push(row);
         }
       }
     }
