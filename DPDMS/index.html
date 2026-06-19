@@ -1892,60 +1892,70 @@
         padding: 30px;
         margin-top: 10px;
       }
-      .excel-proc-title {
-        font-size: 20px;
-        font-weight: 800;
-        color: var(--txt);
-        margin-bottom: 8px;
+      .excel-proc-header {
         display: flex;
         align-items: center;
-        gap: 10px;
+        justify-content: space-between;
+        gap: 20px;
+        border-bottom: 1px solid var(--bdr);
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .excel-proc-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--txt);
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
       .excel-proc-subtitle {
         color: var(--muted);
-        font-size: 13.5px;
-        margin-bottom: 24px;
-        line-height: 1.5;
+        font-size: 12px;
+        margin-bottom: 0;
+        line-height: 1.4;
       }
       .dropzone {
-        border: 2px dashed var(--bdr2);
-        border-radius: 8px;
-        padding: 40px 20px;
+        border: 1.5px dashed var(--bdr2);
+        border-radius: 6px;
+        padding: 8px 16px;
         text-align: center;
         background: var(--surf2);
         cursor: pointer;
         transition: all var(--trans);
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
         justify-content: center;
-        gap: 12px;
+        gap: 8px;
+        min-height: auto;
       }
       .dropzone:hover, .dropzone.dragover {
         border-color: var(--gold);
         background: var(--gold-dim);
       }
       .dropzone-icon {
-        font-size: 40px;
+        font-size: 18px;
       }
       .dropzone-text {
         font-weight: 600;
         color: var(--txt2);
+        font-size: 13px;
       }
       .dropzone-subtext {
-        font-size: 12px;
-        color: var(--muted);
+        display: none;
       }
       .file-info {
-        display: flex;
+        display: none;
         align-items: center;
-        justify-content: space-between;
-        padding: 12px 16px;
+        gap: 12px;
+        padding: 6px 12px;
         background: var(--surf3);
         border-radius: 6px;
         border: 1px solid var(--bdr);
-        margin-top: 20px;
-        display: none;
+        margin-top: 0;
       }
       .file-name {
         font-weight: 600;
@@ -1953,20 +1963,21 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        font-size: 12px;
       }
       .btn-process {
         background: var(--gold);
         color: #ffffff;
         border: none;
-        padding: 10px 24px;
+        padding: 6px 14px;
         font-weight: 700;
-        font-size: 13.5px;
-        border-radius: 6px;
+        font-size: 12px;
+        border-radius: 4px;
         cursor: pointer;
         transition: background var(--trans);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
       }
       .btn-process:hover {
         background: var(--gold-lt);
@@ -1976,15 +1987,20 @@
         cursor: not-allowed;
       }
       .progress-container {
-        margin-top: 24px;
+        margin-top: 0;
+        margin-bottom: 20px;
+        padding: 12px 16px;
+        background: var(--surf2);
+        border-radius: 6px;
+        border: 1px solid var(--bdr);
         display: none;
       }
       .progress-bar-bg {
         background: var(--surf3);
-        height: 8px;
-        border-radius: 4px;
+        height: 6px;
+        border-radius: 3px;
         overflow: hidden;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
       .progress-bar-fill {
         background: var(--gold);
@@ -1995,9 +2011,9 @@
       .status-step {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
-        font-size: 13px;
+        gap: 6px;
+        margin-bottom: 0;
+        font-size: 11.5px;
         color: var(--muted);
       }
       .status-step.active {
@@ -2018,42 +2034,43 @@
         content: '⚪';
       }
       .result-container {
-        margin-top: 24px;
-        padding: 20px;
+        margin-top: 0;
+        margin-bottom: 20px;
+        padding: 10px 16px;
         background: var(--grn-dim);
         border: 1px solid var(--grn-lt);
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-        text-align: center;
+        border-radius: 6px;
         display: none;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        text-align: left;
       }
       .result-title {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 700;
         color: var(--grn);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
       }
       .result-text {
-        font-size: 13px;
+        font-size: 12px;
         color: var(--txt2);
       }
       .btn-download {
         background: var(--grn);
         color: #ffffff;
         border: none;
-        padding: 12px 28px;
+        padding: 6px 14px;
         font-weight: 700;
-        font-size: 14px;
-        border-radius: 6px;
+        font-size: 12px;
+        border-radius: 4px;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         transition: background var(--trans);
         text-decoration: none;
       }
@@ -2120,27 +2137,33 @@
     </style>
     
     <div class="excel-proc-container">
-      <div class="excel-proc-title">
-        <span>🗂️</span> Non-Heinous UI Cases Report Generator
-      </div>
-      <div class="excel-proc-subtitle">
-        Upload the raw Excel case file to split sheets by Police Station, Circle, and Sub-Division, and generate context-aware navigation dashboards automatically in your browser.
-      </div>
-      
-      <!-- Drag & Drop Zone -->
-      <div id="excelDropzone" class="dropzone">
-        <div class="dropzone-icon">📥</div>
-        <div class="dropzone-text">Drag and drop your Excel file here or click to browse</div>
-        <div class="dropzone-subtext">Supports .xlsx spreadsheets</div>
-        <input type="file" id="excelFileInput" accept=".xlsx" style="display: none;" />
-      </div>
-      
-      <!-- File Info Area -->
-      <div id="excelFileInfo" class="file-info">
-        <div class="file-name">
-          <span>📄</span> <span id="excelSelectedFileName">filename.xlsx</span>
+      <div class="excel-proc-header">
+        <div>
+          <div class="excel-proc-title">
+            <span>🗂️</span> Heinous and Non-Heinous UI Cases Report Generator
+          </div>
+          <div class="excel-proc-subtitle">
+            Upload the raw Excel case file to split sheets by Police Station, Circle, and Sub-Division, and generate context-aware navigation dashboards automatically in your browser.
+          </div>
         </div>
-        <button id="excelBtnProcess" class="btn-process">⚡ Process & Split Workbook</button>
+        
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <!-- Drag & Drop Zone -->
+          <div id="excelDropzone" class="dropzone">
+            <div class="dropzone-icon">📥</div>
+            <div class="dropzone-text">Drag & drop or click to upload Excel</div>
+            <div class="dropzone-subtext" style="display: none;">Supports .xlsx spreadsheets</div>
+            <input type="file" id="excelFileInput" accept=".xlsx" style="display: none;" />
+          </div>
+          
+          <!-- File Info Area -->
+          <div id="excelFileInfo" class="file-info">
+            <div class="file-name">
+              <span>📄</span> <span id="excelSelectedFileName">filename.xlsx</span>
+            </div>
+            <button id="excelBtnProcess" class="btn-process">⚡ Process</button>
+          </div>
+        </div>
       </div>
       
       <!-- Progress Indicator -->
@@ -2148,22 +2171,29 @@
         <div class="progress-bar-bg">
           <div id="excelProgressBarFill" class="progress-bar-fill"></div>
         </div>
-        <div id="excelStep1" class="status-step pending"><span class="step-icon"></span> Reading spreadsheet file...</div>
-        <div id="excelStep2" class="status-step pending"><span class="step-icon"></span> Splitting cases by Police Station...</div>
-        <div id="excelStep3" class="status-step pending"><span class="step-icon"></span> Splitting cases by Circle & Sub-Division...</div>
-        <div id="excelStep4" class="status-step pending"><span class="step-icon"></span> Generating summary dashboards (DB CBP SD, DB CMI SD)...</div>
-        <div id="excelStep5" class="status-step pending"><span class="step-icon"></span> Reordering sheets and applying hyperlinks...</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;">
+          <div id="excelStep1" class="status-step pending"><span class="step-icon"></span> Read file</div>
+          <div id="excelStep2" class="status-step pending"><span class="step-icon"></span> Split Stations</div>
+          <div id="excelStep3" class="status-step pending"><span class="step-icon"></span> Split Circles</div>
+          <div id="excelStep4" class="status-step pending"><span class="step-icon"></span> Create Dashboards</div>
+          <div id="excelStep5" class="status-step pending"><span class="step-icon"></span> Link & Reorder</div>
+        </div>
       </div>
       
       <!-- Results / Download -->
       <div id="excelResultContainer" class="result-container">
-        <div class="result-title">🎉 Processing Complete!</div>
-        <div class="result-text">Your Excel file has been successfully split and dashboards have been generated.</div>
-        <button id="excelBtnDownload" class="btn-download">⬇️ Download Processed Excel File</button>
+        <div style="text-align: left; display: flex; align-items: center; gap: 8px;">
+          <div class="result-title">🎉 Processing Complete!</div>
+          <div class="result-text">Your processed Excel file is ready.</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button id="excelBtnDownload" class="btn-download">⬇️ Download Processed Excel</button>
+          <button id="excelBtnReset" class="btn btn-sm btn-sub" style="padding: 6px 12px; font-size: 12px; height: auto;">Upload Another</button>
+        </div>
       </div>
 
       <!-- Dynamic Web Dashboard -->
-      <div id="excelDashboardContainer" style="display: none; margin-top: 40px; border-top: 1px solid var(--bdr); padding-top: 30px;">
+      <div id="excelDashboardContainer" style="display: none; margin-top: 0; padding-top: 10px;">
         <!-- Dashboard Sub-Division Tabs -->
         <div class="tab-row" style="border-top: none; border-bottom: 1px solid var(--bdr); padding-bottom: 8px; margin-bottom: 20px; display: flex; gap: 8px;">
           <button class="tab-btn act" id="btnShowCbpDash" style="font-weight:700;"><span class="ti">🔵</span>Chikkaballapura Sub-Division</button>
@@ -7023,6 +7053,7 @@ const excelProgressContainer = $('excelProgressContainer');
 const excelProgressBarFill = $('excelProgressBarFill');
 const excelResultContainer = $('excelResultContainer');
 const excelBtnDownload = $('excelBtnDownload');
+const excelBtnReset = $('excelBtnReset');
 
 let uploadedExcelFile = null;
 let processedExcelBlobUrl = null;
@@ -7269,6 +7300,18 @@ excelDropzone.addEventListener('click', () => excelFileInput.click());
 excelFileInput.addEventListener('change', (e) => {
   if (e.target.files.length > 0) {
     handleExcelFileSelected(e.target.files[0]);
+  }
+});
+excelBtnReset.addEventListener('click', () => {
+  uploadedExcelFile = null;
+  excelFileInput.value = '';
+  excelDropzone.style.display = 'flex';
+  excelFileInfo.style.display = 'none';
+  excelProgressContainer.style.display = 'none';
+  excelResultContainer.style.display = 'none';
+  if (processedExcelBlobUrl) {
+    URL.revokeObjectURL(processedExcelBlobUrl);
+    processedExcelBlobUrl = null;
   }
 });
 excelDropzone.addEventListener('dragover', (e) => {
