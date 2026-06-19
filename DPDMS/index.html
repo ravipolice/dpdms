@@ -2370,6 +2370,46 @@
         </div>
       </div>
 
+      <!-- Cases Detail Modal -->
+      <div id="excelCasesModalBackdrop" class="excel-modal-backdrop" style="z-index: 10002;">
+        <div class="excel-modal" style="max-width: 1100px; width: 95%;">
+          <div class="excel-modal-header">
+            <div class="excel-modal-title" id="excelCasesModalTitle">
+              <span>📋</span> Case Details
+            </div>
+            <button id="btnCloseExcelCasesModal" class="excel-modal-close">&times;</button>
+          </div>
+          <div class="excel-modal-body" style="padding: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+              <div style="position: relative; max-width: 360px; width: 100%;">
+                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px;">🔍</span>
+                <input type="text" id="excelCasesSearchInput" placeholder="Search by FIR No, PS, Act Section, Crime Head..." style="width: 100%; padding: 8px 12px 8px 32px; border-radius: 4px; border: 1px solid var(--bdr); background: var(--surf2); color: var(--txt); font-size: 13px;">
+              </div>
+              <div id="excelCasesTotalCount" style="font-weight: 700; font-size: 13px; color: var(--muted);">Total Cases: 0</div>
+            </div>
+            <div style="overflow-x: auto; max-height: 480px; border: 1px solid var(--bdr); border-radius: 6px;">
+              <table class="excel-table" id="excelCasesTable" style="margin: 0; width: 100%; border-collapse: collapse;">
+                <thead style="position: sticky; top: 0; z-index: 1; background: var(--surf2);">
+                  <tr>
+                    <th>Sl No</th>
+                    <th>PS Name</th>
+                    <th>FIR No</th>
+                    <th>FIR Date</th>
+                    <th>Act Section</th>
+                    <th>Major Head</th>
+                    <th>Status Category</th>
+                    <th>Pending Days</th>
+                  </tr>
+                </thead>
+                <tbody id="excelCasesTableBody">
+                  <!-- Case rows will be injected here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Dynamic Web Dashboard -->
       <div id="excelDashboardContainer" style="display: none; margin-top: 0; padding-top: 10px;">
         <!-- Dashboard Sub-Division Tabs -->
@@ -7699,6 +7739,7 @@ excelBtnProcess.addEventListener('click', async () => {
     // Step 4: Generating summary dashboards
     updateExcelStep(4);
     const activeCases = {};
+    const uploadedRawCases = [];
     for (let r = 4; r <= rawSheet.rowCount; r++) {
       const row = rawSheet.getRow(r);
       const stage = row.getCell(27).value;
@@ -7713,13 +7754,47 @@ excelBtnProcess.addEventListener('click', async () => {
         const c19 = row.getCell(19).value;
         
         let isCc = false, isB = false, isC = false, isDraft = false;
+        let caseTypeLabel = "Actual UI";
         if (c17) {
           const str = String(c17).trim();
-          if (str.startsWith("Draft")) isDraft = true;
-          else if (str !== "X") isCc = true;
+          if (str.startsWith("Draft")) {
+            isDraft = true;
+            caseTypeLabel = "CS in Draft";
+          } else if (str !== "X") {
+            isCc = true;
+            caseTypeLabel = "CC Pending";
+          }
         }
-        if (c18 && String(c18).trim() !== "X") isB = true;
-        if (c19 && String(c19).trim() !== "X") isC = true;
+        if (c18 && String(c18).trim() !== "X") {
+          isB = true;
+          caseTypeLabel = "B-Report";
+        }
+        if (c19 && String(c19).trim() !== "X") {
+          isC = true;
+          caseTypeLabel = "C-Report";
+        }
+        
+        const days = row.getCell(7).value || 0;
+        const sections = row.getCell(4).value || '';
+        const majorHead = row.getCell(5).value || '';
+        const firNo = row.getCell(2).value || '';
+        
+        uploadedRawCases.push({
+          slNo: r - 3,
+          ps,
+          firNo,
+          firDate: firDateStr,
+          year,
+          sections,
+          majorHead,
+          days,
+          stage,
+          caseType: caseTypeLabel,
+          isCc,
+          isB,
+          isC,
+          isDraft
+        });
         
         if (!activeCases[ps]) {
           activeCases[ps] = {
@@ -7736,6 +7811,7 @@ excelBtnProcess.addEventListener('click', async () => {
         if (counts.years[year] !== undefined) counts.years[year]++;
       }
     }
+    window.uploadedRawCases = uploadedRawCases;
     
     // Remove old worksheets if any
     const oldSheets = ['Dash Board', 'DB CBP SD', 'DB CMI SD'];
@@ -8452,6 +8528,181 @@ excelBtnProcess.addEventListener('click', async () => {
   } finally {
     excelBtnProcess.disabled = false;
   }
+// Helpers for Web Cases Drilldown
+function getSubDivOfPS(psName) {
+  const cbpPS = [
+    'Chickballapura Town PS', 'Chickballapura Rural PS', 'Nandi Giridhama PS', 'Chickballapura Traffic PS',
+    'Gowribidanur Town PS', 'Gowribidanur Rural PS', 'Manchenalli PS',
+    'Gudibande PS', 'Peresandra PS', 'Manchenahalli PS', 'Nandigiridhama PS'
+  ];
+  const cmiPS = [
+    'Bagepalli PS', 'Chelur PS', 'Patapalya PS', 'Pathapalya PS',
+    'Batlahalli PS', 'Chintamani Rural PS', 'Chintamani Town PS', 'Dibburahalli PS',
+    'Kencharlahalli PS', 'Shidlagatta Rural PS', 'Shidlagatta Town PS',
+    'Chikkaballapura Women PS', 'Chikkaballapura CEN PS'
+  ];
+  const clean = psName.trim();
+  if (cbpPS.includes(clean)) return 'CBP';
+  if (cmiPS.includes(clean)) return 'CMI';
+  if (clean.includes("Town") || clean.includes("Rural") || clean.includes("Gowribidanur") || clean.includes("Gudibande")) return 'CBP';
+  return 'CMI';
+}
+
+function getCircleOfPS(psName) {
+  const mapping = {
+    'Chickballapura Town PS': 'Chikkaballapura Circle',
+    'Chickballapura Rural PS': 'Chikkaballapura Circle',
+    'Nandi Giridhama PS': 'Chikkaballapura Circle',
+    'Nandigiridhama PS': 'Chikkaballapura Circle',
+    'Chickballapura Traffic PS': 'Chikkaballapura Circle',
+    'Gowribidanur Town PS': 'Gowribidanur Circle',
+    'Gowribidanur Rural PS': 'Gowribidanur Circle',
+    'Manchenalli PS': 'Gowribidanur Circle',
+    'Manchenahalli PS': 'Gowribidanur Circle',
+    'Gudibande PS': 'Gudibande Circle',
+    'Peresandra PS': 'Gudibande Circle',
+    'Bagepalli PS': 'Bagepalli Circle',
+    'Chelur PS': 'Chelur Circle',
+    'Patapalya PS': 'Chelur Circle',
+    'Pathapalya PS': 'Chelur Circle',
+    'Batlahalli PS': 'Kencharlahalli Circle',
+    'Kencharlahalli PS': 'Kencharlahalli Circle',
+    'Shidlagatta Rural PS': 'Shidlagatta Circle',
+    'Shidlagatta Town PS': 'Shidlagatta Circle',
+    'Dibburahalli PS': 'Shidlagatta Circle'
+  };
+  return mapping[psName.trim()] || null;
+}
+
+const getWebActiveCaseKey = (name) => {
+  if (name === "Manchenahalli PS") return "Manchenalli PS";
+  if (name === "Nandigiridhama PS") return "Nandi Giridhama PS";
+  if (name === "Pathapalya PS") return "Patapalya PS";
+  return name.trim();
+};
+
+window.showDrillDownCases = function(filters) {
+  if (!window.uploadedRawCases || window.uploadedRawCases.length === 0) {
+    alert("Please upload and process an Excel file first to view case details!");
+    return;
+  }
+  
+  window.activeCasesFilter = filters;
+  
+  const filtered = window.uploadedRawCases.filter(c => {
+    // 1. Filter by Police Station / Circle / Sub-division
+    if (filters.ps) {
+      if (getWebActiveCaseKey(c.ps) !== getWebActiveCaseKey(filters.ps)) return false;
+    } else if (filters.circle) {
+      const circleOfCase = getCircleOfPS(c.ps);
+      if (!circleOfCase || circleOfCase.toLowerCase() !== filters.circle.toLowerCase()) {
+        if (filters.circle.includes("Sub-division") || filters.circle.includes("Sub-Division")) {
+          const subdivOfCase = getSubDivOfPS(c.ps);
+          const targetSubdiv = filters.circle.includes("Chintamani") ? "CMI" : "CBP";
+          if (subdivOfCase !== targetSubdiv) return false;
+        } else {
+          return false;
+        }
+      }
+    } else if (filters.subdiv) {
+      const subdivOfCase = getSubDivOfPS(c.ps);
+      if (subdivOfCase !== filters.subdiv) return false;
+    }
+    
+    // 2. Filter by status
+    if (filters.status) {
+      if (c.caseType !== filters.status) return false;
+    }
+    
+    // 3. Filter by year
+    if (filters.year) {
+      if (c.year !== filters.year) return false;
+    }
+    
+    return true;
+  });
+  
+  window.activeFilteredCases = filtered;
+  
+  let titleStr = "Case Details";
+  if (filters.ps) titleStr += ` for ${filters.ps}`;
+  else if (filters.circle) titleStr += ` for ${filters.circle}`;
+  else if (filters.subdiv) titleStr += ` for ${filters.subdiv === 'CBP' ? 'Chikkaballapura' : 'Chintamani'} Sub-Division`;
+  
+  if (filters.status) titleStr += ` (${filters.status})`;
+  if (filters.year) titleStr += ` [Year ${filters.year}]`;
+  
+  $('excelCasesModalTitle').innerHTML = `<span>📋</span> ${titleStr}`;
+  $('excelCasesSearchInput').value = '';
+  
+  renderFilteredCasesTable(filtered);
+  $('excelCasesModalBackdrop').classList.add('show');
+};
+
+function renderFilteredCasesTable(cases) {
+  const tbody = $('excelCasesTableBody');
+  const countEl = $('excelCasesTotalCount');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  countEl.textContent = `Total Cases: ${cases.length}`;
+  
+  if (cases.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--muted); padding: 24px;">No cases found for the selected filters.</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = cases.map((c, idx) => {
+    let statusClass = "badge-muted";
+    if (c.caseType === "CC Pending") statusClass = "badge-purple";
+    else if (c.caseType === "B-Report") statusClass = "badge-red";
+    else if (c.caseType === "C-Report") statusClass = "badge-cyan";
+    else if (c.caseType === "CS in Draft") statusClass = "badge-amber";
+    else if (c.caseType === "Actual UI") statusClass = "badge-green";
+    
+    return `
+      <tr>
+        <td style="text-align: center;">${idx + 1}</td>
+        <td style="text-align: left; font-weight: 600;">${c.ps}</td>
+        <td style="font-weight: 700; color: var(--navy);">${c.firNo}</td>
+        <td>${c.firDate}</td>
+        <td style="text-align: left; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${c.sections}">${c.sections}</td>
+        <td style="text-align: left; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${c.majorHead}">${c.majorHead}</td>
+        <td style="text-align: center;"><span class="badge ${statusClass}">${c.caseType}</span></td>
+        <td style="text-align: center; font-weight: 700; color: ${c.days > 365 ? 'var(--red)' : 'var(--txt)'};">${c.days}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Bind search input filter
+$('excelCasesSearchInput').addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase().trim();
+  if (!window.activeFilteredCases) return;
+  if (query === '') {
+    renderFilteredCasesTable(window.activeFilteredCases);
+    return;
+  }
+  const searched = window.activeFilteredCases.filter(c => {
+    return c.ps.toLowerCase().includes(query) ||
+           c.firNo.toLowerCase().includes(query) ||
+           c.sections.toLowerCase().includes(query) ||
+           c.majorHead.toLowerCase().includes(query) ||
+           c.caseType.toLowerCase().includes(query);
+  });
+  renderFilteredCasesTable(searched);
+});
+
+// Bind close button
+$('btnCloseExcelCasesModal').addEventListener('click', () => {
+  $('excelCasesModalBackdrop').classList.remove('remove');
+  $('excelCasesModalBackdrop').classList.remove('show');
+});
+
+// Bind backdrop click to close
+$('excelCasesModalBackdrop').addEventListener('click', (e) => {
+  if (e.target === $('excelCasesModalBackdrop')) {
+    $('excelCasesModalBackdrop').classList.remove('show');
+  }
 });
 
 let currentDashboardSubDiv = 'CBP'; // Default to Chikkaballapura
@@ -8473,7 +8724,17 @@ function renderWebDashboard() {
     if (name === "Manchenahalli PS") return "Manchenalli PS";
     if (name === "Nandigiridhama PS") return "Nandi Giridhama PS";
     if (name === "Pathapalya PS") return "Patapalya PS";
-    return name;
+    return name.trim();
+  };
+
+  // Helper to format interactive cells
+  const makeCell = (val, filters, isBold = false) => {
+    if (val === undefined || val === null || val === 0) {
+      return `<td style="${isBold ? 'font-weight:700;' : ''}">0</td>`;
+    }
+    const boldStyle = isBold ? 'font-weight:700;' : '';
+    const filterJson = JSON.stringify(filters).replace(/"/g, '&quot;');
+    return `<td style="${boldStyle}"><span class="td-link" onclick="window.showDrillDownCases(${filterJson})">${val}</span></td>`;
   };
 
   // 1. Gather stats based on selection
@@ -8514,8 +8775,8 @@ function renderWebDashboard() {
       ["Chikkaballapura Women PS", 13, 1, 0, 0, 1, 11, 0, 0, 0, 0, 0, 0, 1, 10, 2, 13]
     ];
     stationList = [
-      "Batlahalli PS", "Chintamani Rural PS", "Chintamani Town PS", "Dibburahalli PS", 
-      "Kencharlahalli PS", "Shidlagatta Rural PS", "Shidlagatta Town PS", 
+      "Batlahalli PS", "Chintamani Rural PS", "Chintamani Town PS", "Dibburahalli PS",
+      "Kencharlahalli PS", "Shidlagatta Rural PS", "Shidlagatta Town PS",
       "Chikkaballapura Women PS", "Chikkaballapura CEN PS"
     ];
     primaryColor = "k-red";
@@ -8541,23 +8802,32 @@ function renderWebDashboard() {
     sumC += data.c;
     sumDraft += data.draft;
     sumActual += (data.total - (data.cc + data.b + data.c + data.draft));
-    
+
     for (const yr of Object.keys(yearSums)) {
       yearSums[yr] += (data.years[yr] || 0);
     }
   });
 
-  const kpiCard = (lbl, val, sub, cls) => {
-    return `<div class="kpi ${cls}"><div class="kpi-glow"></div><div class="kpi-lbl">${lbl}</div><div class="kpi-val">${val}</div><div class="kpi-sub">${sub}</div></div>`;
+  const kpiCard = (lbl, val, sub, cls, statusVal) => {
+    const filterObj = statusVal ? { subdiv: currentDashboardSubDiv, status: statusVal } : { subdiv: currentDashboardSubDiv };
+    const filterJson = JSON.stringify(filterObj).replace(/"/g, '&quot;');
+    return `
+      <div class="kpi ${cls}" style="cursor: pointer;" onclick="window.showDrillDownCases(${filterJson})">
+        <div class="kpi-glow"></div>
+        <div class="kpi-lbl">${lbl}</div>
+        <div class="kpi-val">${val}</div>
+        <div class="kpi-sub">${sub}</div>
+      </div>
+    `;
   };
 
   $('excelKpiGrid').innerHTML = `
-    ${kpiCard('Total UI Cases', sumTotal, 'Pending active cases', primaryColor)}
-    ${kpiCard('CC Pending', sumCc, 'Charge sheet submitted', 'k-pur')}
-    ${kpiCard('B-Report', sumB, 'Non-cognizable/False', 'k-red')}
-    ${kpiCard('C-Report', sumC, 'Undetected cases', 'k-cyn')}
-    ${kpiCard('CS in Draft', sumDraft, 'Draft charge sheets', 'k-amb')}
-    ${kpiCard('Actual UI', sumActual, 'Active investigation', 'k-grn')}
+    ${kpiCard('Total UI Cases', sumTotal, 'Pending active cases', primaryColor, null)}
+    ${kpiCard('CC Pending', sumCc, 'Charge sheet submitted', 'k-pur', 'CC Pending')}
+    ${kpiCard('B-Report', sumB, 'Non-cognizable/False', 'k-red', 'B-Report')}
+    ${kpiCard('C-Report', sumC, 'Undetected cases', 'k-cyn', 'C-Report')}
+    ${kpiCard('CS in Draft', sumDraft, 'Draft charge sheets', 'k-amb', 'CS in Draft')}
+    ${kpiCard('Actual UI', sumActual, 'Active investigation', 'k-grn', 'Actual UI')}
   `;
 
   // 3. Render Table 1/3 (Circle Stats)
@@ -8594,26 +8864,28 @@ function renderWebDashboard() {
   let cTotals = Array(15).fill(0);
   circleData.forEach((row, i) => {
     const actUI = row[1] - (row[2]+row[3]+row[4]+row[5]);
+    const name = row[0];
+
     tCPIBody += `
       <tr>
         <td>${i+1}</td>
-        <td style="text-align:left; font-weight:600;">${row[0]}</td>
-        <td style="font-weight:700;">${row[1]}</td>
-        <td>${row[2]}</td>
-        <td>${row[3]}</td>
-        <td>${row[4]}</td>
-        <td>${row[5]}</td>
-        <td style="font-weight:700;">${actUI}</td>
-        <td>${row[6]}</td>
-        <td>${row[7]}</td>
-        <td>${row[8]}</td>
-        <td>${row[9]}</td>
-        <td>${row[10]}</td>
-        <td>${row[11]}</td>
-        <td>${row[12]}</td>
-        <td>${row[13]}</td>
-        <td>${row[14]}</td>
-        <td style="font-weight:700;">${row[1]}</td>
+        <td style="text-align:left; font-weight:600;"><span class="td-link" onclick="window.showDrillDownCases({ circle: '${name}' })">${name}</span></td>
+        ${makeCell(row[1], { circle: name }, true)}
+        ${makeCell(row[2], { circle: name, status: 'CC Pending' })}
+        ${makeCell(row[3], { circle: name, status: 'B-Report' })}
+        ${makeCell(row[4], { circle: name, status: 'C-Report' })}
+        ${makeCell(row[5], { circle: name, status: 'CS in Draft' })}
+        ${makeCell(actUI, { circle: name, status: 'Actual UI' }, true)}
+        ${makeCell(row[6], { circle: name, year: '2018' })}
+        ${makeCell(row[7], { circle: name, year: '2019' })}
+        ${makeCell(row[8], { circle: name, year: '2020' })}
+        ${makeCell(row[9], { circle: name, year: '2021' })}
+        ${makeCell(row[10], { circle: name, year: '2022' })}
+        ${makeCell(row[11], { circle: name, year: '2023' })}
+        ${makeCell(row[12], { circle: name, year: '2024' })}
+        ${makeCell(row[13], { circle: name, year: '2025' })}
+        ${makeCell(row[14], { circle: name, year: '2026' })}
+        ${makeCell(row[1], { circle: name }, true)}
       </tr>
     `;
     cTotals[0] += row[1];
@@ -8629,14 +8901,17 @@ function renderWebDashboard() {
     <tr class="total-row">
       <td></td>
       <td style="text-align:left;">Total</td>
-      <td>${cTotals[0]}</td>
-      <td>${cTotals[1]}</td>
-      <td>${cTotals[2]}</td>
-      <td>${cTotals[3]}</td>
-      <td>${cTotals[4]}</td>
-      <td>${cTotals[5]}</td>
-      ${cTotals.slice(6).map(v => `<td>${v}</td>`).join('')}
-      <td>${cTotals[0]}</td>
+      ${makeCell(cTotals[0], { subdiv: currentDashboardSubDiv }, true)}
+      ${makeCell(cTotals[1], { subdiv: currentDashboardSubDiv, status: 'CC Pending' })}
+      ${makeCell(cTotals[2], { subdiv: currentDashboardSubDiv, status: 'B-Report' })}
+      ${makeCell(cTotals[3], { subdiv: currentDashboardSubDiv, status: 'C-Report' })}
+      ${makeCell(cTotals[4], { subdiv: currentDashboardSubDiv, status: 'CS in Draft' })}
+      ${makeCell(cTotals[5], { subdiv: currentDashboardSubDiv, status: 'Actual UI' }, true)}
+      ${cTotals.slice(6).map((v, idx) => {
+        const yr = (2018 + idx).toString();
+        return makeCell(v, { subdiv: currentDashboardSubDiv, year: yr });
+      }).join('')}
+      ${makeCell(cTotals[0], { subdiv: currentDashboardSubDiv }, true)}
     </tr>
   `;
   $('excelTableCPI').innerHTML = headerHtml + '<tbody>' + tCPIBody + '</tbody>';
@@ -8655,15 +8930,15 @@ function renderWebDashboard() {
     tPSBody += `
       <tr>
         <td>${idx+1}</td>
-        <td style="text-align:left; font-weight:600;">${psName}</td>
-        <td style="font-weight:700;">${data.total}</td>
-        <td>${data.cc}</td>
-        <td>${data.b}</td>
-        <td>${data.c}</td>
-        <td>${data.draft}</td>
-        <td style="font-weight:700;">${actUI}</td>
-        ${years.map(yr => `<td>${data.years[yr] || 0}</td>`).join('')}
-        <td style="font-weight:700;">${data.total}</td>
+        <td style="text-align:left; font-weight:600;"><span class="td-link" onclick="window.showDrillDownCases({ ps: '${psName}' })">${psName}</span></td>
+        ${makeCell(data.total, { ps: psName }, true)}
+        ${makeCell(data.cc, { ps: psName, status: 'CC Pending' })}
+        ${makeCell(data.b, { ps: psName, status: 'B-Report' })}
+        ${makeCell(data.c, { ps: psName, status: 'C-Report' })}
+        ${makeCell(data.draft, { ps: psName, status: 'CS in Draft' })}
+        ${makeCell(actUI, { ps: psName, status: 'Actual UI' }, true)}
+        ${years.map(yr => makeCell(data.years[yr] || 0, { ps: psName, year: yr })).join('')}
+        ${makeCell(data.total, { ps: psName }, true)}
       </tr>
     `;
     stTotals[0] += data.total;
@@ -8681,14 +8956,17 @@ function renderWebDashboard() {
     <tr class="total-row">
       <td></td>
       <td style="text-align:left;">Total</td>
-      <td>${stTotals[0]}</td>
-      <td>${stTotals[1]}</td>
-      <td>${stTotals[2]}</td>
-      <td>${stTotals[3]}</td>
-      <td>${stTotals[4]}</td>
-      <td>${stTotals[5]}</td>
-      ${stTotals.slice(6).map(v => `<td>${v}</td>`).join('')}
-      <td>${stTotals[0]}</td>
+      ${makeCell(stTotals[0], { subdiv: currentDashboardSubDiv }, true)}
+      ${makeCell(stTotals[1], { subdiv: currentDashboardSubDiv, status: 'CC Pending' })}
+      ${makeCell(stTotals[2], { subdiv: currentDashboardSubDiv, status: 'B-Report' })}
+      ${makeCell(stTotals[3], { subdiv: currentDashboardSubDiv, status: 'C-Report' })}
+      ${makeCell(stTotals[4], { subdiv: currentDashboardSubDiv, status: 'CS in Draft' })}
+      ${makeCell(stTotals[5], { subdiv: currentDashboardSubDiv, status: 'Actual UI' }, true)}
+      ${stTotals.slice(6).map((v, idx) => {
+        const yr = (2018 + idx).toString();
+        return makeCell(v, { subdiv: currentDashboardSubDiv, year: yr });
+      }).join('')}
+      ${makeCell(stTotals[0], { subdiv: currentDashboardSubDiv }, true)}
     </tr>
   `;
   $('excelTablePS').innerHTML = headerHtml + '<tbody>' + tPSBody + '</tbody>';
@@ -8697,11 +8975,11 @@ function renderWebDashboard() {
   const barChartData = stationList.map(ps => {
     const key = getActiveCaseKey(ps);
     const d = activeCasesMap[key] || { total: 0 };
-    return { n: ps.replace(" PS", ""), c: d.total };
+    return { n: ps.replace(" PS", ""), fullName: ps, c: d.total };
   }).sort((a,b)=>b.c-a.c);
   const mxPs = Math.max(...barChartData.map(d=>d.c), 1);
   $('excelPsChart').innerHTML = barChartData.map(item => `
-    <div class="bar-row">
+    <div class="bar-row" style="cursor: pointer;" onclick="window.showDrillDownCases({ ps: '${item.fullName}' })">
       <div class="bar-lbl" title="${item.n}">${item.n}</div>
       <div class="bar-track">
         <div class="bar-fill ${chartColor}" style="width: ${Math.round(item.c / mxPs * 100)}%"></div>
@@ -8714,7 +8992,7 @@ function renderWebDashboard() {
   const yearChartData = Object.keys(yearSums).map(yr => ({ n: yr, c: yearSums[yr] }));
   const mxYr = Math.max(...yearChartData.map(d=>d.c), 1);
   $('excelYearChart').innerHTML = yearChartData.map(item => `
-    <div class="bar-row">
+    <div class="bar-row" style="cursor: pointer;" onclick="window.showDrillDownCases({ subdiv: currentDashboardSubDiv, year: '${item.n}' })">
       <div class="bar-lbl" title="${item.n}">${item.n}</div>
       <div class="bar-track">
         <div class="bar-fill bar-purple" style="width: ${Math.round(item.c / mxYr * 100)}%"></div>
