@@ -2185,61 +2185,186 @@
           grid-template-columns: repeat(2, 1fr) !important;
         }
       }
+      
+      /* Modal Styles */
+      .excel-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      .excel-modal-backdrop.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .excel-modal {
+        background: var(--surf);
+        border: 1px solid var(--bdr);
+        border-radius: 12px;
+        width: 100%;
+        max-width: 520px;
+        box-shadow: var(--sh-lg);
+        overflow: hidden;
+        transform: translateY(20px);
+        transition: transform 0.25s ease;
+      }
+      .excel-modal-backdrop.show .excel-modal {
+        transform: translateY(0);
+      }
+      .excel-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--bdr);
+      }
+      .excel-modal-title {
+        font-weight: 800;
+        font-size: 15px;
+        color: var(--txt);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .excel-modal-close {
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        transition: color 0.2s;
+        min-height: unset;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+      }
+      .excel-modal-close:hover {
+        color: var(--txt);
+      }
+      .excel-modal-body {
+        padding: 20px;
+      }
+      .modal-dropzone {
+        border: 2px dashed var(--bdr2);
+        border-radius: 8px;
+        padding: 35px 20px;
+        text-align: center;
+        background: var(--surf2);
+        cursor: pointer;
+        transition: all var(--trans);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+      .modal-dropzone:hover, .modal-dropzone.dragover {
+        border-color: var(--gold);
+        background: var(--gold-dim);
+      }
+      .modal-dropzone-icon {
+        font-size: 32px;
+      }
+      .modal-dropzone-text {
+        font-weight: 700;
+        color: var(--txt);
+        font-size: 14px;
+      }
+      .modal-dropzone-subtext {
+        color: var(--muted);
+        font-size: 11px;
+      }
     </style>
     
     <div class="excel-proc-container">
-      <div class="excel-proc-header">
+      <div class="excel-proc-header" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
         <div>
-          <div class="excel-proc-title">
-            <span>🗂️</span> Heinous and Non-Heinous UI Cases Report Generator
+          <div class="excel-proc-title" style="font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 4px;">
+            <span>🗂️</span> Heinous and Non-Heinous UI Cases Report
           </div>
-          <div class="excel-proc-subtitle">
-            Upload the raw Excel case file to split sheets by Police Station, Circle, and Sub-Division, and generate context-aware navigation dashboards automatically in your browser.
+          <div class="excel-proc-subtitle" style="font-size: 12px; color: var(--muted);">
+            Interactive dashboard, statistics, and circle/subdivision reports.
           </div>
         </div>
-        
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-          <!-- Drag & Drop Zone -->
-          <div id="excelDropzone" class="dropzone">
-            <div class="dropzone-icon">📥</div>
-            <div class="dropzone-text">Drag & drop or click to upload Excel</div>
-            <div class="dropzone-subtext" style="display: none;">Supports .xlsx spreadsheets</div>
-            <input type="file" id="excelFileInput" accept=".xlsx" style="display: none;" />
-          </div>
-          
-          <!-- File Info Area -->
-          <div id="excelFileInfo" class="file-info">
-            <div class="file-name">
-              <span>📄</span> <span id="excelSelectedFileName">filename.xlsx</span>
+        <div>
+          <button id="btnOpenExcelModal" class="btn" style="background: var(--gold); color: white; font-weight: 700; font-size: 13px; padding: 10px 18px; border-radius: var(--r); box-shadow: var(--sh); display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; transition: background 0.2s;">
+            <span>📤</span> Upload and Download
+          </button>
+        </div>
+      </div>
+      
+      <!-- Divider -->
+      <div style="height: 1px; background: var(--bdr); margin: 20px 0 20px 0;"></div>
+
+      <!-- Modal Backdrop -->
+      <div id="excelModalBackdrop" class="excel-modal-backdrop">
+        <div class="excel-modal">
+          <div class="excel-modal-header">
+            <div class="excel-modal-title">
+              <span>📤</span> Upload & Process UI Cases Excel
             </div>
-            <button id="excelBtnProcess" class="btn-process">⚡ Process</button>
+            <button id="btnCloseExcelModal" class="excel-modal-close">&times;</button>
           </div>
-        </div>
-      </div>
-      
-      <!-- Progress Indicator -->
-      <div id="excelProgressContainer" class="progress-container">
-        <div class="progress-bar-bg">
-          <div id="excelProgressBarFill" class="progress-bar-fill"></div>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;">
-          <div id="excelStep1" class="status-step pending"><span class="step-icon"></span> Read file</div>
-          <div id="excelStep2" class="status-step pending"><span class="step-icon"></span> Split Stations</div>
-          <div id="excelStep3" class="status-step pending"><span class="step-icon"></span> Split Circles</div>
-          <div id="excelStep4" class="status-step pending"><span class="step-icon"></span> Create Dashboards</div>
-          <div id="excelStep5" class="status-step pending"><span class="step-icon"></span> Link & Reorder</div>
-        </div>
-      </div>
-      
-      <!-- Results / Download -->
-      <div id="excelResultContainer" class="result-container">
-        <div style="text-align: left; display: flex; align-items: center; gap: 8px;">
-          <div class="result-title">🎉 Processing Complete!</div>
-          <div class="result-text">Your processed Excel file is ready.</div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <button id="excelBtnDownload" class="btn-download">⬇️ Download Processed Excel</button>
-          <button id="excelBtnReset" class="btn btn-sm btn-sub" style="padding: 6px 12px; font-size: 12px; height: auto;">Upload Another</button>
+          <div class="excel-modal-body">
+            
+            <!-- Drag & Drop Zone -->
+            <div id="excelDropzone" class="modal-dropzone">
+              <div class="modal-dropzone-icon">📥</div>
+              <div class="modal-dropzone-text">Drag & drop or click to upload Excel</div>
+              <div class="modal-dropzone-subtext">Supports .xlsx spreadsheets containing raw case details</div>
+              <input type="file" id="excelFileInput" accept=".xlsx" style="display: none;" />
+            </div>
+            
+            <!-- File Info Area -->
+            <div id="excelFileInfo" class="file-info" style="margin-top: 16px; display: none; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; background: var(--surf2); border: 1px solid var(--bdr); border-radius: 6px;">
+              <div class="file-name" style="font-weight: 600; color: var(--txt); font-size: 13px; display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                <span>📄</span> <span id="excelSelectedFileName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px;">filename.xlsx</span>
+              </div>
+              <button id="excelBtnProcess" class="btn-process" style="background: var(--gold); color: white; border: none; padding: 6px 14px; font-weight: 700; font-size: 12px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px;">⚡ Process & Convert</button>
+            </div>
+            
+            <!-- Progress Indicator -->
+            <div id="excelProgressContainer" class="progress-container" style="margin-top: 16px; display: none; padding: 14px; background: var(--surf2); border: 1px solid var(--bdr); border-radius: 6px;">
+              <div class="progress-bar-bg" style="background: var(--surf3); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 12px;">
+                <div id="excelProgressBarFill" class="progress-bar-fill" style="background: var(--gold); width: 0%; height: 100%; transition: width 0.3s ease;"></div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                <div id="excelStep1" class="status-step pending"><span class="step-icon"></span> Read file</div>
+                <div id="excelStep2" class="status-step pending"><span class="step-icon"></span> Split Stations</div>
+                <div id="excelStep3" class="status-step pending"><span class="step-icon"></span> Split Circles</div>
+                <div id="excelStep4" class="status-step pending"><span class="step-icon"></span> Create Dashboards</div>
+                <div id="excelStep5" class="status-step pending"><span class="step-icon"></span> Link & Reorder</div>
+              </div>
+            </div>
+            
+            <!-- Results / Download -->
+            <div id="excelResultContainer" class="result-container" style="margin-top: 16px; display: none; flex-direction: column; align-items: stretch; gap: 14px; padding: 16px; border: 1px solid var(--grn-lt); background: var(--grn-dim); border-radius: 6px;">
+              <div style="text-align: left; display: flex; align-items: center; gap: 8px;">
+                <div class="result-title" style="color: var(--grn); font-weight: 700; font-size: 14px;">🎉 Conversion Complete!</div>
+              </div>
+              <div class="result-text" style="color: var(--txt2); font-size: 12px; margin-bottom: 8px;">Your split worksheets with context-aware navigation links are ready.</div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button id="excelBtnDownload" class="btn-download" style="justify-content: center; width: 100%; font-size: 13px; padding: 10px 14px; background: var(--grn); color: white; border: none; font-weight: 700; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px;">⬇️ Download Processed Excel</button>
+                <button id="excelBtnViewDash" class="btn" style="background: var(--navy); color: white; font-weight: 700; width: 100%; font-size: 13px; padding: 10px; border-radius: var(--r); box-shadow: var(--sh); display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer;">📊 Show in Web App</button>
+                <button id="excelBtnReset" class="btn btn-sm btn-sub" style="padding: 8px; font-size: 11px; height: auto; text-align: center; border: 1px solid var(--bdr); border-radius: 4px; background: var(--surf2); color: var(--txt2); cursor: pointer; width: 100%;">Upload Another File</button>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -8582,6 +8707,26 @@ $('btnShowCmiDash').addEventListener('click', () => {
   currentDashboardSubDiv = 'CMI';
   renderWebDashboard();
 });
+
+// Bind modal controls for Upload and Download
+$('btnOpenExcelModal').addEventListener('click', () => {
+  $('excelModalBackdrop').classList.add('show');
+});
+
+const closeExcelModal = () => {
+  $('excelModalBackdrop').classList.remove('show');
+};
+
+$('btnCloseExcelModal').addEventListener('click', closeExcelModal);
+$('excelBtnViewDash').addEventListener('click', closeExcelModal);
+
+// Close on backdrop click
+$('excelModalBackdrop').addEventListener('click', (e) => {
+  if (e.target === $('excelModalBackdrop')) {
+    closeExcelModal();
+  }
+});
+
 
 // Boot System
 (function() {
