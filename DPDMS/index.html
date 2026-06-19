@@ -2331,10 +2331,12 @@
             
             <!-- File Info Area -->
             <div id="excelFileInfo" class="file-info" style="margin-top: 16px; display: none; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; background: var(--surf2); border: 1px solid var(--bdr); border-radius: 6px;">
-              <div class="file-name" style="font-weight: 600; color: var(--txt); font-size: 13px; display: flex; align-items: center; gap: 8px; overflow: hidden;">
-                <span>📄</span> <span id="excelSelectedFileName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px;">filename.xlsx</span>
+              <div class="file-name" style="font-weight: 600; color: var(--txt); font-size: 13px; display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
+                <span>📄</span> 
+                <span id="excelSelectedFileName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">filename.xlsx</span>
+                <button id="excelBtnRemoveFile" title="Remove selected file" style="background: none; border: none; color: var(--red); cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 4px; transition: background 0.2s; min-height: unset; width: auto; height: auto; font-weight: 700;" onmouseover="this.style.background='var(--red-dim)'" onmouseout="this.style.background='none'">🗑️ Remove</button>
               </div>
-              <button id="excelBtnProcess" class="btn-process" style="background: var(--gold); color: white; border: none; padding: 6px 14px; font-weight: 700; font-size: 12px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px;">⚡ Process & Convert</button>
+              <button id="excelBtnProcess" class="btn-process" style="background: var(--gold); color: white; border: none; padding: 8px 14px; font-weight: 700; font-size: 12px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">⚡ Process & Convert</button>
             </div>
             
             <!-- Progress Indicator -->
@@ -8726,6 +8728,12 @@ $('excelModalBackdrop').addEventListener('click', (e) => {
     closeExcelModal();
   }
 });
+
+// Bind remove selected file click
+$('excelBtnRemoveFile').addEventListener('click', () => {
+  $('excelBtnReset').click();
+});
+
 
 
 // Boot System
