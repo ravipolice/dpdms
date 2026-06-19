@@ -7829,14 +7829,36 @@ excelBtnProcess.addEventListener('click', async () => {
     
     let cbpRow = 1;
     function writeTableHeader(ws, titleText, rowRef) {
-      ws.mergeCells(rowRef, 1, rowRef, 22);
-      const titleCell = ws.getCell(rowRef, 1);
-      titleCell.value = titleText;
-      titleCell.font = fontTitle;
-      titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
-      titleCell.fill = fillTitle;
-      ws.getRow(rowRef).height = 26;
-      rowRef++;
+      if (rowRef === 1) {
+        ws.mergeCells(1, 1, 1, 7);
+        const titleCell = ws.getCell(1, 1);
+        titleCell.value = titleText;
+        titleCell.font = fontTitle;
+        titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+        titleCell.fill = fillTitle;
+        
+        ws.mergeCells('H1:K1');
+        const rawCell = ws.getCell('H1');
+        rawCell.value = { formula: 'HYPERLINK("#\'RAW DATA\'!A1", "<- Back to RAW DATA")', result: '<- Back to RAW DATA' };
+        rawCell.font = fontBackLink;
+        rawCell.alignment = alignBackLink;
+        for (let col = 8; col <= 11; col++) {
+          ws.getRow(1).getCell(col).fill = fillYellow;
+          ws.getRow(1).getCell(col).border = borderButton;
+        }
+        
+        ws.getRow(1).height = 26;
+        rowRef++;
+      } else {
+        ws.mergeCells(rowRef, 1, rowRef, 22);
+        const titleCell = ws.getCell(rowRef, 1);
+        titleCell.value = titleText;
+        titleCell.font = fontTitle;
+        titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        titleCell.fill = fillTitle;
+        ws.getRow(rowRef).height = 26;
+        rowRef++;
+      }
       
       ws.mergeCells(rowRef, 1, rowRef + 1, 1);
       ws.getCell(rowRef, 1).value = "Sl.\nNo.";
@@ -8304,9 +8326,11 @@ excelBtnProcess.addEventListener('click', async () => {
     updateExcelStep(5);
     
     const chintamaniSheets = [
-      'Chintamani Sub-Division', 'Kencharlahalli Circle', 'Shidlagatta Circle', 'Batlahalli PS',
-      'Chintamani Rural PS', 'Chintamani Town PS', 'Dibburahalli PS', 'Kencharlahalli PS',
-      'Shidlagatta Rural PS', 'Shidlagatta Town PS', 'Chikkaballapura Women PS', 'Chikkaballapura CEN PS'
+      'Chintamani Sub-Division', 'Chintamani Sub-division', 'Kencharlahalli Circle', 'Shidlagatta Circle', 
+      'Bagepalli Circle', 'Chelur Circle', 'Batlahalli PS', 'Chintamani Rural PS', 
+      'Chintamani Town PS', 'Dibburahalli PS', 'Kencharlahalli PS', 'Shidlagatta Rural PS', 
+      'Shidlagatta Town PS', 'Chikkaballapura Women PS', 'Chikkaballapura CEN PS',
+      'Bagepalli PS', 'Chelur PS', 'Patapalya PS'
     ];
     function getBackLinkSheet(sheetName) {
       if (chintamaniSheets.includes(sheetName)) return 'DB CMI SD';
