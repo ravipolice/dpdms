@@ -7660,20 +7660,20 @@ excelBtnProcess.addEventListener('click', async () => {
     };
     
     function getTable1SheetName(name) {
-      if (name === "Chikkaballapura Sub-division") return "Chikkaballapura Women PS";
       if (name === "Bagepalli PS") return "Bagepalli Circle";
       return name;
     }
     function getTable3SheetName(name) {
-      if (name === "Bagepalli Circle") return "Bagepalli Circle";
-      if (name === "Chelur Circle") return "Chelur Circle";
+      if (name === "Chintamani Sub-division") return "Chintamani Sub-Division";
+      if (name === "Kencharlahalli Circle") return "Kencharlahalli Circle";
+      if (name === "Shidlagatta Circle") return "Shidlagatta Circle";
+      if (name === "Chintamani Rural PS") return "Chintamani Rural PS";
+      if (name === "Chintamani Town PS") return "Chintamani Town PS";
+      if (name === "Chikkaballapura Women PS") return "Chikkaballapura Women PS";
       return "Chintamani Sub-Division";
     }
     function getTable4SheetName(name) {
-      if (name === "Bagepalli PS") return "Bagepalli PS";
-      if (name === "Chelur PS") return "Chelur PS";
-      if (name === "Pathapalya PS") return "Patapalya PS";
-      return "Chintamani Sub-Division";
+      return name;
     }
     function getActiveCaseKey(name) {
       if (name === "Manchenahalli PS") return "Manchenalli PS";
@@ -7955,12 +7955,12 @@ excelBtnProcess.addEventListener('click', async () => {
     cmiRow = writeTableHeader(wsCmi, "Chintamani Sub-Division UI Statistics as per Police IT (Henious & Non-Henious)", cmiRow);
     const t3Start = cmiRow;
     const t3Data = [
-      ["Bagepalli Circle", 22, 0, 0, 0, 5, 17, 0, 0, 0, 0, 0, 0, 0, 20, 2, 22],
-      ["Chelur Circle", 16, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 0, 0, 14, 2, 16],
-      ["Chintamani Town PS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      ["Chintamani Rural PS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      ["Shidlagatta Circle", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      ["Kencharlahalli Circle", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ["Chintamani Sub-division", 6, 1, 0, 0, 2, 3, 0, 0, 0, 0, 2, 0, 0, 4, 0, 6],
+      ["Kencharlahalli Circle", 15, 0, 0, 0, 3, 12, 0, 0, 0, 0, 0, 0, 1, 11, 3, 15],
+      ["Shidlagatta Circle", 38, 3, 0, 1, 5, 29, 0, 0, 0, 0, 0, 0, 6, 28, 4, 38],
+      ["Chintamani Rural PS", 31, 0, 0, 0, 7, 24, 0, 0, 0, 0, 0, 0, 1, 28, 2, 31],
+      ["Chintamani Town PS", 6, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 1, 4, 1, 6],
+      ["Chikkaballapura Women PS", 13, 1, 0, 0, 1, 11, 0, 0, 0, 0, 0, 0, 1, 10, 2, 13]
     ];
     
     t3Data.forEach((rowVals, idx) => {
@@ -8051,9 +8051,15 @@ excelBtnProcess.addEventListener('click', async () => {
     cmiRow = writeTableHeader(wsCmi, "Chintamani Sub-Division UI Statistics as per Police IT (Non-Henious)", cmiRow);
     const t4Start = cmiRow;
     const t4Stations = [
-      [1, "Bagepalli PS"], [2, "Chelur PS"], [3, "Pathapalya PS"], [4, "Chintamani Town PS"],
-      [5, "Chintamani Rural PS"], [6, "Shidlagatta Town PS"], [7, "Shidlagatta Rural PS"],
-      [8, "Dibburahalli PS"], [9, "Kencharlahalli PS"], [10, "Batlahalli PS"]
+      [1, "Batlahalli PS"],
+      [2, "Chintamani Rural PS"],
+      [3, "Chintamani Town PS"],
+      [4, "Dibburahalli PS"],
+      [5, "Kencharlahalli PS"],
+      [6, "Shidlagatta Rural PS"],
+      [7, "Shidlagatta Town PS"],
+      [8, "Chikkaballapura Women PS"],
+      [9, "Chikkaballapura CEN PS"]
     ];
     
     t4Stations.forEach((st, idx) => {
@@ -8158,9 +8164,9 @@ excelBtnProcess.addEventListener('click', async () => {
     updateExcelStep(5);
     
     const chintamaniSheets = [
-      'Chintamani Sub-Division', 'Bagepalli Circle', 'Chelur Circle', 'Bagepalli PS', 'Chelur PS', 'Patapalya PS',
-      'Chintamani Town PS', 'Chintamani Rural PS', 'Shidlagatta Town PS', 'Shidlagatta Rural PS', 'Dibburahalli PS',
-      'Kencharlahalli PS', 'Batlahalli PS'
+      'Chintamani Sub-Division', 'Kencharlahalli Circle', 'Shidlagatta Circle', 'Batlahalli PS',
+      'Chintamani Rural PS', 'Chintamani Town PS', 'Dibburahalli PS', 'Kencharlahalli PS',
+      'Shidlagatta Rural PS', 'Shidlagatta Town PS', 'Chikkaballapura Women PS', 'Chikkaballapura CEN PS'
     ];
     function getBackLinkSheet(sheetName) {
       if (chintamaniSheets.includes(sheetName)) return 'DB CMI SD';
@@ -8321,12 +8327,14 @@ function renderWebDashboard() {
       ["Chikkaballapura Sub-division", 4, 1, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 3, 0, 4],
       ["Chikkaballapura Circle", 55, 0, 2, 2, 16, 35, 0, 0, 0, 0, 0, 2, 3, 48, 2, 55],
       ["Gowribidanur Circle", 39, 2, 0, 0, 10, 27, 0, 0, 0, 0, 0, 1, 2, 33, 3, 39],
-      ["Gudibande Circle", 33, 0, 0, 0, 8, 25, 0, 0, 0, 0, 0, 0, 1, 26, 6, 33]
+      ["Chelur Circle", 16, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 0, 0, 14, 2, 16],
+      ["Gudibande Circle", 33, 0, 0, 0, 8, 25, 0, 0, 0, 0, 0, 0, 1, 26, 6, 33],
+      ["Bagepalli PS", 22, 0, 0, 0, 5, 17, 0, 0, 0, 0, 0, 0, 0, 20, 2, 22]
     ];
     stationList = [
-      "Chickballapura Rural PS", "Chickballapura Town PS", "Chickballapura Traffic PS", 
-      "Gowribidanur Rural PS", "Gowribidanur Town PS", "Gudibande PS", 
-      "Manchenahalli PS", "Nandigiridhama PS", "Peresandra PS"
+      "Bagepalli PS", "Chelur PS", "Chickballapura Rural PS", "Chickballapura Town PS",
+      "Chickballapura Traffic PS", "Gowribidanur Rural PS", "Gowribidanur Town PS",
+      "Gudibande PS", "Manchenahalli PS", "Nandigiridhama PS", "Pathapalya PS", "Peresandra PS"
     ];
     primaryColor = "k-blu";
     chartColor = "bar-navy";
@@ -8334,16 +8342,17 @@ function renderWebDashboard() {
     titleCPI = "Chintamani Sub-Division Circle Overall UI Statistics";
     titlePS = "Chintamani Station Detailed Non-Heinous UI Statistics";
     circleData = [
-      ["Bagepalli Circle", 22, 0, 0, 0, 5, 17, 0, 0, 0, 0, 0, 0, 0, 20, 2, 22],
-      ["Chelur Circle", 16, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 0, 0, 14, 2, 16],
-      ["Chintamani Town PS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      ["Chintamani Rural PS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      ["Shidlagatta Circle", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      ["Kencharlahalli Circle", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ["Chintamani Sub-division", 6, 1, 0, 0, 2, 3, 0, 0, 0, 0, 2, 0, 0, 4, 0, 6],
+      ["Kencharlahalli Circle", 15, 0, 0, 0, 3, 12, 0, 0, 0, 0, 0, 0, 1, 11, 3, 15],
+      ["Shidlagatta Circle", 38, 3, 0, 1, 5, 29, 0, 0, 0, 0, 0, 0, 6, 28, 4, 38],
+      ["Chintamani Rural PS", 31, 0, 0, 0, 7, 24, 0, 0, 0, 0, 0, 0, 1, 28, 2, 31],
+      ["Chintamani Town PS", 6, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 1, 4, 1, 6],
+      ["Chikkaballapura Women PS", 13, 1, 0, 0, 1, 11, 0, 0, 0, 0, 0, 0, 1, 10, 2, 13]
     ];
     stationList = [
-      "Bagepalli PS", "Chelur PS", "Pathapalya PS", "Chintamani Town PS", "Chintamani Rural PS",
-      "Shidlagatta Town PS", "Shidlagatta Rural PS", "Dibburahalli PS", "Kencharlahalli PS", "Batlahalli PS"
+      "Batlahalli PS", "Chintamani Rural PS", "Chintamani Town PS", "Dibburahalli PS", 
+      "Kencharlahalli PS", "Shidlagatta Rural PS", "Shidlagatta Town PS", 
+      "Chikkaballapura Women PS", "Chikkaballapura CEN PS"
     ];
     primaryColor = "k-red";
     chartColor = "bar-amber";
