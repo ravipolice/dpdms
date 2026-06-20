@@ -4961,10 +4961,10 @@ function renderDraftFamily() {
             return `
               <tr class="family-row" data-idx="${idx}">
                 <td style="padding: 6px; border-bottom: 1px solid var(--bdr);">
-                  <input type="text" class="fm-name" value="${esc(f.name)}" placeholder="Enter Name" required style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px;" ${disableActions ? 'disabled' : ''} />
+                  <input type="text" class="fm-name" value="${esc(f.name)}" placeholder="Enter Name" style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px;" ${disableActions ? 'disabled' : ''} />
                 </td>
                 <td style="padding: 6px; border-bottom: 1px solid var(--bdr);">
-                  <select class="fm-relation" required style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px;" ${disableActions ? 'disabled' : ''}>
+                  <select class="fm-relation" style="width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--bdr); border-radius: var(--r-sm); background: var(--surf); font-size: 12.5px;" ${disableActions ? 'disabled' : ''}>
                     <option value="">— Select —</option>
                     <option value="Spouse" ${f.relation === 'Spouse' ? 'selected' : ''}>Spouse</option>
                     <option value="Son" ${f.relation === 'Son' ? 'selected' : ''}>Son</option>
