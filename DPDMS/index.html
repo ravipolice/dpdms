@@ -2332,6 +2332,18 @@
       <!-- Divider -->
       <div style="height: 1px; background: var(--bdr); margin: 20px 0 20px 0;"></div>
 
+      <!-- Dashboard Empty State / Placeholder -->
+      <div id="excelDashboardPlaceholder" style="padding: 40px 20px; text-align: center; background: var(--surf); border: 1px solid var(--bdr); border-radius: var(--r); box-shadow: var(--sh); margin-top: 10px; display: block;">
+        <div style="font-size: 40px; margin-bottom: 12px;">📊</div>
+        <h3 style="font-size: 15px; font-weight: 700; color: var(--txt); margin-bottom: 8px;">No Case Data Loaded Yet</h3>
+        <p style="font-size: 12px; color: var(--muted); max-width: 440px; margin: 0 auto 16px auto; line-height: 1.5;">
+          Upload your raw cases Excel spreadsheet to view interactive KPI cards, station-wise distribution charts, circle summaries, and detailed case drill-downs.
+        </p>
+        <button onclick="$('btnOpenExcelModal').click()" class="btn" style="background: var(--gold); color: white; font-weight: 700; font-size: 13px; padding: 10px 18px; border-radius: var(--r); border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin: 0 auto; box-shadow: var(--sh);">
+          <span>📤</span> Click Here to Upload & Process
+        </button>
+      </div>
+
       <!-- Modal Backdrop -->
       <div id="excelModalBackdrop" class="excel-modal-backdrop">
         <div class="excel-modal">
@@ -5911,6 +5923,9 @@ function switchTab(t){
   if(t==='excel-processing') {
     if(window.activeCasesData) {
       renderWebDashboard();
+    } else {
+      if ($('excelDashboardContainer')) $('excelDashboardContainer').style.display = 'none';
+      if ($('excelDashboardPlaceholder')) $('excelDashboardPlaceholder').style.display = 'block';
     }
   }
 }
@@ -7302,242 +7317,7 @@ let uploadedExcelFile = null;
 let processedExcelBlobUrl = null;
 let processedExcelName = "";
 
-window.activeCasesData = {
-  "Chickballapura Town PS": {
-    "total": 45,
-    "cc": 0,
-    "b": 0,
-    "c": 0,
-    "draft": 8,
-    "years": {
-      "2018": 0,
-      "2019": 1,
-      "2020": 0,
-      "2021": 3,
-      "2022": 7,
-      "2023": 6,
-      "2024": 1,
-      "2025": 21,
-      "2026": 6
-    }
-  },
-  "Bagepalli PS": {
-    "total": 78,
-    "cc": 0,
-    "b": 0,
-    "c": 0,
-    "draft": 23,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 3,
-      "2023": 2,
-      "2024": 13,
-      "2025": 52,
-      "2026": 8
-    }
-  },
-  "Chickballapura Rural PS": {
-    "total": 67,
-    "cc": 0,
-    "b": 0,
-    "c": 0,
-    "draft": 17,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 2,
-      "2023": 3,
-      "2024": 7,
-      "2025": 50,
-      "2026": 5
-    }
-  },
-  "Chikkaballapura Women PS": {
-    "total": 14,
-    "cc": 0,
-    "b": 0,
-    "c": 0,
-    "draft": 2,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 2,
-      "2024": 0,
-      "2025": 12,
-      "2026": 0
-    }
-  },
-  "Nandi Giridhama PS": {
-    "total": 50,
-    "cc": 1,
-    "b": 0,
-    "c": 1,
-    "draft": 14,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 1,
-      "2024": 0,
-      "2025": 46,
-      "2026": 3
-    }
-  },
-  "Gowribidanur Rural PS": {
-    "total": 57,
-    "cc": 0,
-    "b": 0,
-    "c": 0,
-    "draft": 17,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 1,
-      "2024": 5,
-      "2025": 42,
-      "2026": 9
-    }
-  },
-  "Gudibande PS": {
-    "total": 32,
-    "cc": 0,
-    "b": 2,
-    "c": 2,
-    "draft": 7,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 0,
-      "2024": 2,
-      "2025": 27,
-      "2026": 3
-    }
-  },
-  "Chelur PS": {
-    "total": 18,
-    "cc": 0,
-    "b": 0,
-    "c": 0,
-    "draft": 9,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 0,
-      "2024": 1,
-      "2025": 9,
-      "2026": 8
-    }
-  },
-  "Manchenalli PS": {
-    "total": 42,
-    "cc": 1,
-    "b": 0,
-    "c": 0,
-    "draft": 7,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 0,
-      "2024": 2,
-      "2025": 34,
-      "2026": 6
-    }
-  },
-  "Chickballapura Traffic PS": {
-    "total": 11,
-    "cc": 0,
-    "b": 0,
-    "c": 0,
-    "draft": 7,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 0,
-      "2024": 0,
-      "2025": 11,
-      "2026": 0
-    }
-  },
-  "Patapalya PS": {
-    "total": 15,
-    "cc": 0,
-    "b": 0,
-    "c": 0,
-    "draft": 1,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 0,
-      "2024": 0,
-      "2025": 11,
-      "2026": 4
-    }
-  },
-  "Peresandra PS": {
-    "total": 36,
-    "cc": 1,
-    "b": 0,
-    "c": 0,
-    "draft": 12,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 0,
-      "2024": 0,
-      "2025": 27,
-      "2026": 9
-    }
-  },
-  "Gowribidanur Town PS": {
-    "total": 15,
-    "cc": 0,
-    "b": 0,
-    "c": 0,
-    "draft": 2,
-    "years": {
-      "2018": 0,
-      "2019": 0,
-      "2020": 0,
-      "2021": 0,
-      "2022": 0,
-      "2023": 0,
-      "2024": 0,
-      "2025": 12,
-      "2026": 3
-    }
-  }
-};
+window.activeCasesData = null;
 
 excelDropzone.addEventListener('click', () => excelFileInput.click());
 excelFileInput.addEventListener('change', (e) => {
@@ -8770,44 +8550,89 @@ function renderWebDashboard() {
   let stationList = [];
   let primaryColor = "k-blu";
   let chartColor = "bar-navy";
+  let subDivCircles = {};
 
   if (currentDashboardSubDiv === 'CBP') {
     titleCPI = "Chikkaballapura Sub-Division Circle Overall UI Statistics";
     titlePS = "Chikkaballapura Station Detailed Non-Heinous UI Statistics";
-    circleData = [
-      ["Chikkaballapura Sub-division", 4, 1, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 3, 0, 4],
-      ["Chikkaballapura Circle", 55, 0, 2, 2, 16, 35, 0, 0, 0, 0, 0, 2, 3, 48, 2, 55],
-      ["Gowribidanur Circle", 39, 2, 0, 0, 10, 27, 0, 0, 0, 0, 0, 1, 2, 33, 3, 39],
-      ["Chelur Circle", 16, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 0, 0, 14, 2, 16],
-      ["Gudibande Circle", 33, 0, 0, 0, 8, 25, 0, 0, 0, 0, 0, 0, 1, 26, 6, 33],
-      ["Bagepalli PS", 22, 0, 0, 0, 5, 17, 0, 0, 0, 0, 0, 0, 0, 20, 2, 22]
-    ];
+    subDivCircles = {
+      "Chikkaballapura Circle": ["Chickballapura Town PS", "Chickballapura Rural PS", "Chickballapura Traffic PS", "Nandi Giridhama PS", "Nandigiridhama PS"],
+      "Gowribidanur Circle": ["Gowribidanur Town PS", "Gowribidanur Rural PS", "Manchenalli PS", "Manchenahalli PS"],
+      "Gudibande Circle": ["Gudibande PS", "Peresandra PS"]
+    };
     stationList = [
-      "Bagepalli PS", "Chelur PS", "Chickballapura Rural PS", "Chickballapura Town PS",
-      "Chickballapura Traffic PS", "Gowribidanur Rural PS", "Gowribidanur Town PS",
-      "Gudibande PS", "Manchenahalli PS", "Nandigiridhama PS", "Pathapalya PS", "Peresandra PS"
+      "Chickballapura Town PS", "Chickballapura Rural PS", "Chickballapura Traffic PS", "Nandigiridhama PS",
+      "Gowribidanur Town PS", "Gowribidanur Rural PS", "Manchenalli PS",
+      "Gudibande PS", "Peresandra PS"
     ];
     primaryColor = "k-blu";
     chartColor = "bar-navy";
   } else {
     titleCPI = "Chintamani Sub-Division Circle Overall UI Statistics";
     titlePS = "Chintamani Station Detailed Non-Heinous UI Statistics";
-    circleData = [
-      ["Chintamani Sub-division", 6, 1, 0, 0, 2, 3, 0, 0, 0, 0, 2, 0, 0, 4, 0, 6],
-      ["Kencharlahalli Circle", 15, 0, 0, 0, 3, 12, 0, 0, 0, 0, 0, 0, 1, 11, 3, 15],
-      ["Shidlagatta Circle", 38, 3, 0, 1, 5, 29, 0, 0, 0, 0, 0, 0, 6, 28, 4, 38],
-      ["Chintamani Rural PS", 31, 0, 0, 0, 7, 24, 0, 0, 0, 0, 0, 0, 1, 28, 2, 31],
-      ["Chintamani Town PS", 6, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 1, 4, 1, 6],
-      ["Chikkaballapura Women PS", 13, 1, 0, 0, 1, 11, 0, 0, 0, 0, 0, 0, 1, 10, 2, 13]
-    ];
+    subDivCircles = {
+      "Bagepalli Circle": ["Bagepalli PS"],
+      "Chelur Circle": ["Chelur PS", "Patapalya PS", "Pathapalya PS"],
+      "Shidlagatta Circle": ["Shidlagatta Town PS", "Shidlagatta Rural PS", "Dibburahalli PS"],
+      "Kencharlahalli Circle": ["Kencharlahalli PS", "Batlahalli PS"],
+      "Chintamani Town PS": ["Chintamani Town PS"],
+      "Chintamani Rural PS": ["Chintamani Rural PS"],
+      "Chikkaballapura Women PS": ["Chikkaballapura Women PS"],
+      "Chikkaballapura CEN PS": ["Chikkaballapura CEN PS"]
+    };
     stationList = [
-      "Batlahalli PS", "Chintamani Rural PS", "Chintamani Town PS", "Dibburahalli PS",
-      "Kencharlahalli PS", "Shidlagatta Rural PS", "Shidlagatta Town PS",
+      "Bagepalli PS", "Chelur PS", "Patapalya PS",
+      "Shidlagatta Town PS", "Shidlagatta Rural PS", "Dibburahalli PS",
+      "Kencharlahalli PS", "Batlahalli PS",
+      "Chintamani Town PS", "Chintamani Rural PS",
       "Chikkaballapura Women PS", "Chikkaballapura CEN PS"
     ];
     primaryColor = "k-red";
     chartColor = "bar-amber";
   }
+
+  // Calculate circleData dynamically from activeCasesMap
+  circleData = [];
+  const overallRow = [
+    currentDashboardSubDiv === 'CBP' ? "Chikkaballapura Sub-division" : "Chintamani Sub-division",
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  ];
+
+  Object.keys(subDivCircles).forEach(circleName => {
+    const stations = subDivCircles[circleName];
+    const cRow = [
+      circleName,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ];
+    stations.forEach(ps => {
+      const key = getActiveCaseKey(ps);
+      const data = activeCasesMap[key];
+      if (data) {
+        cRow[1] += data.total || 0;
+        cRow[2] += data.cc || 0;
+        cRow[3] += data.b || 0;
+        cRow[4] += data.c || 0;
+        cRow[5] += data.draft || 0;
+        const years = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+        years.forEach((yr, yIdx) => {
+          cRow[6 + yIdx] += (data.years && data.years[yr]) || 0;
+        });
+      }
+    });
+
+    circleData.push(cRow);
+
+    overallRow[1] += cRow[1];
+    overallRow[2] += cRow[2];
+    overallRow[3] += cRow[3];
+    overallRow[4] += cRow[4];
+    overallRow[5] += cRow[5];
+    for (let y = 0; y < 9; y++) {
+      overallRow[6 + y] += cRow[6 + y];
+    }
+  });
+
+  circleData.unshift(overallRow);
 
   $('excelTitleCPI').textContent = titleCPI;
   $('excelTitlePS').textContent = titlePS;
