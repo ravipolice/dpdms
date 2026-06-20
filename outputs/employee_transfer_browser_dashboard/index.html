@@ -2778,7 +2778,7 @@ async function apiFetch(action, params = {}, options = {}) {
   const token = getToken();
   
   if (url) {
-    const queryParams = new URLSearchParams({ ...params, action, token });
+    const queryParams = new URLSearchParams({ ...params, action, token, _cb: Date.now() });
     const requestUrl = `${url}?${queryParams.toString()}`;
     
     if (options.method === 'POST' || options.method === 'DELETE') {
